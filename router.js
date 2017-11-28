@@ -12,5 +12,5 @@ module.exports = function(app){
 
 	// routes
 	app.get('/test', json_encoding, Test.test)
-
+	app.post('/send_message', json_encoding, Test.send_message)
 }
