@@ -3,11 +3,12 @@ const twilio = require('twilio')
 const MessagingResponse = twilio.twiml.MessagingResponse
 const twilio_client = generate_twilio_client()
 const gatherOutgoingNumber = require('../api/sms_routing').gatherOutgoingNumber
+const insertSMSLog = require('../message_logs/dynamodb_api').insertSMSLog
 
 // POST /initial
 exports.initial = function(req, res, next) {
+  console.log('---------------- Initial message ----------------')
   console.log(req.body)
-  console.log('Initial message')
   twilio_client.messages.create({
     body: 'Initial Message Sent',
     to: '+15195726998',
@@ -16,13 +17,13 @@ exports.initial = function(req, res, next) {
   }).then((message) => {
     console.log('MESSAGE SENT')
     console.log(message)
+    insertSMSLog(req.body)
   }).catch((err) => {
     console.log('ERROR OCCURRED')
     console.log(err)
   })
   res.status(200).send()
 }
-
 
 // POST /sms
 exports.sms = function(req, res, next) {
@@ -35,7 +36,13 @@ const body = req.body.Body
  gatherOutgoingNumber(from)
   .then(function (outgoingPhoneNumber) {
     var messagingResponse = new MessagingResponse();
-    messagingResponse.message({ to: outgoingPhoneNumber }, body)
+    messagingResponse.message({
+      to: outgoingPhoneNumber,
+      statusCallback: () => {
+        console.log('statusCallback')
+        insertSMSLog(req.body)
+      }
+    }, body)
 
    res.type('text/xml');
    res.send(messagingResponse.toString());
