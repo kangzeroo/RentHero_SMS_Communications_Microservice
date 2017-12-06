@@ -1,4 +1,5 @@
 const express = require('express')
+const http = require('http')
 const https = require('https')
 const fs = require('fs')
 const morgan = require('morgan')
@@ -24,34 +25,38 @@ router(app);
 // Server setup
 // if there is an environment variable of PORT already defined, use it. otherwise use port 3002
 const port = process.env.PORT || 3006
-
+const server = http.createServer(app)
+server.listen(port, function(){
+  console.log("Server listening on http: ", port)
+})
 // create a server with the native node https library
-if (process.env.NODE_ENV === 'production') {
-  // instantiate the SSL certificate necessary for HTTPS
-  const options = {
-      ca: fs.readFileSync('./credentials/rentburrow_com.ca-bundle'),
-      key: fs.readFileSync('./credentials/rentburrow_com.key'),
-      cert: fs.readFileSync('./credentials/rentburrow_com.crt'),
-      requestCert: false,
-      rejectUnauthorized: false
-  }
-  const server = https.createServer(options, app)
-  // listen to the server on port
-  server.listen(port, function(){
-    console.log("Server listening on https: ", port)
-  })
-} else {
-  // instantiate the SSL certificate necessary for HTTPS
-  const options = {
-      // ca: fs.readFileSync('./credentials/rentburrow_com.ca-bundle'),
-      key: fs.readFileSync('./credentials/rentburrow_com.key'),
-      cert: fs.readFileSync('./credentials/rentburrow_com.crt'),
-      requestCert: false,
-      rejectUnauthorized: false
-  }
-  const server = https.createServer(options, app)
-  // listen to the server on port
-  server.listen(port, function(){
-    console.log("Server listening on https: ", port)
-  })
-}
+
+// if (process.env.NODE_ENV === 'production') {
+//   // instantiate the SSL certificate necessary for HTTPS
+//   const options = {
+//       ca: fs.readFileSync('./credentials/rentburrow_com.ca-bundle'),
+//       key: fs.readFileSync('./credentials/rentburrow_com.key'),
+//       cert: fs.readFileSync('./credentials/rentburrow_com.crt'),
+//       requestCert: false,
+//       rejectUnauthorized: false
+//   }
+//   const server = https.createServer(options, app)
+//   // listen to the server on port
+//   server.listen(port, function(){
+//     console.log("Server listening on https: ", port)
+//   })
+// } else {
+//   // instantiate the SSL certificate necessary for HTTPS
+//   const options = {
+//       // ca: fs.readFileSync('./credentials/rentburrow_com.ca-bundle'),
+//       key: fs.readFileSync('./credentials/rentburrow_com.key'),
+//       cert: fs.readFileSync('./credentials/rentburrow_com.crt'),
+//       requestCert: false,
+//       rejectUnauthorized: false
+//   }
+//   const server = https.createServer(options, app)
+//   // listen to the server on port
+//   server.listen(port, function(){
+//     console.log("Server listening on https: ", port)
+//   })
+// }
