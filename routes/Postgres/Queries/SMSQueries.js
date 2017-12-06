@@ -19,7 +19,7 @@ const log_through = data => {
   return data
 }
 
-const formattedPhoneNumber = (number) {
+const formattedPhoneNumber = (number) => {
   return '+1' + number.replace(/\D/, '')
 }
 
@@ -28,7 +28,23 @@ exports.insert_tenant_landlord_sms = (req, res, next) => {
 
   const tenant_phone = formattedPhoneNumber(info.tenant_phone)
   const landlord_phone = formattedPhoneNumber(info.landlord_phone)
+  const twilio_phone = '+12268870232'
+  const notes = info.notes
+  const id = uuid.v4()
 
-  console.log(tenant_phone, landlord_phone)
+  const values = [id, tenant_phone, landlord_phone, twilio_phone]
 
+  const insert_match = `INSERT INTO tenant_landlord_phones (id, tenant_phone, landlord_phone, twilio_phone)
+                                                    VALUES ($1, $2, $3, $4)
+                        `
+
+  query(insert_match, values)
+  .then((data) => {
+    res.json({
+      message: 'Successfully inserted tenant landlord phone match'
+    })
+  })
+  .catch((err) => {
+    console.log(err)
+  })
 }
