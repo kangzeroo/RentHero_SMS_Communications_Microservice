@@ -13,7 +13,7 @@ const docClient = new dynaDoc.DynamoDB(dynamodb)
 exports.insertSMSLog = function(intel){
   const p = new Promise((res, rej) => {
     console.log('============= intel ==============')
-    console.log(intel)
+    // console.log(intel)
     // docClient.putItem(intel, function(err, data) {
     //   if (err){
     //       console.log(JSON.stringify(err, null, 2));

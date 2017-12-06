@@ -24,5 +24,6 @@ module.exports = function(app){
 	// app.post('/use-sms', twilio.webhook({ validate: false }), Test.sms)
 
 	app.post('/initial', json_encoding, SMSRoutes.initial)
-	app.post('/use-sms', twilio.webhook({ validate: false }), SMSRoutes.sms)
+	app.post('/sms', twilio.webhook({ validate: false }), SMSRoutes.sms)
+	app.post('/fallback', twilio.webhook({ validate: false }), SMSRoutes.fallback)
 }
