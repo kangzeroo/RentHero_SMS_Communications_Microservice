@@ -58,13 +58,13 @@ exports.initial = function(req, res, next) {
   .then((message) => {
     // step 5: done, twilio will handle the rest of the messages
     console.log('MESSAGE SENT TO LANDLORD')
+    res.status(200).send()
     // console.log(message)
     // insertSMSLog(req.body)
   }).catch((err) => {
     console.log('ERROR OCCURRED')
     console.log(err)
   })
-  res.status(200).send()
 }
 
 // POST /sms
