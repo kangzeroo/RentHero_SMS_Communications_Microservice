@@ -10,7 +10,13 @@ const json_encoding = bodyParser.json({type:'*/*'})
 
 module.exports = function(app){
 
+	app.use(bodyParser())
+
 	// routes
 	app.get('/test', json_encoding, Test.test)
 	app.post('/send_message', json_encoding, Test.send_message)
+	app.post('/copilot_message', json_encoding, Test.copilot_message)
+
+	app.get('/inbound', json_encoding, Test.inbound)
+	app.post('/outbound', json_encoding, Test.outbound)
 }
