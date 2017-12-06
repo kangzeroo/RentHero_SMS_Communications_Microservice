@@ -1,6 +1,7 @@
 const generate_twilio_client = require('../twilio_setup').generate_twilio_client
 const twilio = require('twilio')
 const MessagingResponse = twilio.twiml.MessagingResponse
+const gatherOutgoingNumber = require('../api/sms_routing')
 
 // GET /test
 exports.test = function(req, res, next){
@@ -76,8 +77,26 @@ exports.outbound = function(req, res, next) {
   console.log(req.body)
   console.log('OUTBOUND')
   const twiml = new MessagingResponse()
-  twiml.message('Awww yea bruh');
+  twiml.message('Awww yea SLAM DUNK');
 
   res.writeHead(200, {'Content-Type': 'text/xml'});
   res.end(twiml.toString());
+}
+
+// POST /use-sms
+exports.sms = function(req, res, next) {
+console.log(req.body)
+
+const from = req.body.From;
+const to   = req.body.To;
+const body = req.body.Body;
+
+ gatherOutgoingNumber(from)
+  .then(function (outgoingPhoneNumber) {
+    var messagingResponse = new MessagingResponse();
+    messagingResponse.message({ to: outgoingPhoneNumber }, body);
+
+   res.type('text/xml');
+   res.send(messagingResponse.toString());
+  })
 }
