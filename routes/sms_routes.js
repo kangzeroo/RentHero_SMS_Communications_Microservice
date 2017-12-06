@@ -2,7 +2,7 @@ const generate_twilio_client = require('../twilio_setup').generate_twilio_client
 const twilio = require('twilio')
 const MessagingResponse = twilio.twiml.MessagingResponse
 const twilio_client = generate_twilio_client()
-
+const gatherOutgoingNumber = require('../api/sms_routing').gatherOutgoingNumber
 
 // POST /initial
 exports.initial = function(req, res, next) {
@@ -40,26 +40,4 @@ const body = req.body.Body
    res.type('text/xml');
    res.send(messagingResponse.toString());
   })
-}
-
-
-const gatherOutgoingNumber = (incomingPhoneNumber) => {
-//  const phoneNumber = anonymousPhoneNumber
-  const p = new Promise((res, rej) => {
-
-   const hostPhoneNumber = '+15195726998'
-   const guestPhoneNumber = '+16475286355'
-
-   let outgoingPhoneNumber
-
-   if (guestPhoneNumber === incomingPhoneNumber) {
-      outgoingPhoneNumber = hostPhoneNumber
-    }
-
-   if (hostPhoneNumber === incomingPhoneNumber) {
-      outgoingPhoneNumber = guestPhoneNumber
-    }
-    res(outgoingPhoneNumber)
-  })
-  return p
 }
