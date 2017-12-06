@@ -1,6 +1,8 @@
 const bodyParser = require('body-parser')
+const twilio = require('twilio')
 // routes
 const Test = require('./routes/test_routes')
+const SMSRoutes = require('./routes/sms_routes')
 
 
 // bodyParser attempts to parse any request into JSON format
@@ -14,9 +16,13 @@ module.exports = function(app){
 
 	// routes
 	app.get('/test', json_encoding, Test.test)
-	app.post('/send_message', json_encoding, Test.send_message)
-	app.post('/copilot_message', json_encoding, Test.copilot_message)
+	// app.post('/send_message', json_encoding, Test.send_message)
+	// app.post('/copilot_message', json_encoding, Test.copilot_message)
 
-	app.get('/inbound', json_encoding, Test.inbound)
-	app.post('/outbound', json_encoding, Test.outbound)
+	// app.get('/inbound', json_encoding, Test.inbound)
+	// app.post('/outbound', json_encoding, Test.outbound)
+	// app.post('/use-sms', twilio.webhook({ validate: false }), Test.sms)
+
+	app.post('/initial', json_encoding, SMSRoutes.initial)
+	app.post('/use-sms', twilio.webhook({ validate: false }), SMSRoutes.sms)
 }
