@@ -35,4 +35,5 @@ module.exports = function(app){
 	app.post('/sms', twilio.webhook({ validate: false }), SMSRoutes.sms)
 	app.post('/stickysms', twilio.webhook({ validate: false }), SMSRoutes.stickysms)
 	app.post('/fallback', twilio.webhook({ validate: false }), SMSRoutes.fallback)
+	app.post('/speechtotext', twilio.webhook({ validate: false }), SMSRoutes.speechtotext)
 }
