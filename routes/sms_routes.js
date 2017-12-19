@@ -16,10 +16,10 @@ const generateInitialMessageBody_Tenant = require('../api/initial_message').gene
 const generateInitialMessageBody_Landlord = require('../api/initial_message').generateInitialMessageBody_Landlord
 
 const insertSMSLog = require('../message_logs/dynamodb_api').insertSMSLog
-
+// const json = require('json')
 const formattedPhoneNumber = require('../api/general_api').formattedPhoneNumber
-
-// POST /initial
+// const { flask, request } = require('flask')
+// POST /initil
 // for those initial sms messages
 exports.initial = function(req, res, next) {
   console.log('---------------- Initial message ----------------')
@@ -54,7 +54,9 @@ exports.initial = function(req, res, next) {
     if (data && data.twilio_phone) {
       console.log('MATCH ALREADY EXISTS')
       console.log('EXISTING TWILIO NUMBER: ', data.twilio_phone)
-      return sendSMSToTenantAndLandlord(info, { landlordName: landlordName, landlordPhone: landlordPhone }, { tenantPhone: tenantPhone }, data.twilio_phone)
+      // log that user and landlord mapping already exist. log(tenantPhone, [info.first_name, info.last_name].join(' '), landlordPhone, landlordName)
+
+      sendSMSToTenant(info, { landlordName: landlordName, landlordPhone: landlordPhone }, { tenantPhone: tenantPhone }, data.twilio_phone)
     } else {
       return get_tenant_landlord_twilio_numbers(tenantPhone, landlordPhone)
       .then((data) => {
@@ -64,6 +66,7 @@ exports.initial = function(req, res, next) {
           buyNewTwilioNumber()
           .then((purchasedTwilioNumber) => {
             console.log('PURCHASED TWILIO NUMBER: ', purchasedTwilioNumber)
+            // log bought a new number: purchasedTwilioNumber for mapping tenantPhone and landlordPhone
             return sendSMSToTenantAndLandlord(info, { landlordName: landlordName, landlordPhone: landlordPhone }, { tenantPhone: tenantPhone }, purchasedTwilioNumber)
           })
         } else {
@@ -82,6 +85,20 @@ exports.initial = function(req, res, next) {
   })
 }
 
+const sendSMSToTenant = (info, tenant, landlord, twilioPhone) => {
+  generateInitialMessageBody_Tenant(info, landlord.landlordName)
+  .then((tenantBody) => {
+    // step 3B: send initial message to tenant
+    return twilio_client.messages.create({
+      body: tenantBody,
+      to: tenant.tenantPhone,
+      from: twilioPhone,
+    })
+    // log this! body, to, from
+  })
+}
+
+
 const sendSMSToTenantAndLandlord = (info, landlord, tenant, twilioPhone) => {
   generateInitialMessageBody_Tenant(info, landlord.landlordName)
   .then((tenantBody) => {
@@ -92,23 +109,26 @@ const sendSMSToTenantAndLandlord = (info, landlord, tenant, twilioPhone) => {
       from: twilioPhone,
       // messagingServiceSid: messagingServiceSid // From a valid Twilio number
     })
+
+    // log message sent to tenant
   })
   .then((message) => {
-    //console.log(message)
     return insert_sms_match(tenant.tenantPhone, landlord.landlordPhone, message.sid, twilioPhone)
   })
   .then(() => {
-    // step 4A: generate initial message to landlord
+    // generate initial message to landlord
     return generateInitialMessageBody_Landlord(info, landlord.landlordName)
   })
   .then((landlordBody) => {
-    // step 4B: send initial message to landlord
+    // send initial message to landlord
     return twilio_client.messages.create({
       body: landlordBody,
       to: landlord.landlordPhone,
       from: twilioPhone,
       // messagingServiceSid: messagingServiceSid // From a valid Twilio number
     })
+
+    // log message sent to landlord
   })
   .then((message) => {
     // step 5: done, twilio will handle the rest of the messages
@@ -168,6 +188,8 @@ console.log(from, to)
     console.log('outgoingPhoneNumber: ', outgoingPhoneNumber)
     console.log('messaging...')
 
+    // log from, to, body, outgoingPhoneNumber
+
     twiml_client.message({
       to: outgoingPhoneNumber,
     }, body)
@@ -182,6 +204,11 @@ console.log(from, to)
 exports.voice = function(req, res, next) {
   console.log('/voice')
 
+  // const addons = json.loads(request.values['AddOns'])
+  // const speechtotext = addons['results']['ibm_watson_speechtotext']
+  //
+  // console.log(speechtotext)
+
   let from = req.body.From
   let to   = req.body.To
   let body = req.body.Body
@@ -193,6 +220,9 @@ exports.voice = function(req, res, next) {
       // voiceResponse.play('http://howtodocs.s3.amazonaws.com/howdy-tng.mp3')
        const dial = voiceResponse.dial({ callerId: to })
        dial.number(outgoingPhoneNumber)
+       // const gather = voiceResponse.gather({
+       //   input: 'speech dtmf'
+       // })
 
        console.log(voiceResponse.toString())
        res.type('text/xml')
@@ -239,6 +269,10 @@ exports.listener = function(req, res, next ) {
 exports.fallback = function(req, res, next) {
   console.log('FALLBACK')
   // console.log(req.body)
+}
+
+exports.speechtotext = function(req, res, next) {
+  console.log(req.body)
 }
 
 // exports.send_mass_text_message = function(req, res, next) {
