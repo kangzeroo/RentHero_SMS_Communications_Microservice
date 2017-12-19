@@ -46,12 +46,12 @@ exports.insert_tenant_landlord_sms = (req, res, next) => {
   })
 }
 
-exports.insert_sms_match = (tenant_phone, landlord_phone, sid) => {
+exports.insert_sms_match = (tenant_phone, landlord_phone, sid, twilio_phone) => {
    // const id = uuid.v4()
-   const values = [sid, tenant_phone, landlord_phone]
+   const values = [sid, tenant_phone, landlord_phone, twilio_phone]
 
-   const insert_match = `INSERT INTO sms_map (id, tenant_phone, landlord_phone)
-                              SELECT $1, $2, $3
+   const insert_match = `INSERT INTO sms_map (id, tenant_phone, landlord_phone, twilio_phone)
+                              SELECT $1, $2, $3, $4
                               WHERE NOT EXISTS (
                                 SELECT tenant_phone, landlord_phone
                                   FROM sms_map
@@ -72,7 +72,7 @@ exports.update_sms_match = (phone, sid) => {
 
   const update_match = `UPDATE sms_map
                            SET twilio_phone = '${phone}'
-                         WHERE id = '${sid}'
+                         WHERE id = '${sid}' AND twilio_phone IS NULL
                         `
 
   query(update_match)
@@ -84,10 +84,10 @@ exports.update_sms_match = (phone, sid) => {
   })
 }
 
-exports.get_sms_match = (twilio_phone) => {
+exports.get_sms_match = (incoming_phone, twilio_phone) => {
 
-  const values = [twilio_phone]
-  const get_match = `SELECT * FROM sms_map WHERE twilio_phone = $1`
+  const values = [twilio_phone, incoming_phone]
+  const get_match = `SELECT * FROM sms_map WHERE twilio_phone = $1 AND (tenant_phone = $2 OR landlord_phone = $2)`
 
   const return_rows = (rows) => {
           return rows[0]
@@ -102,4 +102,36 @@ exports.get_sms_match = (twilio_phone) => {
     .then((data) => {
       return return_rows(data)
     })
+}
+
+exports.get_tenant_landlord_match = (tenantPhone, landlordPhone) => {
+  const values = [tenantPhone, landlordPhone]
+  const get_match = `SELECT twilio_phone FROM sms_map WHERE tenant_phone = $1 AND landlord_phone = $2`
+
+  return query(get_match, values)
+  .then((data) => {
+    return data.rows[0]
+  })
+  .catch((err) => {
+    console.log(err)
+  })
+}
+
+exports.get_tenant_landlord_twilio_numbers = (tenantPhone, landlordPhone) => {
+  const values = [tenantPhone, landlordPhone]
+  const get_match = `SELECT DISTINCT twilio_phone FROM sms_map WHERE tenant_phone = $1 OR landlord_phone = $2`
+
+  const return_rows = (rows) => {
+          return rows
+        }
+  return query(get_match, values)
+  .then((data) => {
+    return stringify_rows(data)
+  })
+  .then((data) => {
+    return json_rows(data)
+  })
+  .then((data) => {
+    return return_rows(data)
+  })
 }

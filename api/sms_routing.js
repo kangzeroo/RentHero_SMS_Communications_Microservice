@@ -20,7 +20,7 @@ exports.gatherOutgoingNumber = function(incomingPhoneNumber, anonymousPhoneNumbe
 
    // const hostPhoneNumber = '+15195726998'
    // const guestPhoneNumber = '+16475286355'
-   get_sms_match(anonymousPhoneNumber)
+   get_sms_match(incomingPhoneNumber, anonymousPhoneNumber)
    .then((data) => {
      console.log('==========SMS MATCH QUERIED =========')
      console.log(data)
