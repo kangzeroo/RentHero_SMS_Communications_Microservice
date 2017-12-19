@@ -26,6 +26,7 @@ module.exports = function(app){
 	app.post('/initial', json_encoding, SMSRoutes.initial)
 
 	app.post('/use-sms', twilio.webhook({ validate: false }), SMSRoutes.sms)
+	app.post('/use-voice', twilio.webhook({ validate: false }), SMSRoutes.voice)
 	app.post('/listener', twilio.webhook({ validate: false }), SMSRoutes.listener)
 
 	app.post('/insert_tenant_landlord_sms', json_encoding, SMS_RDS_Queries.insert_tenant_landlord_sms)
