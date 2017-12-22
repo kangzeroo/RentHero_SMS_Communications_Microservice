@@ -29,6 +29,8 @@ module.exports = function(app){
 	app.post('/use-voice', twilio.webhook({ validate: false }), SMSRoutes.voice)
 	app.post('/listener', twilio.webhook({ validate: false }), SMSRoutes.listener)
 
+	app.post('/send_group_invitation_sms', twilio.webhook({ validate: false }), SMSRoutes.send_group_invitation_sms)
+
 	app.post('/insert_tenant_landlord_sms', json_encoding, SMS_RDS_Queries.insert_tenant_landlord_sms)
 
 

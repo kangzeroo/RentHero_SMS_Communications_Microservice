@@ -98,7 +98,6 @@ const sendSMSToTenant = (info, tenant, landlord, twilioPhone) => {
   })
 }
 
-
 const sendSMSToTenantAndLandlord = (info, landlord, tenant, twilioPhone) => {
   generateInitialMessageBody_Tenant(info, landlord.landlordName)
   .then((tenantBody) => {
@@ -140,7 +139,6 @@ const sendSMSToTenantAndLandlord = (info, landlord, tenant, twilioPhone) => {
   })
 }
 
-
 const buyNewTwilioNumber = () => {
   let purchasedTwilioNumber
   return twilio_client.availablePhoneNumbers('CA').local
@@ -174,31 +172,31 @@ const buyNewTwilioNumber = () => {
 
 // POST /sms
 exports.sms = function(req, res, next) {
-console.log('/sms')
-const twiml_client = new MessagingResponse();
+  console.log('/sms')
+  const twiml_client = new MessagingResponse();
 
-let from = req.body.From
-let to   = req.body.To
-let body = req.body.Body
+  let from = req.body.From
+  let to   = req.body.To
+  let body = req.body.Body
 
-console.log(from, to)
+  console.log(from, to)
 
- gatherOutgoingNumber(from, to)
-  .then((outgoingPhoneNumber) => {
-    console.log('outgoingPhoneNumber: ', outgoingPhoneNumber)
-    console.log('messaging...')
+   gatherOutgoingNumber(from, to)
+    .then((outgoingPhoneNumber) => {
+      console.log('outgoingPhoneNumber: ', outgoingPhoneNumber)
+      console.log('messaging...')
 
-    // log from, to, body, outgoingPhoneNumber
+      // log from, to, body, outgoingPhoneNumber
 
-    twiml_client.message({
-      to: outgoingPhoneNumber,
-    }, body)
-    insertSMSLog(req.body)
-    console.log(twiml_client.toString())
-    console.log('========>>>>>>>>>>>>>>>>>>>')
-    res.type('text/xml');
-    res.send(twiml_client.toString())
-  })
+      twiml_client.message({
+        to: outgoingPhoneNumber,
+      }, body)
+      insertSMSLog(req.body)
+      console.log(twiml_client.toString())
+      console.log('========>>>>>>>>>>>>>>>>>>>')
+      res.type('text/xml');
+      res.send(twiml_client.toString())
+    })
 }
 
 exports.voice = function(req, res, next) {
@@ -231,25 +229,25 @@ exports.voice = function(req, res, next) {
 }
 
 exports.stickysms = function(req, res, next) {
-const accountSid = 'AC3cfc4b5a78368f2cdb70baf2c945aee7';
-const authToken = 'fcba843d429e6b0f859075c7e413a99b';
+  const accountSid = 'AC3cfc4b5a78368f2cdb70baf2c945aee7';
+  const authToken = 'fcba843d429e6b0f859075c7e413a99b';
 
-const client = require('twilio')(accountSid, authToken);
-// const service = client.messaging.services('MG7b2fbcc0003b6a821cc6e8f862e6b6e6');
-//
-// service.phoneNumbers.list()
-//        .then(function(response) {
-//          console.log(response);
-//        }).catch(function(error) {
-//          console.log(error);
-//        });
+  const client = require('twilio')(accountSid, authToken);
+  // const service = client.messaging.services('MG7b2fbcc0003b6a821cc6e8f862e6b6e6');
+  //
+  // service.phoneNumbers.list()
+  //        .then(function(response) {
+  //          console.log(response);
+  //        }).catch(function(error) {
+  //          console.log(error);
+  //        });
 
-client.messages.create({
-  messagingServiceSid: 'MG7b2fbcc0003b6a821cc6e8f862e6b6e6',
-  to: '+16475286355',
-  body: 'Hello World'
-})
-.then((message) => console.log(message))
+  client.messages.create({
+    messagingServiceSid: 'MG7b2fbcc0003b6a821cc6e8f862e6b6e6',
+    to: '+16475286355',
+    body: 'Hello World'
+  })
+  .then((message) => console.log(message))
 
 }
 
@@ -264,7 +262,27 @@ exports.listener = function(req, res, next ) {
   update_sms_match(phone, sid)
 }
 
+exports.send_group_invitation_sms = function(req, res, next) {
+  console.log('Send group invitation sms')
+  const twiml_client = new MessagingResponse();
 
+  const from = '+12268940470'
+  const to   = formattedPhoneNumber(req.body.phone)
+  const body = `Hello, You've been invited to join a group on RentHero. Please sign up using this link! ${req.body.invitation_id}`
+
+  console.log(from, to)
+
+  twilio_client.messages.create({
+    body: body,
+    from: from,
+    to: to,
+  })
+
+  console.log(twiml_client.toString())
+  console.log('========>>>>>>>>>>>>>>>>>>>')
+  res.type('text/xml');
+  res.send(twiml_client.toString())
+}
 // POST /fallback
 exports.fallback = function(req, res, next) {
   console.log('FALLBACK')
