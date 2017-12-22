@@ -272,7 +272,7 @@ exports.send_group_invitation_sms = function(req, res, next) {
   const phone = info.phone
   const email = info.email
   const group_id = info.group_id
-  const referrer = info.invitor_first_name
+  const referrer = info.referrer
 
   const from = '+12268940470'
   const to   = formattedPhoneNumber(info.phone)
