@@ -1,1 +1,1 @@
-docker build -t nodeultimate .
+docker build -t sms_communications_microservice .
