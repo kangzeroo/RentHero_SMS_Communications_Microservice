@@ -272,7 +272,7 @@ exports.send_group_invitation_sms = function(req, res, next) {
   const name = info.invitee_first_name
   const phone = info.phone
   const email = info.email
-  const group_name = info.group_name
+  const group_id = info.group_id
   const referrer = info.referrer
   const magic_link_id = uuid.v4()
   const invitation = info.invitation_id
@@ -280,7 +280,7 @@ exports.send_group_invitation_sms = function(req, res, next) {
   const from = '+12268940470'
   const to   = formattedPhoneNumber(info.phone)
   const link = `http://localhost:4001/invitation?${encodeURIComponent(
-    `name=${name}&phone=${phone}&email=${email}&group=${group_name}&referrer=${referrer}&magic=${magic_link_id}&invitation=${invitation}`
+    `name=${name}&phone=${phone}&email=${email}&group=${group_id}&referrer=${referrer}&magic=${magic_link_id}&invitation=${invitation}`
   )}`
   const body = `Hello, You've been invited to join a group on RentHero. Please sign up using this link! ${link}`
 
