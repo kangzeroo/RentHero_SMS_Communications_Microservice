@@ -264,10 +264,18 @@ exports.listener = function(req, res, next ) {
 
 exports.send_group_invitation_sms = function(req, res, next) {
   console.log('Send group invitation sms')
-  const twiml_client = new MessagingResponse();
+  const info = req.body
+  const twiml_client = new MessagingResponse()
+
+
+  const name = info.invitee_first_name
+  const phone = info.phone
+  const email = info.email
+  const group_id = info.group_id
+  const referrer = info.invitor_first_name
 
   const from = '+12268940470'
-  const to   = formattedPhoneNumber(req.body.phone)
+  const to   = formattedPhoneNumber(info.phone)
   const body = `Hello, You've been invited to join a group on RentHero. Please sign up using this link! ${req.body.invitation_id}`
 
   console.log(from, to)
