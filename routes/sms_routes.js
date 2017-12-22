@@ -3,7 +3,7 @@ const twilio_client = require('../twilio_setup').generate_twilio_client();
 const uuid = require('uuid')
 const MessagingResponse = require('twilio').twiml.MessagingResponse;
 const VoiceResponse = require('twilio').twiml.VoiceResponse;
-
+const shortenUrl = require('../api/general_api').shortenUrl
 const messagingServiceSid = 'MG7b2fbcc0003b6a821cc6e8f862e6b6e6'
 
 const gatherOutgoingNumber = require('../api/sms_routing').gatherOutgoingNumber
@@ -279,23 +279,28 @@ exports.send_group_invitation_sms = function(req, res, next) {
 
   const from = '+12268940470'
   const to   = formattedPhoneNumber(info.phone)
-  const link = `http://localhost:4001/invitation?${encodeURIComponent(
-    `name=${name}&phone=${phone}&email=${email}&group=${group_id}&referrer=${referrer}&magic=${magic_link_id}&invitation=${invitation}`
-  )}`
-  const body = `Hello, You've been invited to join a group on RentHero. Please sign up using this link! ${link}`
+  const longUrl = `http://localhost:4001/invitation?${encodeURIComponent(`name=${name}&phone=${phone}&email=${email}&group=${group_id}&referrer=${referrer}&magic=${magic_link_id}&invitation=${invitation}`)}`
 
-  console.log(from, to)
+  console.log('ABOUT TO SHORTEN URL')
+  shortenUrl(longUrl).then((result) => {
+    const body = `Hello, You've been invited to join a group on RentHero. Please sign up using this link! ${result.id}`
 
-  twilio_client.messages.create({
-    body: body,
-    from: from,
-    to: to,
+    console.log(from, to)
+
+    twilio_client.messages.create({
+      body: body,
+      from: from,
+      to: to,
+    })
+
+    console.log(twiml_client.toString())
+    console.log('========>>>>>>>>>>>>>>>>>>>')
+    res.type('text/xml');
+    res.send(twiml_client.toString())
+  }).catch((err) => {
+    console.log(err)
+    res.status(500).send('Error occurred sending SMS notification')
   })
-
-  console.log(twiml_client.toString())
-  console.log('========>>>>>>>>>>>>>>>>>>>')
-  res.type('text/xml');
-  res.send(twiml_client.toString())
 }
 // POST /fallback
 exports.fallback = function(req, res, next) {
