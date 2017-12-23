@@ -273,13 +273,17 @@ exports.send_group_invitation_sms = function(req, res, next) {
   const phone = info.phone
   const email = info.email
   const group_id = info.group_id
+  const group_name = info.group_name
   const referrer = info.referrer
   const magic_link_id = uuid.v4()
   const invitation = info.invitation_id
 
+  const referrer_tenant_id = info.referrer_tenant_id
+  const referrer_phone = info.referrer_phone
+
   const from = '+12268940470'
   const to   = formattedPhoneNumber(info.phone)
-  const longUrl = `http://localhost:4001/invitation?${encodeURIComponent(`name=${name}&phone=${phone}&email=${email}&group=${group_id}&referrer=${referrer}&magic=${magic_link_id}&invitation=${invitation}`)}`
+  const longUrl = `http://localhost:4001/invitation?${encodeURIComponent(`name=${name}&phone=${phone}&email=${email}&group=${group_id}&referrer=${referrer}&magic=${magic_link_id}&invitation=${invitation}&group_name=${group_name}`)}`
 
   console.log('ABOUT TO SHORTEN URL')
   shortenUrl(longUrl).then((result) => {
