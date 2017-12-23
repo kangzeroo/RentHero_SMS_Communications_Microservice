@@ -1,2 +1,2 @@
 
-exports.SMS_HISTORY = 'SMS_History_Logs'
+exports.COMMUNICATIONS_HISTORY = 'Communication_Logs'

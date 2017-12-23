@@ -16,7 +16,7 @@ const get_tenant_landlord_twilio_numbers = require('./LeasingDB/Queries/SMSQueri
 const generateInitialMessageBody_Tenant = require('../api/initial_message').generateInitialMessageBody_Tenant
 const generateInitialMessageBody_Landlord = require('../api/initial_message').generateInitialMessageBody_Landlord
 
-const insertSMSLog = require('../message_logs/dynamodb_api').insertSMSLog
+const insertCommunicationsLog = require('../message_logs/dynamodb_api').insertCommunicationsLog
 // const json = require('json')
 const formattedPhoneNumber = require('../api/general_api').formattedPhoneNumber
 // const { flask, request } = require('flask')
@@ -192,7 +192,6 @@ exports.sms = function(req, res, next) {
       twiml_client.message({
         to: outgoingPhoneNumber,
       }, body)
-      insertSMSLog(req.body)
       console.log(twiml_client.toString())
       console.log('========>>>>>>>>>>>>>>>>>>>')
       res.type('text/xml');
@@ -268,7 +267,8 @@ exports.send_group_invitation_sms = function(req, res, next) {
   const info = req.body
   const twiml_client = new MessagingResponse()
 
-
+  const sender_id = info.tenant_id
+  const sender_phone = info.sender_phone
   const name = info.invitee_first_name
   const phone = info.phone
   const email = info.email
@@ -285,7 +285,6 @@ exports.send_group_invitation_sms = function(req, res, next) {
   const to   = formattedPhoneNumber(info.phone)
   const longUrl = `http://localhost:4001/invitation?${encodeURIComponent(`name=${name}&phone=${phone}&email=${email}&group=${group_id}&referrer=${referrer}&magic=${magic_link_id}&invitation=${invitation}&group_name=${group_name}`)}`
 
-  console.log('ABOUT TO SHORTEN URL')
   shortenUrl(longUrl).then((result) => {
     const body = `Hello, You've been invited to join a group on RentHero. Please sign up using this link! ${result.id}`
 
@@ -296,8 +295,20 @@ exports.send_group_invitation_sms = function(req, res, next) {
       from: from,
       to: to,
     })
+    insertCommunicationsLog({
+      'ACTION': 'SENT_GROUP_INVITE',
+      'DATE': new Date().getTime(),
+      'PROXY_CONTACT_ID': from,
+      'SENDER_ID': sender_id,
+      'RECEIVER_ID': phone,
+      'SENDER_CONTACT_ID': sender_phone,
+      'RECEIVER_CONTACT_ID': phone,
+      'TEXT': body,
+      'GROUP_ID': group_id,
+      'INVITATION_ID': invitation,
+    })
 
-    console.log(twiml_client.toString())
+    // console.log(twiml_client.toString())
     console.log('========>>>>>>>>>>>>>>>>>>>')
     res.type('text/xml');
     res.send(twiml_client.toString())
@@ -334,7 +345,7 @@ exports.speechtotext = function(req, res, next) {
 //       twiml_client.message({
 //         to: outgoingPhoneNumber,
 //       }, body)
-//       insertSMSLog(req.body)
+//       insertCommunicationsLog(req.body)
 //       console.log(twiml_client.toString())
 //       console.log('========>>>>>>>>>>>>>>>>>>>')
 //       res.type('text/xml');

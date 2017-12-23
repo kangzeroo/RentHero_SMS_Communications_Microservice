@@ -10,7 +10,7 @@ const app = express()
 require('./twilio_setup')
 
 // const createTables = require('./message_logs/schema/sms_history/sms_history_table').createTables
-
+// createTables()
 // Database setup
 
 // App setup
