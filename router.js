@@ -23,9 +23,9 @@ module.exports = function(app){
 	// app.post('/outbound', json_encoding, Test.outbound)
 	// app.post('/use-sms', twilio.webhook({ validate: false }), Test.sms)
 
-	app.post('/initial', json_encoding, SMSRoutes.initial)
+	app.post('/initial', json_encoding, SMSRoutes.initial_contact)
 
-	app.post('/use-sms', twilio.webhook({ validate: false }), SMSRoutes.sms)
+	app.post('/use-sms', twilio.webhook({ validate: false }), SMSRoutes.sms_forwarder)
 	app.post('/use-voice', twilio.webhook({ validate: false }), SMSRoutes.voice)
 	app.post('/listener', twilio.webhook({ validate: false }), SMSRoutes.listener)
 
@@ -34,7 +34,7 @@ module.exports = function(app){
 	app.post('/insert_tenant_landlord_sms', json_encoding, SMS_RDS_Queries.insert_tenant_landlord_sms)
 
 
-	app.post('/sms', twilio.webhook({ validate: false }), SMSRoutes.sms)
+	app.post('/sms', twilio.webhook({ validate: false }), SMSRoutes.sms_forwarder)
 	app.post('/stickysms', twilio.webhook({ validate: false }), SMSRoutes.stickysms)
 	app.post('/fallback', twilio.webhook({ validate: false }), SMSRoutes.fallback)
 	app.post('/speechtotext', twilio.webhook({ validate: false }), SMSRoutes.speechtotext)
