@@ -267,19 +267,19 @@ exports.send_group_invitation_sms = function(req, res, next) {
   const info = req.body
   const twiml_client = new MessagingResponse()
 
-  const sender_id = info.tenant_id
-  const sender_phone = info.sender_phone
+  const referrer = info.referrer
+  const referrer_tenant_id = info.referrer_tenant_id
+  const referrer_phone = info.referrer_phone
+
+  // invitee
   const name = info.invitee_first_name
   const phone = info.phone
   const email = info.email
+
   const group_id = info.group_id
   const group_name = info.group_name
-  const referrer = info.referrer
   const magic_link_id = uuid.v4()
   const invitation = info.invitation_id
-
-  const referrer_tenant_id = info.referrer_tenant_id
-  const referrer_phone = info.referrer_phone
 
   const from = '+12268940470'
   const to   = formattedPhoneNumber(info.phone)
@@ -295,13 +295,14 @@ exports.send_group_invitation_sms = function(req, res, next) {
       from: from,
       to: to,
     })
+    // check out message_logs/schema/communications_history/communications_history_item to see a list of possible insertion entries
     insertCommunicationsLog({
       'ACTION': 'SENT_GROUP_INVITE',
       'DATE': new Date().getTime(),
       'PROXY_CONTACT_ID': from,
-      'SENDER_ID': sender_id,
+      'SENDER_ID': referrer_tenant_id,
       'RECEIVER_ID': phone,
-      'SENDER_CONTACT_ID': sender_phone,
+      'SENDER_CONTACT_ID': referrer_phone,
       'RECEIVER_CONTACT_ID': phone,
       'TEXT': body,
       'GROUP_ID': group_id,

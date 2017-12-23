@@ -19,16 +19,16 @@ exports.insertCommunicationsLog = function(intel){
       'Item': intel,
     }
     console.log(item)
-    // docClient.putItem(intel, function(err, data) {
-    //   if (err){
-    //       console.log(JSON.stringify(err, null, 2));
-    //       rej()
-    //   }else{
-    //       console.log(data)
-    //       console.log('INTEL INSERTION SUCCESS!')
-    //       res()
-    //   }
-    // })
+    docClient.putItem(item, function(err, data) {
+      if (err){
+          console.log(JSON.stringify(err, null, 2));
+          rej()
+      }else{
+          console.log(data)
+          console.log('INTEL INSERTION SUCCESS!')
+          res()
+      }
+    })
   })
   return p
 }
