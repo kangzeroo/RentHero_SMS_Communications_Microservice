@@ -1,24 +1,24 @@
 const AWS = require('aws-sdk')
 const aws_config = require('../../../credentials/aws_config')
-const SMS_HISTORY = require('../dynamodb_tablenames').SMS_HISTORY
+const COMMUNICATIONS_HISTORY = require('../dynamodb_tablenames').COMMUNICATIONS_HISTORY
 AWS.config.update(aws_config)
 
 
-const smsHistoryTableParams = {
-    TableName : SMS_HISTORY,
+const communicationsHistoryTableParams = {
+    TableName : COMMUNICATIONS_HISTORY,
     KeySchema: [
         // USE CASE: ALLOWS ME TO SEE ALL USER PREFERENCES INTEL IN CHRONOLOGICAL ORDER. EG: USER LOOKS FOR ENSUITE FIRST BEFORE CHANGING THEIR FILTERS TO LOOK FOR LESS ROOMATES NO ENSUITE
-        { AttributeName: "SENDER_PHONE", KeyType: "HASH" },  //Partition key
+        { AttributeName: "SENDER_CONTACT_ID", KeyType: "HASH" },  //Partition key
         { AttributeName: "DATE", KeyType: "RANGE" },  //Sort key
     ],
     AttributeDefinitions: [
-        { AttributeName: "SENDER_PHONE", AttributeType: "S" },
-        { AttributeName: "RECEIVER_PHONE", AttributeType: "S" },
+        { AttributeName: "SENDER_CONTACT_ID", AttributeType: "S" },       // a phone, email, fb messenger id (of the sender)
+        { AttributeName: "PROXY_CONTACT_ID", AttributeType: "S" },        // a twilio number, a email forwarder client, a facebook chat thread
+        { AttributeName: "RECEIVER_CONTACT_ID", AttributeType: "S" },     // a phone, email, fb messenger id (of the receiver)
         { AttributeName: "DATE", AttributeType: "N" },
         { AttributeName: "ACTION", AttributeType: "S" },
-        { AttributeName: "BUILDING_ID", AttributeType: "S" },
-        { AttributeName: "LANDLORD_ID", AttributeType: "S" },
-        { AttributeName: "TENANT_ID", AttributeType: "S" },
+        { AttributeName: "SENDER_ID", AttributeType: "S" },
+        { AttributeName: "RECEIVER_ID", AttributeType: "S" },
     ],
     ProvisionedThroughput: {
         ReadCapacityUnits: 1,
@@ -27,14 +27,14 @@ const smsHistoryTableParams = {
     LocalSecondaryIndexes: [
       {
         // USE CASE: ALLOWS ME TO SHOW ALL USER PREFERENCES INTEL GROUPED BY ACTION. EG: I CAN SHOW THE TRENDS OF A USER ADJUSTING THEIR RENT PRICE THROUGHOUT THEIR 4 YEARS IN UNIVERSITY
-        IndexName: 'By_Local_Sender_BuildingId', /* required */
+        IndexName: 'By_Local_Sender_vs_Receiver', /* required */
         KeySchema: [ /* required */
           {
-            AttributeName: 'SENDER_PHONE', /* required */
+            AttributeName: 'SENDER_CONTACT_ID', /* required */
             KeyType: 'HASH' /* required */
           },
           {
-            AttributeName: 'BUILDING_ID', /* required */
+            AttributeName: 'RECEIVER_CONTACT_ID', /* required */
             KeyType: 'RANGE' /* required */
           }
           /* more items */
@@ -63,9 +63,9 @@ const smsHistoryTableParams = {
       },
       {
         // USE CASE: ALLOWS ME TO SEE ALL INTEL OF A SPECIFIC ACTION, GROUPED BY USERS. EG: SHOW ME ALL PRICE ADJUSTMENTS, AND NOW I CAN GROUP USER POPULATIONS INTO PRICE RANGES.
-        IndexName: 'By_Building_Id', /* required */
+        IndexName: 'By_RECEIVER_ID', /* required */
         KeySchema: [ /* required */
-          {AttributeName: 'BUILDING_ID', KeyType: 'HASH'},
+          {AttributeName: 'RECEIVER_ID', KeyType: 'HASH'},
           {AttributeName: 'DATE', KeyType: 'RANGE'}
         ],
         Projection: { /* required */
@@ -78,9 +78,9 @@ const smsHistoryTableParams = {
       },
       {
         // USE CASE: ALLOWS ME TO SEE ALL INTEL OF A SPECIFIC ACTION, GROUPED BY USERS. EG: SHOW ME ALL PRICE ADJUSTMENTS, AND NOW I CAN GROUP USER POPULATIONS INTO PRICE RANGES.
-        IndexName: 'By_Landlord_Id', /* required */
+        IndexName: 'By_SENDER_ID', /* required */
         KeySchema: [ /* required */
-          {AttributeName: 'LANDLORD_ID', KeyType: 'HASH'},
+          {AttributeName: 'SENDER_ID', KeyType: 'HASH'},
           {AttributeName: 'DATE', KeyType: 'RANGE'}
         ],
         Projection: { /* required */
@@ -93,24 +93,9 @@ const smsHistoryTableParams = {
       },
       {
         // USE CASE: ALLOWS ME TO SEE ALL INTEL OF A SPECIFIC ACTION, GROUPED BY USERS. EG: SHOW ME ALL PRICE ADJUSTMENTS, AND NOW I CAN GROUP USER POPULATIONS INTO PRICE RANGES.
-        IndexName: 'By_Receiver_Phone', /* required */
+        IndexName: 'By_PROXY_CONTACT_ID', /* required */
         KeySchema: [ /* required */
-          {AttributeName: 'RECEIVER_PHONE', KeyType: 'HASH'},
-          {AttributeName: 'DATE', KeyType: 'RANGE'}
-        ],
-        Projection: { /* required */
-          ProjectionType: 'ALL'
-        },
-        ProvisionedThroughput: { /* required */
-          ReadCapacityUnits: 1, /* required */
-          WriteCapacityUnits: 5 /* required */
-        }
-      },
-      {
-        // USE CASE: ALLOWS ME TO SEE ALL INTEL OF A SPECIFIC ACTION, GROUPED BY USERS. EG: SHOW ME ALL PRICE ADJUSTMENTS, AND NOW I CAN GROUP USER POPULATIONS INTO PRICE RANGES.
-        IndexName: 'By_Tenant_Id', /* required */
-        KeySchema: [ /* required */
-          {AttributeName: 'TENANT_ID', KeyType: 'HASH'},
+          {AttributeName: 'PROXY_CONTACT_ID', KeyType: 'HASH'},
           {AttributeName: 'DATE', KeyType: 'RANGE'}
         ],
         Projection: { /* required */
@@ -133,7 +118,7 @@ exports.createTables = function(){
     region: "us-east-1"
   })
 
-  dynamodb.createTable(smsHistoryTableParams, function(err, data) {
+  dynamodb.createTable(communicationsHistoryTableParams, function(err, data) {
       if (err)
           console.log(JSON.stringify(err, null, 2));
       else
