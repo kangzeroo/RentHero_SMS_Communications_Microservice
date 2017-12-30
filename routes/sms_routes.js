@@ -99,6 +99,7 @@ exports.initial_contact = function(req, res, next) {
         } else {
           console.log('USE EXISTING NUMBER')
           let selected_twilio_number
+          console.log(serviceNumbers)
           if (dbtwilio_numbers && dbtwilio_numbers.length > 0) {
             selected_twilio_number = serviceNumbers.filter(val => !dbtwilio_numbers.includes(val))[0]
           } else {
@@ -160,7 +161,7 @@ const sendInitialSMSForExistingTenantLandlordPair = (info, landlord, tenant, twi
     // log message sent to tenant
   })
   .then((message) => {
-    return insert_sms_match(tenant.tenantPhone, landlord.landlordPhone, message.sid, twilioPhone)
+    return insert_sms_match(tenant.tenantId, tenant.tenantPhone, landlord.landlordId, landlord.landlordPhone, message.sid, twilioPhone)
   })
   .then(() => {
     // generate initial message to landlord
@@ -245,7 +246,7 @@ const sendInitialSMSToTenantAndLandlord = (info, landlord, tenant, twilioPhone) 
     // log message sent to tenant
   })
   .then((message) => {
-    return insert_sms_match(tenant.tenantPhone, landlord.landlordPhone, message.sid, twilioPhone)
+    return insert_sms_match(tenant.tenantId, tenant.tenantPhone, landlord.landlordId, landlord.landlordPhone, message.sid, twilioPhone)
   })
   .then(() => {
     // generate initial message to landlord
