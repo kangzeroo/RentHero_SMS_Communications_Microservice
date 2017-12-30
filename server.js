@@ -46,7 +46,7 @@ if (process.env.NODE_ENV === 'production') {
   // server.listen(port, function(){
   //   console.log("Server listening on http: ", port)
   // })
-  const port = process.env.PORT || 3106
+  const port = process.env.PORT || 3006
   const options = {
       ca: fs.readFileSync('./credentials/rentburrow_com.ca-bundle'),
       key: fs.readFileSync('./credentials/rentburrow_com.key'),
