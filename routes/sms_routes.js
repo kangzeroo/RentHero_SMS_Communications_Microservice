@@ -68,7 +68,7 @@ exports.initial_contact = function(req, res, next) {
       twilioNumber = data.twilio_phone
       return sendInitialSMSForExistingTenantLandlordPair(
         info,
-        { landlordId: landlordId, landlordName: landlordName, landlordPhone: landlordPhone },
+        { landlordId: data.corporation_id, landlordName: landlordName, landlordPhone: landlordPhone },
         { tenantId: tenantId, tenantPhone: tenantPhone },
         data.twilio_phone
       )
