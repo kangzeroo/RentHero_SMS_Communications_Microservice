@@ -33,6 +33,7 @@ exports.initial_contact = function(req, res, next) {
   console.log(info)
   let tenantId = info.tenant_id
   let tenantPhone = formattedPhoneNumber(info.phone)
+  let landlordId
   let landlordPhone = ''
   let landlordName = ''
   let totalServiceNumbers
@@ -68,14 +69,19 @@ exports.initial_contact = function(req, res, next) {
       twilioNumber = data.twilio_phone
       return sendInitialSMSForExistingTenantLandlordPair(
         info,
-        { landlordId: data.corporation_id, landlordName: landlordName, landlordPhone: landlordPhone },
+        { landlordId: landlordId, landlordName: landlordName, landlordPhone: landlordPhone },
         { tenantId: tenantId, tenantPhone: tenantPhone },
         data.twilio_phone
       )
     } else {
       return get_tenant_landlord_twilio_numbers(tenantPhone, landlordPhone)
       .then((data) => {
-        const dbtwilio_numbers = data.map(s => s.twilio_phone)
+        let dbtwilio_numbers
+        if (data && data.length > 0) {
+          dbtwilio_numbers = data.map(s => s.twilio_phone)
+        } else {
+          dbtwilio_numbers = []
+        }
         if (dbtwilio_numbers.length >= totalServiceNumbers) {
           console.log('BUY A NEW NUMBER')
           return buyNewTwilioNumber()
