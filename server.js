@@ -9,8 +9,8 @@ const cors = require('cors')
 const app = express()
 require('./twilio_setup')
 
-// const createTables = require('./message_logs/schema/sms_history/sms_history_table').createTables
-// createTables()
+const createTables = require('./message_logs/schema/tour_hints/tour_hints_table').createTables
+createTables()
 // Database setup
 
 // App setup
