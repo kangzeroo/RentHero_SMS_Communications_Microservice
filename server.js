@@ -9,7 +9,7 @@ const cors = require('cors')
 const app = express()
 require('./twilio_setup')
 
-// const createTables = require('./message_logs/schema/tour_hints/tour_hints_table').createTables
+// const createTables = require('./message_logs/schema/communications_history/communications_history_table').createTables
 // createTables()
 // Database setup
 
@@ -40,12 +40,13 @@ if (process.env.NODE_ENV === 'production') {
   server.listen(port, function(){
     console.log("Server listening on https: ", port)
   })
+} else if (process.env.NODE_ENV === 'twilio') {
+  const port = process.env.PORT || 3106
+  const server = http.createServer(app)
+  server.listen(port, function(){
+    console.log("Server listening on http: ", port)
+  })
 } else {
-  // const port = process.env.PORT || 3006
-  // const server = http.createServer(app)
-  // server.listen(port, function(){
-  //   console.log("Server listening on http: ", port)
-  // })
   const port = process.env.PORT || 3006
   const options = {
       ca: fs.readFileSync('./credentials/rentburrow_com.ca-bundle'),

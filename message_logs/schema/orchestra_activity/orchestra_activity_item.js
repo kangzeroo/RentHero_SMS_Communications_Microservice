@@ -9,6 +9,7 @@ exports.reference_items = [
     'Item': {
       'ACTION': 'INITIAL_TOUR_REQUEST',
       'DATE': new Date().getTime(),
+      'ORCHESTRA_ID': 'uuid.v4()',
 
       'TENANT_ID': `this.props.tenant_profile.id` || 'NONE',
       'TENANT_PHONE': '+134534536565',
@@ -33,6 +34,7 @@ exports.reference_items = [
     'Item': {
       'ACTION': 'INITIAL_MESSAGE',
       'DATE': new Date().getTime(),
+      'ORCHESTRA_ID': 'uuid.v4()',
 
       'TENANT_ID': `this.props.tenant_profile.id` || 'NONE',
       'TENANT_NAME': 'Steve Carrol',
@@ -57,6 +59,7 @@ exports.reference_items = [
     'Item': {
       'ACTION': 'SMS_MESSAGE',
       'DATE': new Date().getTime(),
+      'ORCHESTRA_ID': 'uuid.v4()',
 
       'PROXY_CONTACT_ID': '983LIJSDFSDFLJ9',
       'SENDER_ID': 'SGF4534536565',
@@ -72,6 +75,7 @@ exports.reference_items = [
     'Item': {
       'ACTION': 'SENT_GROUP_INVITE',
       'DATE': new Date().getTime(),
+      'ORCHESTRA_ID': 'uuid.v4()',
 
       'PROXY_CONTACT_ID': '983LIJSDFSDFLJ9',
       'SENDER_ID': `this.props.tenant_profile.id` || 'NONE',
@@ -89,6 +93,7 @@ exports.reference_items = [
     'Item': {
       'ACTION': 'SENT_RECOMMENDATION',
       'DATE': new Date().getTime(),
+      'ORCHESTRA_ID': 'uuid.v4()',
 
       'PROXY_CONTACT_ID': '983LIJSDFSDFLJ9',
       'SENDER_ID': `this.props.tenant_profile.id` || 'NONE',
@@ -98,6 +103,78 @@ exports.reference_items = [
 
       'TEXT': 'Hello Sarah, check out this link for recommendations',
       'RECOMMENDATION_DETAILS': '4 bed places with ensuite - 110 columbia with id...',
+    }
+  },
+  {
+    'TableName': COMMUNICATIONS_HISTORY,
+    'Item': {
+      'ACTION': 'MAGIC_LINK_GROUP_SENT',
+      'DATE': new Date().getTime(),
+      'ORCHESTRA_ID': 'uuid.v4()',
+
+      'SENDER_ID': `tenant_id`,
+      'RECEIVER_ID': 'tenant_id',
+      'SENDER_CONTACT_ID': '+134534536565',
+      'RECEIVER_CONTACT_ID': '+14556485767',
+      'PROXY_CONTACT_ID': '983LIJSDFSDFLJ9',
+
+      'GROUP_ID': 'LSDJF45OFS456FD',
+      'INVITATION_ID': 'LJSDFJLSKDFS3849',
+      'MAGIC_LINK_ID': 'jolasf7iu8s8auf9asf'
+    }
+  },
+  {
+    'TableName': COMMUNICATIONS_HISTORY,
+    'Item': {
+      'ACTION': 'MAGIC_LINK_GROUP_OPENED',
+      'DATE': new Date().getTime(),
+      'ORCHESTRA_ID': 'uuid.v4()',
+
+      'SENDER_ID': `tenant_id`,
+      'RECEIVER_ID': 'tenant_id',
+      'SENDER_CONTACT_ID': '+134534536565',
+      'RECEIVER_CONTACT_ID': '+14556485767',
+      'PROXY_CONTACT_ID': '983LIJSDFSDFLJ9',
+
+      'GROUP_ID': 'LSDJF45OFS456FD',
+      'INVITATION_ID': 'LJSDFJLSKDFS3849',
+      'MAGIC_LINK_ID': 'jolasf7iu8s8auf9asf'
+    },
+  },
+  {
+    'TableName': COMMUNICATIONS_HISTORY,
+    'Item': {
+      'ACTION': 'MAGIC_LINK_RECOMMENDATION_SENT',
+      'DATE': new Date().getTime(),
+      'ORCHESTRA_ID': 'uuid.v4()',
+
+      'SENDER_ID': `RENTHERO_ORCHESTRA`,
+      'RECEIVER_ID': 'tenant_id',
+      'SENDER_CONTACT_ID': 'RENTHERO_ORCHESTRA',
+      'RECEIVER_CONTACT_ID': '+14556485767',
+      'PROXY_CONTACT_ID': '983LIJSDFSDFLJ9',
+
+      'GROUP_ID': 'LSDJF45OFS456FD',
+      'INVITATION_ID': 'LJSDFJLSKDFS3849',
+      'MAGIC_LINK_ID': 'jolasf7iu8s8auf9asf'
+    }
+  },
+  {
+    'TableName': COMMUNICATIONS_HISTORY,
+    'Item': {
+      'ACTION': 'MAGIC_LINK_RECOMMENDATION_OPENED',
+      'DATE': new Date().getTime(),
+      'ORCHESTRA_ID': 'uuid.v4()',
+
+      'SENDER_ID': `tenant_id`,
+      'RECEIVER_ID': 'tenant_id',
+      'SENDER_CONTACT_ID': '+134534536565',
+      'RECEIVER_CONTACT_ID': '+14556485767',
+      'PROXY_CONTACT_ID': '983LIJSDFSDFLJ9',
+
+      'GROUP_ID': 'LSDJF45OFS456FD',
+      'INVITATION_ID': 'LJSDFJLSKDFS3849',
+      'MAGIC_LINK_ID': 'jolasf7iu8s8auf9asf'
     }
   }
 ]
