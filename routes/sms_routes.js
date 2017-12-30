@@ -2,6 +2,7 @@ const twilio_client = require('../twilio_setup').generate_twilio_client();
 // const twiml_client = new require('../twilio_setup').generate_twiml_client()
 const RENTHERO_SENDER_ID = require('../message_logs/schema/dynamodb_tablenames').RENTHERO_SENDER_ID
 const uuid = require('uuid')
+const shortid = require('shortid')
 const MessagingResponse = require('twilio').twiml.MessagingResponse;
 const VoiceResponse = require('twilio').twiml.VoiceResponse;
 const shortenUrl = require('../api/general_api').shortenUrl
@@ -126,13 +127,15 @@ exports.initial_contact = function(req, res, next) {
 }
 
 const sendInitialSMSForExistingTenantLandlordPair = (info, landlord, tenant, twilioPhone) => {
-  generateInitialMessageBody_Tenant_ForExistingPair(info, landlord.landlordName)
+  const id1 = shortid.generate()
+  const id2 = shortid.generate()
+  generateInitialMessageBody_Tenant_ForExistingPair(info, landlord.landlordName, id1)
   .then((tenantBody) => {
     // step 3B: send initial message to tenant
     insertCommunicationsLog({
       'ACTION': 'INITIAL_MESSAGE',
       'DATE': new Date().getTime(),
-      'COMMUNICATION_ID': uuid.v4(),
+      'COMMUNICATION_ID': id1,
 
       'TENANT_ID': tenant.tenantId,
       'TENANT_NAME': info.first_name,
@@ -165,14 +168,14 @@ const sendInitialSMSForExistingTenantLandlordPair = (info, landlord, tenant, twi
   })
   .then(() => {
     // generate initial message to landlord
-    return generateInitialMessageBody_Landlord_ForExistingPair(info, landlord.landlordName)
+    return generateInitialMessageBody_Landlord_ForExistingPair(info, landlord.landlordName, id2)
   })
   .then((landlordBody) => {
     // send initial message to landlord
     insertCommunicationsLog({
       'ACTION': 'INITIAL_MESSAGE',
       'DATE': new Date().getTime(),
-      'COMMUNICATION_ID': uuid.v4(),
+      'COMMUNICATION_ID': id2,
 
       'TENANT_ID': tenant.tenantId,
       'TENANT_NAME': info.first_name,
@@ -211,13 +214,15 @@ const sendInitialSMSForExistingTenantLandlordPair = (info, landlord, tenant, twi
 }
 
 const sendInitialSMSToTenantAndLandlord = (info, landlord, tenant, twilioPhone) => {
-  generateInitialMessageBody_Tenant(info, landlord.landlordName)
+  const id1 = shortid.generate()
+  const id2 = shortid.generate()
+  generateInitialMessageBody_Tenant(info, landlord.landlordName, id1)
   .then((tenantBody) => {
     // step 3B: send initial message to tenant
     insertCommunicationsLog({
       'ACTION': 'INITIAL_MESSAGE',
       'DATE': new Date().getTime(),
-      'COMMUNICATION_ID': uuid.v4(),
+      'COMMUNICATION_ID': id1,
 
       'TENANT_ID': tenant.tenantId,
       'TENANT_NAME': info.first_name,
@@ -250,14 +255,14 @@ const sendInitialSMSToTenantAndLandlord = (info, landlord, tenant, twilioPhone) 
   })
   .then(() => {
     // generate initial message to landlord
-    return generateInitialMessageBody_Landlord(info, landlord.landlordName)
+    return generateInitialMessageBody_Landlord(info, landlord.landlordName, id2)
   })
   .then((landlordBody) => {
     // send initial message to landlord
     insertCommunicationsLog({
       'ACTION': 'INITIAL_MESSAGE',
       'DATE': new Date().getTime(),
-      'COMMUNICATION_ID': uuid.v4(),
+      'COMMUNICATION_ID': id2,
 
       'TENANT_ID': tenant.tenantId,
       'TENANT_NAME': info.first_name,
@@ -346,7 +351,7 @@ exports.sms_forwarder = function(req, res, next) {
       insertCommunicationsLog({
         'ACTION': 'SMS_MESSAGE',
         'DATE': new Date().getTime(),
-        'COMMUNICATION_ID': uuid.v4(),
+        'COMMUNICATION_ID': shortid.generate(),
         'PROXY_CONTACT_ID': twilio_to,
         'SENDER_ID': original_from,
         'RECEIVER_ID': outgoingPhoneNumber,
@@ -431,6 +436,7 @@ exports.send_group_invitation_sms = function(req, res, next) {
   console.log('Send group invitation sms')
   const info = req.body
   const twiml_client = new MessagingResponse()
+  const id = shortid.generate()
 
   const referrer = info.referrer
   const referrer_tenant_id = info.referrer_tenant_id
@@ -451,7 +457,7 @@ exports.send_group_invitation_sms = function(req, res, next) {
   const longUrl = `http://localhost:4001/invitation?${encodeURIComponent(`name=${name}&phone=${phone}&email=${email}&group=${group_id}&referrer=${referrer}&magic=${magic_link_id}&invitation=${invitation}&group_alias=${group_alias}`)}`
 
   shortenUrl(longUrl).then((result) => {
-    const body = `Hello, You've been invited to join a group on RentHero. Please sign up using this link! ${result.id}`
+    const body = `Hello, You've been invited to join a group on RentHero. Please sign up using this link! ${result.id}     - RentHero.ca/m/${id}`
 
     console.log(from, to)
 
@@ -464,7 +470,7 @@ exports.send_group_invitation_sms = function(req, res, next) {
     insertCommunicationsLog({
       'ACTION': 'SENT_GROUP_INVITE',
       'DATE': new Date().getTime(),
-      'COMMUNICATION_ID': uuid.v4(),
+      'COMMUNICATION_ID': id,
       'PROXY_CONTACT_ID': from,
       'SENDER_ID': referrer_tenant_id,
       'RECEIVER_ID': phone,
@@ -473,6 +479,7 @@ exports.send_group_invitation_sms = function(req, res, next) {
       'TEXT': body,
       'GROUP_ID': group_id,
       'INVITATION_ID': invitation,
+      'MAGIC_LINK_ID': magic_link_id,
     })
 
     // console.log(twiml_client.toString())
