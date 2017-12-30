@@ -98,7 +98,12 @@ exports.initial_contact = function(req, res, next) {
             })
         } else {
           console.log('USE EXISTING NUMBER')
-          const selected_twilio_number = serviceNumbers.filter(val => !dbtwilio_numbers.includes(val))[0]
+          let selected_twilio_number
+          if (dbtwilio_numbers && dbtwilio_numbers.length > 0) {
+            selected_twilio_number = serviceNumbers.filter(val => !dbtwilio_numbers.includes(val))[0]
+          } else {
+            selected_twilio_number = serviceNumbers[0]
+          }
           console.log('SELECTED TWILIO NUMBER: ', selected_twilio_number)
           twilioNumber = selected_twilio_number
           return sendInitialSMSToTenantAndLandlord(
