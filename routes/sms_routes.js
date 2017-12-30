@@ -13,6 +13,7 @@ const getLandlordInfo = require('./PropertyDB/Queries/LandlordQuery').get_landlo
 const insert_sms_match = require('./LeasingDB/Queries/SMSQueries').insert_sms_match
 const update_sms_match = require('./LeasingDB/Queries/SMSQueries').update_sms_match
 const get_tenant_landlord_match = require('./LeasingDB/Queries/SMSQueries').get_tenant_landlord_match
+const get_tenant_landlord_sms_match = require('./LeasingDB/Queries/SMSQueries').get_tenant_landlord_sms_match
 const get_tenant_landlord_twilio_numbers = require('./LeasingDB/Queries/SMSQueries').get_tenant_landlord_twilio_numbers
 
 const generateInitialMessageBody_Tenant_ForExistingPair = require('../api/initial_message').generateInitialMessageBody_Tenant_ForExistingPair
@@ -147,7 +148,7 @@ const sendInitialSMSForExistingTenantLandlordPair = (info, landlord, tenant, twi
       'LANDLORD_PHONE': landlord.landlordPhone,
 
       'PROXY_CONTACT_ID': twilioPhone,
-      'SENDER_ID': RENTHERO_SENDER_ID,
+      'SENDER_ID': landlord.landlordId,
       'RECEIVER_ID': tenant.tenantId,
       'SENDER_CONTACT_ID': landlord.landlordPhone,
       'RECEIVER_CONTACT_ID': tenant.tenantPhone,
@@ -187,7 +188,7 @@ const sendInitialSMSForExistingTenantLandlordPair = (info, landlord, tenant, twi
       'LANDLORD_PHONE': landlord.landlordPhone,
 
       'PROXY_CONTACT_ID': twilioPhone,
-      'SENDER_ID': RENTHERO_SENDER_ID,
+      'SENDER_ID': tenant.tenantId,
       'RECEIVER_ID': landlord.landlordId,
       'SENDER_CONTACT_ID': tenant.tenantPhone,
       'RECEIVER_CONTACT_ID': landlord.landlordPhone,
@@ -234,7 +235,7 @@ const sendInitialSMSToTenantAndLandlord = (info, landlord, tenant, twilioPhone) 
       'LANDLORD_PHONE': landlord.landlordPhone,
 
       'PROXY_CONTACT_ID': twilioPhone,
-      'SENDER_ID': RENTHERO_SENDER_ID,
+      'SENDER_ID': landlord.landlordId,
       'RECEIVER_ID': tenant.tenantId,
       'SENDER_CONTACT_ID': landlord.landlordPhone,
       'RECEIVER_CONTACT_ID': tenant.tenantPhone,
@@ -274,7 +275,7 @@ const sendInitialSMSToTenantAndLandlord = (info, landlord, tenant, twilioPhone) 
       'LANDLORD_PHONE': landlord.landlordPhone,
 
       'PROXY_CONTACT_ID': twilioPhone,
-      'SENDER_ID': RENTHERO_SENDER_ID,
+      'SENDER_ID': tenant.tenantId,
       'RECEIVER_ID': landlord.landlordId,
       'SENDER_CONTACT_ID': tenant.tenantPhone,
       'RECEIVER_CONTACT_ID': landlord.landlordPhone,
@@ -341,6 +342,7 @@ exports.sms_forwarder = function(req, res, next) {
   let original_from = req.body.From
   let twilio_to   = req.body.To
   let body = req.body.Body
+  let original_to = ''
 
   console.log(original_from, twilio_to)
 
@@ -348,27 +350,41 @@ exports.sms_forwarder = function(req, res, next) {
     .then((outgoingPhoneNumber) => {
       console.log('outgoingPhoneNumber: ', outgoingPhoneNumber)
       console.log('messaging...')
-
+      original_to = outgoingPhoneNumber
+      return get_tenant_landlord_sms_match(original_from, outgoingPhoneNumber)
+    })
+    .then((data) => {
+      console.log(data)
+      const sender_id = getAppropriateId(data, original_from)
+      const receiver_id = getAppropriateId(data, original_to)
       // log from, to, body, outgoingPhoneNumber
       insertCommunicationsLog({
         'ACTION': 'SMS_MESSAGE',
         'DATE': new Date().getTime(),
         'COMMUNICATION_ID': shortid.generate(),
         'PROXY_CONTACT_ID': twilio_to,
-        'SENDER_ID': original_from,
-        'RECEIVER_ID': outgoingPhoneNumber,
+        'SENDER_ID': sender_id,
+        'RECEIVER_ID': receiver_id,
         'SENDER_CONTACT_ID': original_from,
-        'RECEIVER_CONTACT_ID': outgoingPhoneNumber,
+        'RECEIVER_CONTACT_ID': original_to,
         'TEXT': body,
       })
       twiml_client.message({
-        to: outgoingPhoneNumber,
+        to: original_to,
       }, body)
       console.log(twiml_client.toString())
       console.log('========>>>>>>>>>>>>>>>>>>>')
       res.type('text/xml');
       res.send(twiml_client.toString())
     })
+
+  const getAppropriateId = (sms_mapping_row, phone) => {
+    if (sms_mapping_row.tenant_phone === phone) {
+      return sms_mapping_row.tenant_id
+    } else if (sms_mapping_row.landlord_phone === phone) {
+      return sms_mapping_row.landlord_id
+    }
+  }
 }
 
 exports.voice = function(req, res, next) {

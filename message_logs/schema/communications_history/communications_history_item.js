@@ -21,8 +21,8 @@ exports.reference_items = [
       'PROXY_CONTACT_ID': '983LIJSDFSDFLJ9',
       'SENDER_ID': 'SGF4534536565',
       'RECEIVER_ID': 'SDF4556485767',
-      'SENDER_CONTACT_ID': 'Rentburrow',
-      'RECEIVER_CONTACT_ID': '+14556485767 but sent to both, so two records would occur',
+      'SENDER_CONTACT_ID': 'us-east-asdsfl4394',
+      'RECEIVER_CONTACT_ID': 'us-east-z243536536 but sent to both, so two records would occur',
 
       'TEXT': 'Hello I would like to book a tour for _______ on ______. Would this work?',
       'BUILDING_ID': '394dfhglf8348to',
@@ -46,8 +46,8 @@ exports.reference_items = [
       'PROXY_CONTACT_ID': '983LIJSDFSDFLJ9',
       'SENDER_ID': 'SGF4534536565',
       'RECEIVER_ID': 'SDF4556485767',
-      'SENDER_CONTACT_ID': 'Rentburrow',
-      'RECEIVER_CONTACT_ID': '+14556485767 but sent to both, so two records would occur',
+      'SENDER_CONTACT_ID': 'us-east-asdsfl4394',
+      'RECEIVER_CONTACT_ID': 'us-east-z243536536 but sent to both, so two records would occur',
 
       'TEXT': 'Hello is this the landlord for XXXX?',
       'BUILDING_ID': '394dfhglf8348to',
