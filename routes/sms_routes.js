@@ -145,9 +145,9 @@ const sendInitialSMSForExistingTenantLandlordPair = (info, landlord, tenant, twi
       'LANDLORD_PHONE': landlord.landlordPhone,
 
       'PROXY_CONTACT_ID': twilioPhone,
-      'SENDER_ID': RENTHERO_SENDER_ID,
+      'SENDER_ID': landlord.landlordPhone,
       'RECEIVER_ID': tenant.tenantId,
-      'SENDER_CONTACT_ID': landlord.landlordPhone,
+      'SENDER_CONTACT_ID': RENTHERO_SENDER_ID,
       'RECEIVER_CONTACT_ID': tenant.tenantPhone,
 
       'TEXT': tenantBody,
@@ -185,9 +185,9 @@ const sendInitialSMSForExistingTenantLandlordPair = (info, landlord, tenant, twi
       'LANDLORD_PHONE': landlord.landlordPhone,
 
       'PROXY_CONTACT_ID': twilioPhone,
-      'SENDER_ID': RENTHERO_SENDER_ID,
+      'SENDER_ID': tenant.tenantPhone,
       'RECEIVER_ID': landlord.landlordId,
-      'SENDER_CONTACT_ID': tenant.tenantPhone,
+      'SENDER_CONTACT_ID': RENTHERO_SENDER_ID,
       'RECEIVER_CONTACT_ID': landlord.landlordPhone,
 
       'TEXT': landlordBody,
@@ -232,9 +232,9 @@ const sendInitialSMSToTenantAndLandlord = (info, landlord, tenant, twilioPhone) 
       'LANDLORD_PHONE': landlord.landlordPhone,
 
       'PROXY_CONTACT_ID': twilioPhone,
-      'SENDER_ID': RENTHERO_SENDER_ID,
+      'SENDER_ID': landlord.landlordPhone,
       'RECEIVER_ID': tenant.tenantId,
-      'SENDER_CONTACT_ID': landlord.landlordPhone,
+      'SENDER_CONTACT_ID': RENTHERO_SENDER_ID,
       'RECEIVER_CONTACT_ID': tenant.tenantPhone,
 
       'TEXT': tenantBody,
@@ -272,9 +272,9 @@ const sendInitialSMSToTenantAndLandlord = (info, landlord, tenant, twilioPhone) 
       'LANDLORD_PHONE': landlord.landlordPhone,
 
       'PROXY_CONTACT_ID': twilioPhone,
-      'SENDER_ID': RENTHERO_SENDER_ID,
+      'SENDER_ID': tenant.tenantPhone,
       'RECEIVER_ID': landlord.landlordId,
-      'SENDER_CONTACT_ID': tenant.tenantPhone,
+      'SENDER_CONTACT_ID': RENTHERO_SENDER_ID,
       'RECEIVER_CONTACT_ID': landlord.landlordPhone,
 
       'TEXT': landlordBody,

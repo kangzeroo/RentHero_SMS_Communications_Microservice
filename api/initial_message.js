@@ -29,7 +29,7 @@ exports.generateInitialMessageBody_Tenant_ForExistingPair = function(info, landl
 exports.generateInitialMessageBody_Landlord_ForExistingPair = function(info, landlord_name, message_id){
   const p = new Promise((res, rej) => {
     res(`
-      Hello ${landlord_name}, ${info.first_name} on RentHero.ca is also interested in ${info.building_address}. - RentHero.ca/m/${message_id}
+      Hello ${landlord_name}, ${info.first_name} on RentHero.ca is also interested in ${info.building_address}. Notes: ${info.group_notes} - RentHero.ca/m/${message_id}
     `)
   })
   return p
