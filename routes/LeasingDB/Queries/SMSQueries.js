@@ -46,12 +46,12 @@ exports.insert_tenant_landlord_sms = (req, res, next) => {
   })
 }
 
-exports.insert_sms_match = (tenant_phone, landlord_phone, sid, twilio_phone) => {
+exports.insert_sms_match = (tenant_id, tenant_phone, landlord_id, landlord_phone, sid, twilio_phone) => {
    // const id = uuid.v4()
-   const values = [sid, tenant_phone, landlord_phone, twilio_phone]
+   const values = [sid, tenant_id, tenant_phone, landlord_id, landlord_phone, twilio_phone]
 
-   const insert_match = `INSERT INTO sms_map (id, tenant_phone, landlord_phone, twilio_phone)
-                              SELECT $1, $2, $3, $4
+   const insert_match = `INSERT INTO sms_map (id, tenant_id, tenant_phone, landlord_id, landlord_phone, twilio_phone)
+                              SELECT $1, $2, $3, $4, $5, $6
                               WHERE NOT EXISTS (
                                 SELECT tenant_phone, landlord_phone
                                   FROM sms_map

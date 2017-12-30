@@ -53,6 +53,7 @@ exports.initial_contact = function(req, res, next) {
     const service = twilio_client.messaging.services(messagingServiceSid)
     service.phoneNumbers.list()
     .then((data) => {
+      console.log(data)
       serviceNumbers = data.map(s => s.phoneNumber)
       totalServiceNumbers = data.length
     })
