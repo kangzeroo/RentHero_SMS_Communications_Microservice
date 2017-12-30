@@ -1,7 +1,7 @@
 const AWS = require('aws-sdk')
 const aws_config = require('../../../credentials/aws_config')
 const TOUR_HINTS = require('../dynamodb_tablenames').TOUR_HINTS
-// AWS.config.update(aws_config)
+AWS.config.update(aws_config)
 
 
 const tourHintsTableParams = {
