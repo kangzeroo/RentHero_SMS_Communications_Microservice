@@ -37,6 +37,7 @@ exports.initial_contact = function(req, res, next) {
   let landlordName = ''
   let totalServiceNumbers
   let serviceNumbers
+  let twilioNumber
 
   // respond with twilio number if match already exists
 
@@ -64,7 +65,7 @@ exports.initial_contact = function(req, res, next) {
       console.log('MATCH ALREADY EXISTS')
       console.log('EXISTING TWILIO NUMBER: ', data.twilio_phone)
       // log that user and landlord mapping already exist. log(tenantPhone, [info.first_name, info.last_name].join(' '), landlordPhone, landlordName)
-
+      twilioNumber = data.twilio_phone
       return sendInitialSMSForExistingTenantLandlordPair(
         info,
         { landlordId: landlordId, landlordName: landlordName, landlordPhone: landlordPhone },
@@ -80,6 +81,7 @@ exports.initial_contact = function(req, res, next) {
           return buyNewTwilioNumber()
             .then((purchasedTwilioNumber) => {
               console.log('PURCHASED TWILIO NUMBER: ', purchasedTwilioNumber)
+              twilioNumber = purchasedTwilioNumber
               // log bought a new number: purchasedTwilioNumber for mapping tenantPhone and landlordPhone
               return sendInitialSMSToTenantAndLandlord(
                 info,
@@ -92,6 +94,7 @@ exports.initial_contact = function(req, res, next) {
           console.log('USE EXISTING NUMBER')
           const selected_twilio_number = serviceNumbers.filter(val => !dbtwilio_numbers.includes(val))[0]
           console.log('SELECTED TWILIO NUMBER: ', selected_twilio_number)
+          twilioNumber = selected_twilio_number
           return sendInitialSMSToTenantAndLandlord(
             info,
             { landlordId: landlordId, landlordName: landlordName, landlordPhone: landlordPhone },
@@ -104,7 +107,8 @@ exports.initial_contact = function(req, res, next) {
   })
   .then((data) => {
     res.json({
-      message: 'Success'
+      message: 'Success',
+      twilioNumber: twilioNumber,
     })
   })
 }
