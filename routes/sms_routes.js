@@ -22,6 +22,7 @@ const generateInitialMessageBody_Tenant = require('../api/initial_message').gene
 const generateInitialMessageBody_Landlord = require('../api/initial_message').generateInitialMessageBody_Landlord
 
 const insertCommunicationsLog = require('../message_logs/dynamodb_api').insertCommunicationsLog
+const insertOrchestraLog = require('../message_logs/dynamodb_api').insertOrchestraLog
 // const json = require('json')
 const formattedPhoneNumber = require('../api/general_api').formattedPhoneNumber
 
@@ -481,7 +482,20 @@ exports.send_group_invitation_sms = function(req, res, next) {
       'INVITATION_ID': invitation,
       'MAGIC_LINK_ID': magic_link_id,
     })
-
+    // for orchestra
+    insertOrchestraLog({
+      'ACTION': 'MAGIC_LINK_GROUP_SENT',
+      'DATE': new Date().getTime(),
+      'ORCHESTRA_ID': uuid.v4(),
+      'MAGIC_LINK_ID': magic_link_id,
+      'TARGET_ID': to,
+      'TARGET_CONTACT_ID': to,
+      'PROXY_CONTACT_ID': from,
+      'SENDER_ID': referrer_tenant_id,
+      'SENDER_CONTACT_ID': referrer_phone,
+      'GROUP_ID': group_id,
+      'INVITATION_ID': invitation,
+    })
     // console.log(twiml_client.toString())
     console.log('========>>>>>>>>>>>>>>>>>>>')
     res.type('text/xml');
