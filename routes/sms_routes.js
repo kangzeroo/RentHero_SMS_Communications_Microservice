@@ -116,6 +116,7 @@ const sendInitialSMSForExistingTenantLandlordPair = (info, landlord, tenant, twi
     insertCommunicationsLog({
       'ACTION': 'INITIAL_MESSAGE',
       'DATE': new Date().getTime(),
+      'COMMUNICATION_ID': uuid.v4(),
 
       'TENANT_ID': tenant.tenantId,
       'TENANT_NAME': info.first_name,
@@ -155,6 +156,7 @@ const sendInitialSMSForExistingTenantLandlordPair = (info, landlord, tenant, twi
     insertCommunicationsLog({
       'ACTION': 'INITIAL_MESSAGE',
       'DATE': new Date().getTime(),
+      'COMMUNICATION_ID': uuid.v4(),
 
       'TENANT_ID': tenant.tenantId,
       'TENANT_NAME': info.first_name,
@@ -199,6 +201,7 @@ const sendInitialSMSToTenantAndLandlord = (info, landlord, tenant, twilioPhone) 
     insertCommunicationsLog({
       'ACTION': 'INITIAL_MESSAGE',
       'DATE': new Date().getTime(),
+      'COMMUNICATION_ID': uuid.v4(),
 
       'TENANT_ID': tenant.tenantId,
       'TENANT_NAME': info.first_name,
@@ -238,6 +241,7 @@ const sendInitialSMSToTenantAndLandlord = (info, landlord, tenant, twilioPhone) 
     insertCommunicationsLog({
       'ACTION': 'INITIAL_MESSAGE',
       'DATE': new Date().getTime(),
+      'COMMUNICATION_ID': uuid.v4(),
 
       'TENANT_ID': tenant.tenantId,
       'TENANT_NAME': info.first_name,
@@ -326,6 +330,7 @@ exports.sms_forwarder = function(req, res, next) {
       insertCommunicationsLog({
         'ACTION': 'SMS_MESSAGE',
         'DATE': new Date().getTime(),
+        'COMMUNICATION_ID': uuid.v4(),
         'PROXY_CONTACT_ID': twilio_to,
         'SENDER_ID': original_from,
         'RECEIVER_ID': outgoingPhoneNumber,
@@ -443,6 +448,7 @@ exports.send_group_invitation_sms = function(req, res, next) {
     insertCommunicationsLog({
       'ACTION': 'SENT_GROUP_INVITE',
       'DATE': new Date().getTime(),
+      'COMMUNICATION_ID': uuid.v4(),
       'PROXY_CONTACT_ID': from,
       'SENDER_ID': referrer_tenant_id,
       'RECEIVER_ID': phone,

@@ -9,6 +9,7 @@ exports.reference_items = [
     'Item': {
       'ACTION': 'INITIAL_TOUR_REQUEST',
       'DATE': new Date().getTime(),
+      'COMMUNICATION_ID': 'uuid.v4()',
 
       'TENANT_ID': `this.props.tenant_profile.id` || 'NONE',
       'TENANT_PHONE': '+134534536565',
@@ -33,6 +34,7 @@ exports.reference_items = [
     'Item': {
       'ACTION': 'INITIAL_MESSAGE',
       'DATE': new Date().getTime(),
+      'COMMUNICATION_ID': 'uuid.v4()',
 
       'TENANT_ID': `this.props.tenant_profile.id` || 'NONE',
       'TENANT_NAME': 'Steve Carrol',
@@ -57,6 +59,7 @@ exports.reference_items = [
     'Item': {
       'ACTION': 'SMS_MESSAGE',
       'DATE': new Date().getTime(),
+      'COMMUNICATION_ID': 'uuid.v4()',
 
       'PROXY_CONTACT_ID': '983LIJSDFSDFLJ9',
       'SENDER_ID': 'SGF4534536565',
@@ -72,6 +75,7 @@ exports.reference_items = [
     'Item': {
       'ACTION': 'SENT_GROUP_INVITE',
       'DATE': new Date().getTime(),
+      'COMMUNICATION_ID': 'uuid.v4()',
 
       'PROXY_CONTACT_ID': '983LIJSDFSDFLJ9',
       'SENDER_ID': `this.props.tenant_profile.id` || 'NONE',
@@ -89,6 +93,7 @@ exports.reference_items = [
     'Item': {
       'ACTION': 'SENT_RECOMMENDATION',
       'DATE': new Date().getTime(),
+      'COMMUNICATION_ID': 'uuid.v4()',
 
       'PROXY_CONTACT_ID': '983LIJSDFSDFLJ9',
       'SENDER_ID': `this.props.tenant_profile.id` || 'NONE',
