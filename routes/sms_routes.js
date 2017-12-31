@@ -52,16 +52,12 @@ exports.initial_contact = function(req, res, next) {
     landlordName = landlord_details.corporation_name
 
     const service = twilio_client.messaging.services(messagingServiceSid)
-    service.phoneNumbers.list()
-    .then((data) => {
-      console.log(data)
-      serviceNumbers = data.map(s => s.phoneNumber)
-      totalServiceNumbers = data.length
-    })
-    .catch((err) => {
-      console.log('Error: ', err)
-    })
-
+    return service.phoneNumbers.list()
+  })
+  .then((data) => {
+    // console.log('=========service.phoneNumbers.list(): ', data)
+    serviceNumbers = data.map(s => s.phoneNumber)
+    totalServiceNumbers = data.length
     return get_tenant_landlord_match(tenantPhone, landlordPhone)
   })
   .then((data) => {
@@ -104,7 +100,7 @@ exports.initial_contact = function(req, res, next) {
           console.log('USE EXISTING NUMBER')
           let selected_twilio_number
           console.log(serviceNumbers)
-          if (dbtwilio_numbers && dbtwilio_numbers.length > 0) {
+          if (dbtwilio_numbers && dbtwilio_numbers.length > 0 && serviceNumbers && serviceNumbers.length > 0) {
             selected_twilio_number = serviceNumbers.filter(val => !dbtwilio_numbers.includes(val))[0]
           } else {
             selected_twilio_number = serviceNumbers[0]
@@ -126,6 +122,9 @@ exports.initial_contact = function(req, res, next) {
       message: 'Success',
       twilioNumber: twilioNumber,
     })
+  })
+  .catch((error) => {
+    console.log(error)
   })
 }
 
