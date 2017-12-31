@@ -3,6 +3,7 @@ const twilio = require('twilio')
 // routes
 const Test = require('./routes/test_routes')
 const SMSRoutes = require('./routes/sms_routes')
+const MassSMSRoutes = require('./routes/mass_sms_routes')
 const SMS_RDS_Queries = require('./routes/LeasingDB/Queries/SMSQueries')
 
 // bodyParser attempts to parse any request into JSON format
@@ -29,6 +30,8 @@ module.exports = function(app){
 	app.post('/use-sms', twilio.webhook({ validate: false }), SMSRoutes.sms_forwarder)
 	app.post('/use-voice', twilio.webhook({ validate: false }), SMSRoutes.voice)
 	app.post('/listener', twilio.webhook({ validate: false }), SMSRoutes.listener)
+
+	app.post('/send_message_to_phones', twilio.webhook({ validate: false }), MassSMSRoutes.send_message_to_phones)
 
 	app.post('/send_group_invitation_sms', twilio.webhook({ validate: false }), SMSRoutes.send_group_invitation_sms)
 
