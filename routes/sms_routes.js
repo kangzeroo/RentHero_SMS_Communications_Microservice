@@ -33,7 +33,7 @@ const formattedPhoneNumber = require('../api/general_api').formattedPhoneNumber
 exports.initial_contact = function(req, res, next) {
   console.log('---------------- Initial message ----------------')
   const info = req.body
-  console.log(info)
+  // console.log(info)
   let tenantId = info.tenant_id
   let tenantPhone = formattedPhoneNumber(info.phone)
   let landlordId
@@ -46,7 +46,7 @@ exports.initial_contact = function(req, res, next) {
   // respond with twilio number if match already exists
 
   getLandlordInfo(info.building_id).then((landlord_details) => {
-    console.log(landlord_details)
+    // console.log(landlord_details)
     landlordId = landlord_details.corporation_id
     landlordPhone = formattedPhoneNumber(landlord_details.phone)
     landlordName = landlord_details.corporation_name
@@ -65,7 +65,7 @@ exports.initial_contact = function(req, res, next) {
     return get_tenant_landlord_match(tenantPhone, landlordPhone)
   })
   .then((data) => {
-    console.log(data)
+    // console.log(data)
     if (data && data.twilio_phone) {
       console.log('MATCH ALREADY EXISTS')
       console.log('EXISTING TWILIO NUMBER: ', data.twilio_phone)
