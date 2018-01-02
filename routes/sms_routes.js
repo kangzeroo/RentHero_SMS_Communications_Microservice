@@ -528,7 +528,7 @@ exports.send_group_invitation_sms = function(req, res, next) {
 // POST /fallback
 exports.fallback = function(req, res, next) {
   console.log('FALLBACK')
-  // console.log(req.body)
+  console.log(req.body)
 }
 
 exports.speechtotext = function(req, res, next) {
