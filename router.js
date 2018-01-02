@@ -31,6 +31,8 @@ module.exports = function(app){
 	app.post('/use-sms', twilio.webhook({ validate: false }), SMSRoutes.sms_forwarder)
 	app.post('/use-voice', twilio.webhook({ validate: false }), SMSRoutes.voice)
 	app.post('/listener', twilio.webhook({ validate: false }), SMSRoutes.listener)
+	app.post('/voice_to_text', twilio.webhook({ validate: false }), SMSRoutes.voice_to_text)
+
 
 	app.post('/send_message_to_phones', twilio.webhook({ validate: false }), MassSMSRoutes.send_message_to_phones)
 	app.post('/send_message_to_phone', twilio.webhook({ validate: false }), MassSMSRoutes.send_message_to_phone)

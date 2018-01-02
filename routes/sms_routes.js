@@ -361,6 +361,18 @@ exports.sms_forwarder = function(req, res, next) {
       const sender_id = getAppropriateId(data, original_from)
       const receiver_id = getAppropriateId(data, original_to)
       // log from, to, body, outgoingPhoneNumber
+      console.log('communication_log',{
+        'ACTION': 'FORWARDED_MESSAGE',
+        'DATE': new Date().getTime(),
+        'COMMUNICATION_ID': shortid.generate(),
+        'PROXY_CONTACT_ID': twilio_to,
+        'SENDER_ID': sender_id,
+        'RECEIVER_ID': receiver_id,
+        'SENDER_CONTACT_ID': original_from,
+        'RECEIVER_CONTACT_ID': original_to,
+        'TEXT': body,
+        'MEDIUM': 'SMS',
+      })
       insertCommunicationsLog({
         'ACTION': 'FORWARDED_MESSAGE',
         'DATE': new Date().getTime(),
@@ -372,6 +384,9 @@ exports.sms_forwarder = function(req, res, next) {
         'RECEIVER_CONTACT_ID': original_to,
         'TEXT': body,
         'MEDIUM': 'SMS',
+      })
+      console.log({
+        to: original_to,
       })
       twiml_client.message({
         to: original_to,
@@ -448,7 +463,12 @@ exports.listener = function(req, res, next ) {
 
   console.log(phone, sid)
 
-  update_sms_match(phone, sid)
+  // update_sms_match(phone, sid)
+}
+
+exports.voice_to_text = function(req, res, next) {
+  console.log('voice_to_text')
+  console.log(req.body)
 }
 
 exports.send_group_invitation_sms = function(req, res, next) {
