@@ -14,19 +14,19 @@ exports.send_initial_email = (req, res, next) => {
   const message = req.body.message
   const buildingId = req.body.building_id
 
-  let landlordObj
+  // let landlordObj
 
   // MUST DO THE FOLLOWING
 
   // 1. Create a relationship between this tenant_email and landlord_email
       // a. get corporation object
       // b. insert relationship
-      get_landlord_info(buildingId)
-      .then((data) => {
-        console.log(data)
-        landlordObj = data
-        insert_email_relationship(tenantId, tenantEmail, /*tenantAliasEmail*/, data.corporation_id, data.email, /*corporationAliasEmail*/)
-      })
+      // get_landlord_info(buildingId)
+      // .then((data) => {
+      //   console.log(data)
+      //   landlordObj = data
+      //   insert_email_relationship(tenantId, tenantEmail, /*tenantAliasEmail*/, data.corporation_id, data.email, /*corporationAliasEmail*/)
+      // })
 
   // 2. Query for the building, tenant and corporation based off the buildingId, tenantId, corporationId
 
