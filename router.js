@@ -3,6 +3,7 @@ const twilio = require('twilio')
 // routes
 const Test = require('./routes/test_routes')
 const SMSRoutes = require('./routes/sms_routes')
+const EmailRoutes = require('./routes/email_routes')
 const MassSMSRoutes = require('./routes/mass_sms_routes')
 const SMS_RDS_Queries = require('./routes/LeasingDB/Queries/SMSQueries')
 
@@ -24,7 +25,7 @@ module.exports = function(app){
 	// app.post('/outbound', json_encoding, Test.outbound)
 	// app.post('/use-sms', twilio.webhook({ validate: false }), Test.sms)
 
-	app.post('/initial', json_encoding, SMSRoutes.initial_contact)
+	app.post('/initial', [json_encoding], SMSRoutes.initial_contact)
 	// app.post('/send_landlord_message', json_encoding, SMSRoutes.sendLandlordMessageFromTenant)
 
 	app.post('/use-sms', twilio.webhook({ validate: false }), SMSRoutes.sms_forwarder)
@@ -44,4 +45,8 @@ module.exports = function(app){
 	app.post('/stickysms', twilio.webhook({ validate: false }), SMSRoutes.stickysms)
 	app.post('/fallback', twilio.webhook({ validate: false }), SMSRoutes.fallback)
 	app.post('/speechtotext', twilio.webhook({ validate: false }), SMSRoutes.speechtotext)
+	
+	app.post('/send_initial_email', [json_encoding], EmailRoutes.send_initial_email)
+	app.post('/email_relationship', [json_encoding], EmailRoutes.email_relationship)
+	app.post('/save_email_communications_log', [json_encoding], EmailRoutes.save_email_communications_log)
 }
