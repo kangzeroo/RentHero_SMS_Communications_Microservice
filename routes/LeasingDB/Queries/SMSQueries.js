@@ -112,6 +112,7 @@ exports.get_tenant_landlord_match = (tenantPhone, landlordPhone) => {
 
   return query(get_match, values)
   .then((data) => {
+    console.log(data)
     return data.rows[0]
   })
   .catch((err) => {
