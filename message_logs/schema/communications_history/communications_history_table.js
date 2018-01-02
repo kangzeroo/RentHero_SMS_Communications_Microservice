@@ -15,7 +15,6 @@ const communicationsHistoryTableParams = {
         { AttributeName: "SENDER_CONTACT_ID", AttributeType: "S" },       // a phone, email, fb messenger id (of the sender)
         { AttributeName: "PROXY_CONTACT_ID", AttributeType: "S" },        // a twilio number, a email forwarder client, a facebook chat thread
         { AttributeName: "RECEIVER_CONTACT_ID", AttributeType: "S" },     // a phone, email, fb messenger id (of the receiver)
-        { AttributeName: "ACTION", AttributeType: "S" },
         { AttributeName: "SENDER_ID", AttributeType: "S" },
         { AttributeName: "RECEIVER_ID", AttributeType: "S" },
         { AttributeName: "COMMUNICATION_ID", AttributeType: "S" },
@@ -28,9 +27,9 @@ const communicationsHistoryTableParams = {
     GlobalSecondaryIndexes: [
       {
         // USE CASE: ALLOWS ME TO SEE ALL INTEL OF A SPECIFIC ACTION, GROUPED BY USERS. EG: SHOW ME ALL PRICE ADJUSTMENTS, AND NOW I CAN GROUP USER POPULATIONS INTO PRICE RANGES.
-        IndexName: 'By_Action', /* required */
+        IndexName: 'By_RECEIVER_CONTACT_ID', /* required */
         KeySchema: [ /* required */
-          {AttributeName: 'ACTION', KeyType: 'HASH'},
+          {AttributeName: 'RECEIVER_CONTACT_ID', KeyType: 'HASH'},
           {AttributeName: 'COMMUNICATION_ID', KeyType: 'RANGE'}
         ],
         Projection: { /* required */
