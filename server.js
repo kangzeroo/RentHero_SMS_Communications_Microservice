@@ -51,7 +51,7 @@ if (process.env.NODE_ENV === 'production') {
     approveDomains: (opts, certs, cb) => {
       if (certs) {
         // change domain list here
-        opts.domains = ['34.227.117.38']
+        opts.domains = ['ec2-34-227-117-38.compute-1.amazonaws.com']
       } else {
         // change default email to accept agreement
         opts.email = 'email.records.rentburrow@gmail.com';
