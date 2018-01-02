@@ -408,11 +408,8 @@ exports.voice = function(req, res, next) {
       console.log(outgoingPhoneNumber)
        const voiceResponse = new VoiceResponse()
       // voiceResponse.play('http://howtodocs.s3.amazonaws.com/howdy-tng.mp3')
-       const dial = voiceResponse.dial({ callerId: to })
+       const dial = voiceResponse.dial({ callerId: to, record: 'record-from-answer' })
        dial.number(outgoingPhoneNumber)
-       // const gather = voiceResponse.gather({
-       //   input: 'speech dtmf'
-       // })
 
        console.log(voiceResponse.toString())
        res.type('text/xml')
