@@ -1,8 +1,8 @@
 
 const AWS = require('aws-sdk')
-const aws_config = require('../credentials/aws_config')
+// const aws_config = require('../credentials/aws_config')
 const dynaDoc = require("dynamodb-doc");
-AWS.config.update(aws_config)
+// AWS.config.update(aws_config)
 const COMMUNICATIONS_HISTORY = require('./schema/dynamodb_tablenames').COMMUNICATIONS_HISTORY
 const ORCHESTRA_ACTIVITY = require('./schema/dynamodb_tablenames').ORCHESTRA_ACTIVITY
 
