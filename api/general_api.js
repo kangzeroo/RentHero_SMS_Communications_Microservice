@@ -6,7 +6,7 @@ exports.formattedPhoneNumber = (number) => {
   let formattedNumber
 
   if (countryCode === '+1') {
-    formattedNumber = number.substring(3)
+    formattedNumber = number.substring(2)
   } else {
     formattedNumber = number
   }

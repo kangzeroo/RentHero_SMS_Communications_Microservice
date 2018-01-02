@@ -20,6 +20,7 @@ exports.send_message_to_phones = function(req, res, next) {
     body: message,
   })
   .then((notification) => {
+    console.log(info.users)
     info.users.forEach((user) => {
       insertCommunicationsLog({
         'ACTION': 'RENTHERO_SMS',
@@ -28,7 +29,8 @@ exports.send_message_to_phones = function(req, res, next) {
 
         'SENDER_ID': 'RentHeroSMS',
         'SENDER_CONTACT_ID': 'RentHeroSMS',
-        'RECEIVER_CONTACT_ID': user.tenant_id,
+        'RECEIVER_CONTACT_ID': user.phone,
+        'RECEIVER_ID': user.tenant_id,
         'PROXY_CONTACT_ID': 'RENTHERO_INITIAL',
         'TEXT': message,
       })
@@ -42,6 +44,40 @@ exports.send_message_to_phones = function(req, res, next) {
     console.log(error)
     res.status(500).send('Error occurred sending SMS notification')
   })
+}
+
+exports.send_message_to_phone = function(req, res, next) {
+  const info = req.body
+  const recipient = info.recipient
+  const message = info.message
+
+  twilio_client.notify.services(notifyServicesSid).notifications.create({
+    toBinding: JSON.stringify({ binding_type: 'sms', address: formattedPhoneNumber(recipient.phone), }),
+    body: message,
+  })
+  .then((notification) => {
+    insertCommunicationsLog({
+      'ACTION': 'RENTHERO_SMS',
+      'DATE': new Date().getTime(),
+      'COMMUNICATION_ID': shortid.generate(),
+
+      'SENDER_ID': 'RentHeroSMS',
+      'SENDER_CONTACT_ID': 'RentHeroSMS',
+      'RECEIVER_CONTACT_ID': recipient.phone,
+      'RECEIVER_ID': recipient.tenant_id,
+      'PROXY_CONTACT_ID': recipient.proxy_contact_id,
+      'TEXT': message,
+    })
+    res.json({
+      message: 'SMS sent',
+      notification_id: notification.id,
+    })
+  })
+  .catch(error => {
+    console.log(error)
+    res.status(500).send('Error occurred sending SMS notification')
+  })
+
 }
 
 exports.receive_message_from_phone = function(req, res, next) {

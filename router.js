@@ -33,6 +33,7 @@ module.exports = function(app){
 	app.post('/listener', twilio.webhook({ validate: false }), SMSRoutes.listener)
 
 	app.post('/send_message_to_phones', twilio.webhook({ validate: false }), MassSMSRoutes.send_message_to_phones)
+	app.post('/send_message_to_phone', twilio.webhook({ validate: false }), MassSMSRoutes.send_message_to_phone)
 	app.post('/receive_message_from_phone', twilio.webhook({ validate: false }), MassSMSRoutes.receive_message_from_phone)
 
 
