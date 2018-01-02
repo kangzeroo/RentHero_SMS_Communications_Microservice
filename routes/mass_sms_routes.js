@@ -1,33 +1,55 @@
 const twilio_client = require('../twilio_setup').generate_twilio_client();
-const MessagingResponse = require('twilio').twiml.MessagingResponse;
-const VoiceResponse = require('twilio').twiml.VoiceResponse;
-const messagingServiceSid = 'MG4f645b25e4396614a92e6377ba73aff2'
-
+const notifyServicesSid = process.env.NOTIFY_SERVICE_ID
+const formattedPhoneNumber = require('../api/general_api').formattedPhoneNumber
 
 exports.send_message_to_phones = function(req, res, next) {
-  console.log('Send group invitation sms')
   const info = req.body
+  const message = info.body
 
-  const body = info.body
 
-  const arrayOfPromises = info.phones.forEach((phone) => {
-    twilio_client.messages.create({
-      body: body,
-      to: phone,
-      messagingServiceSid: messagingServiceSid,
-    })
-    .then((message) => {
-      console.log(message)
-    })
+  const toBind = info.phones.map((phone) => {
+    return JSON.stringify({ binding_type: 'sms', address: formattedPhoneNumber(phone), })
   })
 
-  Promise.all(arrayOfPromises)
-  .then((data) => {
+  twilio_client.notify.services(notifyServicesSid).notifications.create({
+    toBinding: toBind,
+    body: message,
+  })
+  .then((notification) => {
     res.json({
-      message: 'sent'
+      message: 'SMS sent',
+      notification_id: notification.id,
     })
   })
-  .catch((err) => {
-    console.log(err)
+  .catch(error => {
+    console.log(error)
+    res.status(500).send('Error occurred sending SMS notification')
   })
+
 }
+
+// console.log('Send group invitation sms')
+// const info = req.body
+//
+// const body = info.body
+//
+// const arrayOfPromises = info.phones.forEach((phone) => {
+//   twilio_client.messages.create({
+//     body: body,
+//     to: phone,
+//     messagingServiceSid: messagingServiceSid,
+//   })
+//   .then((message) => {
+//     console.log(message)
+//   })
+// })
+//
+// Promise.all(arrayOfPromises)
+// .then((data) => {
+//   res.json({
+//     message: 'sent'
+//   })
+// })
+// .catch((err) => {
+//   console.log(err)
+// })
