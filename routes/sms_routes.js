@@ -13,7 +13,7 @@ const getLandlordInfo = require('./PropertyDB/Queries/LandlordQuery').get_landlo
 const insert_sms_match = require('./LeasingDB/Queries/SMSQueries').insert_sms_match
 const update_sms_match = require('./LeasingDB/Queries/SMSQueries').update_sms_match
 const get_tenant_landlord_match = require('./LeasingDB/Queries/SMSQueries').get_tenant_landlord_match
-const get_tenant_landlord_sms_match = require('./LeasingDB/Queries/SMSQueries').get_tenant_landlord_match
+const get_tenant_landlord_sms_match = require('./LeasingDB/Queries/SMSQueries').get_tenant_landlord_sms_match
 const get_tenant_landlord_twilio_numbers = require('./LeasingDB/Queries/SMSQueries').get_tenant_landlord_twilio_numbers
 
 const generateInitialMessageBody_Tenant_ForExistingPair = require('../api/initial_message').generateInitialMessageBody_Tenant_ForExistingPair
@@ -365,6 +365,18 @@ exports.sms_forwarder = function(req, res, next) {
       const sender_id = getAppropriateId(data, original_from)
       const receiver_id = getAppropriateId(data, original_to)
       // log from, to, body, outgoingPhoneNumber
+      console.log('communication_log',{
+        'ACTION': 'FORWARDED_MESSAGE',
+        'DATE': new Date().getTime(),
+        'COMMUNICATION_ID': shortid.generate(),
+        'PROXY_CONTACT_ID': twilio_to,
+        'SENDER_ID': sender_id,
+        'RECEIVER_ID': receiver_id,
+        'SENDER_CONTACT_ID': original_from,
+        'RECEIVER_CONTACT_ID': original_to,
+        'TEXT': body,
+        'MEDIUM': 'SMS',
+      })
       insertCommunicationsLog({
         'ACTION': 'FORWARDED_MESSAGE',
         'DATE': new Date().getTime(),
@@ -376,6 +388,9 @@ exports.sms_forwarder = function(req, res, next) {
         'RECEIVER_CONTACT_ID': original_to,
         'TEXT': body,
         'MEDIUM': 'SMS',
+      })
+      console.log({
+        to: original_to,
       })
       twiml_client.message({
         to: original_to,

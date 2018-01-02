@@ -132,3 +132,31 @@ exports.get_tenant_landlord_twilio_numbers = (tenantPhone, landlordPhone) => {
     return return_rows(data)
   })
 }
+
+// allows you to get the IDs of the sender_phone and receiver_phone
+exports.get_tenant_landlord_sms_match = (sender_phone, receiver_phone) => {
+ const p = new Promise((res, rej) => {
+   const values = [sender_phone, receiver_phone]
+   const get_match = `SELECT * FROM sms_map WHERE (tenant_phone = $1 AND landlord_phone = $2) OR (tenant_phone = $2 AND landlord_phone = $1)`
+
+   const return_rows = (rows) => {
+     res(rows[0])
+   }
+
+   query(get_match, values)
+   .then((data) => {
+     return stringify_rows(data)
+   })
+   .then((data) => {
+     console.log(data)
+     return json_rows(data)
+   })
+   .then((data) => {
+     return return_rows(data)
+   })
+   .catch((error) => {
+       rej('Failed to get sms matches')
+   })
+ })
+ return p
+}
