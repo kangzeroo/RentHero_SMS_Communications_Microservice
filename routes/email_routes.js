@@ -35,6 +35,7 @@ exports.send_initial_email = (req, res, next) => {
                   'ACTION': 'INITIAL_MESSAGE',
                   'DATE': new Date().getTime(),
                   'COMMUNICATION_ID': RelationshipID,
+                  'MEDIUM': 'EMAIL',
 
                   'TENANT_ID': tenantId,
                   'TENANT_NAME': tenant.first_name,
@@ -60,6 +61,7 @@ exports.send_initial_email = (req, res, next) => {
                   'ACTION': 'INITIAL_MESSAGE',
                   'DATE': new Date().getTime(),
                   'COMMUNICATION_ID': RelationshipID,
+                  'MEDIUM': 'EMAIL',
 
                   'TENANT_ID': tenantId,
                   'TENANT_NAME': tenant.first_name,
@@ -100,9 +102,6 @@ exports.email_relationship = (req, res, next) => {
 }
 
 
-
-
-
 // POST /save_email_communications_log
 exports.save_email_communications_log = (req, res, next) => {
   const proxyEmailAddress = req.body.proxy_email
@@ -113,9 +112,10 @@ exports.save_email_communications_log = (req, res, next) => {
   const message = req.body.message
 
   insertCommunicationsLog({
-    'ACTION': 'SMS_MESSAGE',
+    'ACTION': 'FORWARDED_MESSAGE',
     'DATE': new Date().getTime(),
     'COMMUNICATION_ID': shortid.generate(),
+    'MEDIUM': 'EMAIL',
     'PROXY_CONTACT_ID': proxyEmailAddress,
     'SENDER_ID': sender_id,
     'RECEIVER_ID': receiver_id,

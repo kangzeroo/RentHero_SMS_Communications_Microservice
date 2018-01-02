@@ -138,6 +138,7 @@ const sendInitialSMSForExistingTenantLandlordPair = (info, landlord, tenant, twi
       'ACTION': 'INITIAL_MESSAGE',
       'DATE': new Date().getTime(),
       'COMMUNICATION_ID': id1,
+      'MEDIUM': 'SMS',
 
       'TENANT_ID': tenant.tenantId,
       'TENANT_NAME': info.first_name,
@@ -178,6 +179,7 @@ const sendInitialSMSForExistingTenantLandlordPair = (info, landlord, tenant, twi
       'ACTION': 'INITIAL_MESSAGE',
       'DATE': new Date().getTime(),
       'COMMUNICATION_ID': id2,
+      'MEDIUM': 'SMS',
 
       'TENANT_ID': tenant.tenantId,
       'TENANT_NAME': info.first_name,
@@ -225,6 +227,7 @@ const sendInitialSMSToTenantAndLandlord = (info, landlord, tenant, twilioPhone) 
       'ACTION': 'INITIAL_MESSAGE',
       'DATE': new Date().getTime(),
       'COMMUNICATION_ID': id1,
+      'MEDIUM': 'SMS',
 
       'TENANT_ID': tenant.tenantId,
       'TENANT_NAME': info.first_name,
@@ -265,6 +268,7 @@ const sendInitialSMSToTenantAndLandlord = (info, landlord, tenant, twilioPhone) 
       'ACTION': 'INITIAL_MESSAGE',
       'DATE': new Date().getTime(),
       'COMMUNICATION_ID': id2,
+      'MEDIUM': 'SMS',
 
       'TENANT_ID': tenant.tenantId,
       'TENANT_NAME': info.first_name,
@@ -358,7 +362,7 @@ exports.sms_forwarder = function(req, res, next) {
       const receiver_id = getAppropriateId(data, original_to)
       // log from, to, body, outgoingPhoneNumber
       insertCommunicationsLog({
-        'ACTION': 'SMS_MESSAGE',
+        'ACTION': 'FORWARDED_MESSAGE',
         'DATE': new Date().getTime(),
         'COMMUNICATION_ID': shortid.generate(),
         'PROXY_CONTACT_ID': twilio_to,
@@ -367,6 +371,7 @@ exports.sms_forwarder = function(req, res, next) {
         'SENDER_CONTACT_ID': original_from,
         'RECEIVER_CONTACT_ID': original_to,
         'TEXT': body,
+        'MEDIUM': 'SMS',
       })
       twiml_client.message({
         to: original_to,
@@ -497,6 +502,7 @@ exports.send_group_invitation_sms = function(req, res, next) {
       'GROUP_ID': group_id,
       'INVITATION_ID': invitation,
       'MAGIC_LINK_ID': magic_link_id,
+      'MEDIUM': 'SMS',
     })
     // for orchestra
     insertOrchestraLog({
@@ -511,6 +517,7 @@ exports.send_group_invitation_sms = function(req, res, next) {
       'SENDER_CONTACT_ID': referrer_phone,
       'GROUP_ID': group_id,
       'INVITATION_ID': invitation,
+      'MEDIUM': 'SMS',
     })
     // console.log(twiml_client.toString())
     console.log('========>>>>>>>>>>>>>>>>>>>')
