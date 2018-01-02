@@ -4,6 +4,10 @@ const AWS = require('aws-sdk/global')
 const ses = new AWS_SES({
   region: 'us-east-1'
 })
+const creds = new AWS.Credentials({
+  accessKey: process.env.ACCESS_KEY_ID,
+  secretAccessKey: process.env.SECRET_ACCESS_KEY,
+})
 
 exports.generateInitialEmail = function(toEmailAddresses, proxyEmailAddress, tenant, message, building, tenantOrLandlord){
   /*
@@ -27,18 +31,20 @@ exports.generateInitialEmail = function(toEmailAddresses, proxyEmailAddress, ten
 		} else {
 			const params = createInitialParams(toEmailAddresses, proxyEmailAddress, tenant, message, building, tenantOrLandlord)
 			// console.log('Sending email with attached params!')
-			// console.log(AWS.config.credentials)
-			ses.sendEmail(params, function(err, data) {
-			  if (err) {
-			  	 console.log(err); // an error occurred
-			  	 rej(err)
-			  } else {
-			  	// console.log(data);           // successful response
-					res({
-            message: 'Success! Initial mail sent',
-            data: data,
-          })
-        }
+			AWS.config.credentials.refresh(function() {
+				// console.log(AWS.config.credentials)
+				ses.sendEmail(params, function(err, data) {
+				  if (err) {
+				  	 console.log(err); // an error occurred
+				  	 rej(err)
+				  } else {
+				  	// console.log(data);           // successful response
+  					res({
+              message: 'Success! Initial mail sent',
+              data: data,
+            })
+          }
+				})
 			})
 		}
 	})
