@@ -28,6 +28,7 @@ exports.send_message_to_phones = function(req, res, next) {
 
         'SENDER_CONATCT_ID': 'RentHeroSMS',
         'RECEIVER_CONTACT_ID': phone,
+        'PROXY_CONTACT_ID': 'RentHeroSMS',
         'TEXT': message,
       })
     })
@@ -79,6 +80,7 @@ exports.receive_message_from_phone = function(req, res, next) {
 
     'SENDER_CONATCT_ID': info.From,
     'RECEIVER_CONTACT_ID': 'RentHeroSMS',
+    'PROXY_CONTACT_ID': info.To,
     'TEXT': info.From,
   })
 }
