@@ -47,11 +47,11 @@ if (process.env.NODE_ENV === 'production') {
   })
 } else if (process.env.NODE_ENV === 'staging') {
   const lex = require('greenlock-express').create({
-    server: 'staging',
+    server: 'https://acme-v01.api.letsencrypt.org/directory',
     approveDomains: (opts, certs, cb) => {
       if (certs) {
         // change domain list here
-        opts.domains = ['localhost:3006', '34.227.117.38']
+        opts.domains = ['34.227.117.38']
       } else {
         // change default email to accept agreement
         opts.email = 'email.records.rentburrow@gmail.com';
