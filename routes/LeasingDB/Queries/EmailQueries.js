@@ -51,7 +51,7 @@ exports.insert_email_relationship = (tenantId, tenantEmail, tenantAliasEmail, co
   const p = new Promise((res, rej) => {
     const values = [uuid.v4(), tenantId, tenantEmail, tenantAliasEmail, corporationId, corporationEmail, corporationAliasEmail]
 
-    const insert_relationship = `INSERT INTO email_map (id, tenant_id, tenant_email, tenant_alias_email, landlord_id, landlord_email, landlord_alias_email)
+    const insert_relationship = `WITH a AS (INSERT INTO email_map (id, tenant_id, tenant_email, tenant_alias_email, landlord_id, landlord_email, landlord_alias_email)
                                       SELECT $1, $2, $3, $4, $5, $6, $7
                                       WHERE NOT EXISTS (
                                         SELECT tenant_id, tenant_email,
@@ -61,13 +61,19 @@ exports.insert_email_relationship = (tenantId, tenantEmail, tenantAliasEmail, co
                                           AND tenant_email = $3
                                           AND landlord_id = $5
                                           AND landlord_email = $6
-                                      )
+                                      ) RETURNING *),
+                                      b AS (SELECT * FROM email_map
+                                      WHERE tenant_id = $2
+                                        AND tenant_email = $3
+                                        AND landlord_id = $5
+                                        AND landlord_email = $6)
+                              SELECT * FROM b UNION ALL SELECT * FROM a
                                 `
 
     query(insert_relationship, values)
       .then((data) => {
         console.log('INSERTED EMAIL RELATIONSHIP')
-        res(data)
+        res(data.rows[0])
       })
       .catch((err) => {
         console.log('ERROR: ', err)

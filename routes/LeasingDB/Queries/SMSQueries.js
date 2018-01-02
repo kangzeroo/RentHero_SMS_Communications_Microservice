@@ -52,14 +52,8 @@ exports.insert_sms_match = (tenant_id, tenant_phone, landlord_id, landlord_phone
    const values = [sid, tenant_id, tenant_phone, landlord_id, landlord_phone, twilio_phone]
 
    const insert_match = `INSERT INTO sms_map (id, tenant_id, tenant_phone, landlord_id, landlord_phone, twilio_phone)
-                              SELECT $1, $2, $3, $4, $5, $6
-                              WHERE NOT EXISTS (
-                                SELECT tenant_phone, landlord_phone, twilio_phone
-                                  FROM sms_map
-                                 WHERE tenant_phone = $2
-                                   AND landlord_phone = $3
-                                   AND twilio_phone = $6
-                                )`
+                              VALUES ($1, $2, $3, $4, $5, $6)
+                              ON CONFLICT (tenant_phone, landlord_phone, twilio_phone) DO NOTHING`
 
    query(insert_match, values)
    .then((data) => {

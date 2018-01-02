@@ -48,7 +48,7 @@ exports.send_initial_email = (info) => {
         // 2. Use AWS SES to send the initial message to each user with the the from email as the email alias (from: emailAlias@renthero.cc), which is essentially our proxyEmailAddress
         // first to the TENANT
         return generateInitialEmail(
-                  [relationshipObj.tenant_alias_email],
+                  [relationshipObj.tenant_email],
                   relationshipObj.landlord_alias_email,
                   { first_name: tenantFirstName, last_name: tenantLastName },
                   message,
@@ -82,7 +82,7 @@ exports.send_initial_email = (info) => {
           'BUILDING_ADDRESS': buildingAddress,
         })
         return generateInitialEmail(
-                  [relationshipObj.landlord_alias_email],
+                  [relationshipObj.landlord_email],
                   relationshipObj.tenant_alias_email,
                   { first_name: tenantFirstName, last_name: tenantLastName },
                   message,
