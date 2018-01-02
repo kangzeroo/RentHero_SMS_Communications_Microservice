@@ -6,7 +6,7 @@ const shortid = require('shortid')
 const MessagingResponse = require('twilio').twiml.MessagingResponse;
 const VoiceResponse = require('twilio').twiml.VoiceResponse;
 const shortenUrl = require('../api/general_api').shortenUrl
-const messagingServiceSid = 'MG7b2fbcc0003b6a821cc6e8f862e6b6e6'
+const messagingServiceSid = process.env.MESSAGE_SERVICE_ID
 
 const gatherOutgoingNumber = require('../api/sms_routing').gatherOutgoingNumber
 const getLandlordInfo = require('./PropertyDB/Queries/LandlordQuery').get_landlord_info
