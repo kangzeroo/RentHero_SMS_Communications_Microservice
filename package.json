@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "NODE_ENV=development nodemon server.js",
     "prod": "NODE_ENV=production nodemon server.js",
+    "staging": "NODE_ENV=staging nodemon server.js",
     "twilio": "NODE_ENV=twilio nodemon server.js"
   },
   "engines": {
@@ -23,6 +24,7 @@
     "express": "4.15.3",
     "flask": "0.2.10",
     "forever": "0.15.3",
+    "greenlock-express": "2.0.12",
     "json": "9.0.6",
     "jsonwebtoken": "7.4.1",
     "jwk-to-pem": "1.2.6",

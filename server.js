@@ -23,11 +23,11 @@ app.use(cors());
 
 // we instantiate the router function that defines all our HTTP route endpoints
 router(app);
+const port = process.env.PORT || 3006
 
 // Server setup
 // if there is an environment variable of PORT already defined, use it. otherwise use port 3002
 if (process.env.NODE_ENV === 'production') {
-  const port = process.env.PORT || 3006
   const options = {
       ca: fs.readFileSync('./credentials/rentburrow_com.ca-bundle'),
       key: fs.readFileSync('./credentials/rentburrow_com.key'),
@@ -41,13 +41,32 @@ if (process.env.NODE_ENV === 'production') {
     console.log("Server listening on https: ", port)
   })
 } else if (process.env.NODE_ENV === 'twilio') {
-  const port = process.env.PORT || 3106
   const server = http.createServer(app)
   server.listen(port, function(){
     console.log("Server listening on http: ", port)
   })
+} else if (process.env.NODE_ENV === 'staging') {
+  const lex = require('greenlock-express').create({
+    server: 'staging',
+    approveDomains: (opts, certs, cb) => {
+      if (certs) {
+        // change domain list here
+        opts.domains = ['localhost:3006', '34.227.117.38']
+      } else {
+        // change default email to accept agreement
+        opts.email = 'email.records.rentburrow@gmail.com';
+        opts.agreeTos = true;
+      }
+      cb(null, { options: opts, certs: certs });
+    }
+  })
+  const middlewareWrapper = lex.middleware
+  const server = https.createServer(lex.httpsOptions, app.use(middlewareWrapper))
+  // listen to the server on port
+  server.listen(port, function(){
+    console.log("Server listening on https: ", port)
+  })
 } else {
-  const port = process.env.PORT || 3006
   const options = {
       ca: fs.readFileSync('./credentials/rentburrow_com.ca-bundle'),
       key: fs.readFileSync('./credentials/rentburrow_com.key'),
