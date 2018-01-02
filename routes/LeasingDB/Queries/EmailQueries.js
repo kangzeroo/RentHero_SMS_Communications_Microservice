@@ -45,29 +45,34 @@ exports.get_email_forwarding_relationship = (sender_actual_email, receiver_alias
     })
 }
 
+
+// THIS SHOULD RETURN THE RELATIONSHIP (both if already existing or not)
 exports.insert_email_relationship = (tenantId, tenantEmail, tenantAliasEmail, corporationId, corporationEmail, corporationAliasEmail) => {
-  const values = [uuid.v4(), tenantId, tenantEmail, tenantAliasEmail, corporationId, corporationEmail, corporationAliasEmail]
+  const p = new Promise((res, rej) => {
+    const values = [uuid.v4(), tenantId, tenantEmail, tenantAliasEmail, corporationId, corporationEmail, corporationAliasEmail]
 
-  const insert_relationship = `INSERT INTO email_map (id, tenant_id, tenant_email, tenant_alias_email, landlord_id, landlord_email, landlord_alias_email)
-                                    SELECT $1, $2, $3, $4, $5, $6, $7
-                                    WHERE NOT EXISTS (
-                                      SELECT tenant_id, tenant_email, tenant_alias_email,
-                                             landlord_id, landlord_email, landlord_alias_email
-                                        FROM email_map
-                                      WHERE tenant_id = $2
-                                        AND tenant_email = $3
-                                        AND tenant_alias_email = $4
-                                        AND landlord_id = $5
-                                        AND landlord_email = $6
-                                        AND landlord_alias_email = $7
-                                    )
-                              `
+    const insert_relationship = `INSERT INTO email_map (id, tenant_id, tenant_email, tenant_alias_email, landlord_id, landlord_email, landlord_alias_email)
+                                      SELECT $1, $2, $3, $4, $5, $6, $7
+                                      WHERE NOT EXISTS (
+                                        SELECT tenant_id, tenant_email,
+                                               landlord_id, landlord_email
+                                          FROM email_map
+                                        WHERE tenant_id = $2
+                                          AND tenant_email = $3
+                                          AND landlord_id = $5
+                                          AND landlord_email = $6
+                                      )
+                                `
 
-  query(insert_relationship, values)
-  .then((data) => {
-    console.log('INSERTED EMAIL RELATIONSHIP')
+    query(insert_relationship, values)
+      .then((data) => {
+        console.log('INSERTED EMAIL RELATIONSHIP')
+        res(data)
+      })
+      .catch((err) => {
+        console.log('ERROR: ', err)
+        rej(err)
+      })
   })
-  .catch((err) => {
-    console.log('ERROR: ', err)
-  })
+  return p
 }
