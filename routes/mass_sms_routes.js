@@ -2,6 +2,7 @@ const twilio_client = require('../twilio_setup').generate_twilio_client();
 const notifyServicesSid = process.env.NOTIFY_SERVICE_ID
 const formattedPhoneNumber = require('../api/general_api').formattedPhoneNumber
 const shortid = require('shortid')
+const get_tenant_id_from_phone = require('./LeasingDB/Queries/TenantQueries').get_tenant_id_from_phone
 
 const insertCommunicationsLog = require('../message_logs/dynamodb_api').insertCommunicationsLog
 
@@ -10,9 +11,8 @@ exports.send_message_to_phones = function(req, res, next) {
   const info = req.body
   const message = info.body
 
-
-  const toBind = info.phones.map((phone) => {
-    return JSON.stringify({ binding_type: 'sms', address: formattedPhoneNumber(phone), })
+  const toBind = info.users.map((user) => {
+    return JSON.stringify({ binding_type: 'sms', address: formattedPhoneNumber(user.phone), })
   })
 
   twilio_client.notify.services(notifyServicesSid).notifications.create({
@@ -20,15 +20,16 @@ exports.send_message_to_phones = function(req, res, next) {
     body: message,
   })
   .then((notification) => {
-    info.phones.forEach((phone) => {
+    info.users.forEach((user) => {
       insertCommunicationsLog({
-        'ACTION': 'SMS_MESSAGE',
+        'ACTION': 'RENTHERO_SMS',
         'DATE': new Date().getTime(),
         'COMMUNICATION_ID': shortid.generate(),
 
+        'SENDER_ID': 'RentHeroSMS',
         'SENDER_CONTACT_ID': 'RentHeroSMS',
-        'RECEIVER_CONTACT_ID': phone,
-        'PROXY_CONTACT_ID': 'RentHeroSMS',
+        'RECEIVER_CONTACT_ID': user.tenant_id,
+        'PROXY_CONTACT_ID': 'RENTHERO_INITIAL',
         'TEXT': message,
       })
     })
@@ -43,45 +44,40 @@ exports.send_message_to_phones = function(req, res, next) {
   })
 }
 
-// console.log('Send group invitation sms')
-// const info = req.body
-//
-// const body = info.body
-//
-// const arrayOfPromises = info.phones.forEach((phone) => {
-//   twilio_client.messages.create({
-//     body: body,
-//     to: phone,
-//     messagingServiceSid: messagingServiceSid,
-//   })
-//   .then((message) => {
-//     console.log(message)
-//   })
-// })
-//
-// Promise.all(arrayOfPromises)
-// .then((data) => {
-//   res.json({
-//     message: 'sent'
-//   })
-// })
-// .catch((err) => {
-//   console.log(err)
-// })
-
 exports.receive_message_from_phone = function(req, res, next) {
   const info = req.body
   console.log(info)
 
-  insertCommunicationsLog({
-    'ACTION': 'SMS_MESSAGE',
-    'DATE': new Date().getTime(),
-    'COMMUNICATION_ID': shortid.generate(),
+  get_tenant_id_from_phone(info.From)
+  .then((data) => {
+    console.log(data)
+    if (data && data.tenant_id) {
+      insertCommunicationsLog({
+        'ACTION': 'RENTHERO_SMS',
+        'DATE': new Date().getTime(),
+        'COMMUNICATION_ID': shortid.generate(),
 
-    'SENDER_CONTACT_ID': info.From,
-    'RECEIVER_CONTACT_ID': 'RentHeroSMS',
-    'PROXY_CONTACT_ID': info.To,
-    'TEXT': info.Body,
+        'SENDER_CONTACT_ID': info.From,
+        'SENDER_ID': data.tenant_id,
+        'RECEIVER_CONTACT_ID': 'RentHeroSMS',
+        'RECEIVER_ID': 'RentHeroSMS',
+        'PROXY_CONTACT_ID': info.To,
+        'TEXT': info.Body,
+      })
+    } else {
+      insertCommunicationsLog({
+        'ACTION': 'RENTHERO_SMS',
+        'DATE': new Date().getTime(),
+        'COMMUNICATION_ID': shortid.generate(),
+
+        'SENDER_CONTACT_ID': info.From,
+        'SENDER_ID': 'NOT_A_TENANT',
+        'RECEIVER_CONTACT_ID': 'RentHeroSMS',
+        'RECEIVER_ID': 'RentHeroSMS',
+        'PROXY_CONTACT_ID': info.To,
+        'TEXT': info.Body,
+      })
+    }
   })
 }
 
@@ -94,7 +90,7 @@ exports.receive_message_from_phone = function(req, res, next) {
 // &AccountSid=AC3cfc4b5a78368f2cdb70baf2c945aee7
 // &From=%2B12892746748
 // &ApiVersion=2010-04-01
-//
+
 // ToCountry=CA
 // &ToState=ON
 // &SmsMessageSid=SMbf505253cd06a3991e7274ba563dcf6e

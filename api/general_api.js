@@ -14,6 +14,17 @@ exports.formattedPhoneNumber = (number) => {
   return '+1' + formattedNumber.replace(/\D/g,'')
 }
 
+exports.unFormattedPhoneNumber = (formattedNumber) => {
+  let number
+  const countryCode = formattedNumber.substring(0, 2)
+  if (countryCode === '+1') {
+    number = formattedNumber.substring(2)
+  } else {
+    number = formattedNumber
+  }
+  return number
+}
+
 
 exports.shortenUrl = (longUrl) => {
   const p = new Promise((res, rej) => {
