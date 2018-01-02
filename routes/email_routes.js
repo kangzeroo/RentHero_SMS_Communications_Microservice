@@ -1,17 +1,32 @@
 const shortid = require('shortid')
 const insertCommunicationsLog = require('../message_logs/dynamodb_api').insertCommunicationsLog
 const generateInitialEmail = require('../api/ses_api').generateInitialEmail
+const get_email_forwarding_relationship = require('./LeasingDB/Queries/EmailQueries').get_email_forwarding_relationship
+const insert_email_relationship = require('./LeasingDB/Queries/EmailQueries').insert_email_relationship
+const get_landlord_info = require('./PropertyDB/Queries/LandlordQuery').get_landlord_info
 
 // POST /send_initial_email
 exports.send_initial_email = (req, res, next) => {
   const tenantId = req.body.tenant_id
   const tenantEmail = req.body.tenant_email
-  const corporationId = req.body.corporation_id
+  // const corporationId = req.body.corporation_id
+
   const message = req.body.message
   const buildingId = req.body.building_id
+
+  let landlordObj
+
   // MUST DO THE FOLLOWING
 
   // 1. Create a relationship between this tenant_email and landlord_email
+      // a. get corporation object
+      // b. insert relationship
+      get_landlord_info(buildingId)
+      .then((data) => {
+        console.log(data)
+        landlordObj = data
+        insert_email_relationship(tenantId, tenantEmail, /*tenantAliasEmail*/, data.corporation_id, data.email, /*corporationAliasEmail*/)
+      })
 
   // 2. Query for the building, tenant and corporation based off the buildingId, tenantId, corporationId
 
@@ -85,6 +100,7 @@ exports.send_initial_email = (req, res, next) => {
 
 // POST /email_relationship
 exports.email_relationship = (req, res, next) => {
+  console.log('email_relationship')
   const receiver_alias_email = req.body.receiver_alias_email
   const sender_actual_email = req.body.sender_actual_email
   // MUST DO THE FOLLOWING
@@ -99,6 +115,18 @@ exports.email_relationship = (req, res, next) => {
           landlord_alias_email,
         }
   */
+  return get_email_forwarding_relationship(sender_actual_email, receiver_alias_email)
+  .then((data) => {
+    if (data) {
+      res.json(data)
+    } else {
+      res.json({})
+    }
+  })
+  .catch((err) => {
+    console.log(err)
+    res.status(500).send(err)
+  })
 }
 
 

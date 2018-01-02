@@ -1,6 +1,6 @@
 // AWS SES (Simple Email Service) for sending emails via Amazon
-import AWS_SES from 'aws-sdk/clients/ses'
-import AWS from 'aws-sdk/global'
+const AWS_SES = require('aws-sdk/clients/ses')
+const AWS = require('aws-sdk/global')
 const ses = new AWS_SES({
   region: 'us-east-1'
 })

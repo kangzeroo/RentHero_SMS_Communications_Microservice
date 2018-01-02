@@ -33,6 +33,7 @@ exports.insert_tenant_landlord_sms = (req, res, next) => {
 
   const insert_match = `INSERT INTO sms_map (id, tenant_phone, landlord_phone, twilio_phone)
                                      VALUES ($1, $2, $3, $4)
+
                         `
 
   query(insert_match, values)
