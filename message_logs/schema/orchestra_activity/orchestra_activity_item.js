@@ -70,5 +70,20 @@ exports.reference_items = [
       'STEP': 'OPENED, STEP1, STEP2, COMPLETED',
       'FINGERPRINT': 'this.props.fingerprint',
     }
+  },
+  {
+    'TableName': ORCHESTRA_ACTIVITY,
+    'Item': {
+      'ACTION': 'REFERRAL_LINK',
+      'DATE': new Date().getTime(),
+      'ORCHESTRA_ID': 'uuid.v4()',
+      'MAGIC_LINK_ID': 'this.state.magicLinkData.referralCredit',
+
+      'TARGET_ID': 'SHARED_LINK',
+      'TARGET_CONTACT_ID': 'SHARED_LINK',
+
+      'STEP': 'REFERRAL_OPENED',
+      'FINGERPRINT': 'this.props.fingerprint',
+    }
   }
 ]
