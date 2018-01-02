@@ -14,6 +14,12 @@ exports.generateInitialEmail = function(toEmailAddresses, proxyEmailAddress, ten
     building = { building_id, building_alias }
     tenantOrLandlord = 'landlord' || 'tenant'
   */
+  console.log('======> toEmailAddresses: ', toEmailAddresses)
+  console.log('======> proxyEmailAddress: ', proxyEmailAddress)
+  console.log('======> tenant: ', tenant)
+  console.log('======> message: ', message)
+  console.log('======> building: ', building)
+  console.log('======> tenantOrLandlord: ', tenantOrLandlord)
 
   const p = new Promise((res, rej) => {
 		if (!toEmailAddresses || toEmailAddresses.length === 0 || !proxyEmailAddress || !message) {
@@ -58,7 +64,7 @@ function createInitialParams(toEmailAddresses, proxyEmailAddress, tenant, messag
 	      },
 	    },
 	    Subject: { /* required */
-	      Data: 'RentHero Inquiry for ' + building.building_alias, /* required */
+	      Data: 'RentHero Inquiry for ' + building.building_address, /* required */
 	      Charset: 'UTF-8'
 	    }
 	  },
@@ -97,6 +103,11 @@ function generateHTMLInquiryEmail_Landlord(tenant, message, building){
 		                <tr style='background-color:#99ccff;'>
 		                    <td align='center' valign='top'>
 		                        <table border='0' cellpadding='20' cellspacing='0' width='100%' id='emailBody'>
+                                <tr>
+                                    <td align='center' valign='top' style='color:#337ab7;'>
+                                        <h2>RentHero.ca Inquiry</h2>
+                                    </td>
+                                </tr>
 		                            <tr>
 		                                <td align='center' valign='top' style='color:#337ab7;'>
 		                                    <h2>${building.building_address}</h2>
@@ -106,6 +117,12 @@ function generateHTMLInquiryEmail_Landlord(tenant, message, building){
 		                            <tr style='border: 1px solid red; font-size: 1.2rem'>
 		                                <td align='center' valign='top'>
 		                                    <p>${message}</p>
+		                                </td>
+		                            </tr>
+		                            <tr style='border: 1px solid red; font-size: 1.2rem'>
+		                                <td align='center' valign='top'>
+		                                    <h3>You can respond to the tenant by directly replying to this email.</h3>
+                                        <h3>View your ad on https://renthero.ca/${building.building_alias.replace(/ /g, '-')}</h3>
 		                                </td>
 		                            </tr>
 		                        </table>
@@ -149,15 +166,25 @@ function generateHTMLInquiryEmail_Tenant(tenant, message, building){
 		                <tr style='background-color:#99ccff;'>
 		                    <td align='center' valign='top'>
 		                        <table border='0' cellpadding='20' cellspacing='0' width='100%' id='emailBody'>
+                                <tr>
+                                    <td align='center' valign='top' style='color:#337ab7;'>
+                                        <h2>RentHero.ca Inquiry</h2>
+                                    </td>
+                                </tr>
 		                            <tr>
 		                                <td align='center' valign='top' style='color:#337ab7;'>
-		                                    <h2>${building.building_address}</h2>
-		                                    <h3>${tenant.first_name} ${tenant.last_name}, your message has been sent to the landlord</h3>
+		                                    <h2>${tenant.first_name} ${tenant.last_name}</h2>
+		                                    <h3>Your message has been sent to the landlord of ${building.building_address}</h3>
 		                                </td>
 		                            </tr>
 		                            <tr style='border: 1px solid red; font-size: 1.2rem'>
 		                                <td align='center' valign='top'>
 		                                    <p>${message}</p>
+		                                </td>
+		                            </tr>
+                                <tr style='border: 1px solid red; font-size: 1.2rem'>
+		                                <td align='center' valign='top'>
+		                                    <h3>You can speak with the landlord by directly replying to this email.</h3>
 		                                </td>
 		                            </tr>
 		                        </table>
