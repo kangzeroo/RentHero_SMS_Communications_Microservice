@@ -81,7 +81,7 @@ exports.receive_message_from_phone = function(req, res, next) {
     'SENDER_CONTACT_ID': info.From,
     'RECEIVER_CONTACT_ID': 'RentHeroSMS',
     'PROXY_CONTACT_ID': info.To,
-    'TEXT': info.From,
+    'TEXT': info.Body,
   })
 }
 
