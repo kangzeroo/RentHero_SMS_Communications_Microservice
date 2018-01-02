@@ -152,7 +152,7 @@ function generateHTMLInquiryEmail_Tenant(tenant, message, building){
 		                            <tr>
 		                                <td align='center' valign='top' style='color:#337ab7;'>
 		                                    <h2>${building.building_address}</h2>
-		                                    <h3>${tenant.first_name} ${tenant.last_name} sent a message:</h3>
+		                                    <h3>${tenant.first_name} ${tenant.last_name}, your message has been sent to the landlord</h3>
 		                                </td>
 		                            </tr>
 		                            <tr style='border: 1px solid red; font-size: 1.2rem'>
