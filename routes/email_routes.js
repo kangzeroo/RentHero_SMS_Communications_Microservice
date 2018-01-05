@@ -31,7 +31,7 @@ exports.send_initial_email = (info) => {
         // b. insert relationship
     get_landlord_info(buildingId)
       .then((data) => {
-        data.corporation_alias_email = 'supportaliasemail@renthero.cc'
+        // data.corporation_alias_email = 'supportaliasemail@renthero.cc'
         landlordObj = data
         return insert_email_relationship(
           tenantId,
@@ -39,7 +39,7 @@ exports.send_initial_email = (info) => {
           generateTenantAliasEmail(tenantFirstName, tenantLastName),
           data.corporation_id,
           data.email,
-          data.corporation_alias_email
+          data.alias_email
         )
       })
       .then((relationship) => {
