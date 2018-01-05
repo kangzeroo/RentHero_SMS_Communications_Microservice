@@ -69,7 +69,7 @@ exports.send_initial_email = (info) => {
           'TENANT_EMAIL': tenantEmail,
           'LANDLORD_ID': landlordObj.corporation_id,
           'LANDLORD_NAME': landlordObj.corporation_name,
-          'LANDLORD_EMAIL': landlordObj.corporation_email,
+          'LANDLORD_EMAIL': landlordObj.email,
 
           'PROXY_CONTACT_ID': relationshipObj.landlord_alias_email,
           'SENDER_ID': landlordObj.corporation_id,
