@@ -168,7 +168,7 @@ function generateHTMLInquiryEmail_Tenant(tenant, message, building){
 		                        <table border='0' cellpadding='20' cellspacing='0' width='100%' id='emailBody'>
                                 <tr>
                                     <td align='center' valign='top' style='color:#337ab7;'>
-                                        <h2>RentHero.ca Inquiry</h2>
+                                        <h2>You sent a message on RentHero</h2>
                                     </td>
                                 </tr>
 		                            <tr>
