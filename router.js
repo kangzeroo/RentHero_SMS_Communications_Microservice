@@ -6,6 +6,7 @@ const InquiryRoutes = require('./routes/inquiry_routes')
 const SMSRoutes = require('./routes/sms_routes')
 const EmailRoutes = require('./routes/email_routes')
 const MassSMSRoutes = require('./routes/mass_sms_routes')
+const goodbyeSMSRoutes = require('./routes/goodbye_sms_routes')
 const SMS_RDS_Queries = require('./routes/LeasingDB/Queries/SMSQueries')
 
 // bodyParser attempts to parse any request into JSON format
@@ -53,4 +54,7 @@ module.exports = function(app){
 
 	app.post('/email_relationship', [json_encoding], EmailRoutes.email_relationship)
 	app.post('/save_email_communications_log', [json_encoding], EmailRoutes.save_email_communications_log)
+
+	// goodbye message
+	app.post('/send_goodbye_message_sms', [json_encoding], goodbyeSMSRoutes.send_goodbye_message_sms)
 }

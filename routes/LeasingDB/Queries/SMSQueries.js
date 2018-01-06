@@ -106,7 +106,6 @@ exports.get_tenant_landlord_match = (tenantPhone, landlordPhone) => {
 
   return query(get_match, values)
   .then((data) => {
-    console.log(data)
     return data.rows[0]
   })
   .catch((err) => {
@@ -137,7 +136,17 @@ exports.get_tenant_landlord_twilio_numbers = (tenantPhone, landlordPhone) => {
 exports.get_tenant_landlord_sms_match = (sender_phone, receiver_phone) => {
  const p = new Promise((res, rej) => {
    const values = [sender_phone, receiver_phone]
-   const get_match = `SELECT * FROM sms_map WHERE (tenant_phone = $1 AND landlord_phone = $2) OR (tenant_phone = $2 AND landlord_phone = $1)`
+   const get_match = `SELECT a.id, a.tenant_id, a.tenant_phone, a.landlord_id, a.landlord_phone, a.twilio_phone,
+                             a.created_at,
+                             b.first_name, b.last_name
+                        FROM (
+                          SELECT *
+                            FROM sms_map
+                           WHERE (tenant_phone = $1 AND landlord_phone = $2)
+                              OR (tenant_phone = $2 AND landlord_phone = $1)
+                        ) a
+                        INNER JOIN tenant b ON a.tenant_id = b.tenant_id
+   `
 
    const return_rows = (rows) => {
      res(rows[0])

@@ -51,3 +51,27 @@ exports.get_landlord_info = (building_id) => {
       console.log(error)
     })
 }
+
+exports.get_landlord_from_id = (landlord_id) => {
+  const values = [landlord_id]
+
+  const get_landlord = `SELECT * FROM corporation WHERE corporation_id = $1
+                        `
+
+  const return_rows = (rows) => {
+    return rows[0]
+  }
+  return query(get_landlord, values)
+    .then((data) => {
+      return stringify_rows(data)
+    })
+    .then((data) => {
+      return json_rows(data)
+    })
+    .then((data) => {
+      return return_rows(data)
+    })
+    .catch((error) => {
+      console.log(error)
+    })
+}
