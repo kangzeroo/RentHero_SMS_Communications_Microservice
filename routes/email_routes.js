@@ -31,7 +31,6 @@ exports.send_initial_email = (info) => {
         // b. insert relationship
     get_landlord_info(buildingId)
       .then((data) => {
-        // data.corporation_alias_email = 'supportaliasemail@renthero.cc'
         landlordObj = data
         return insert_email_relationship(
           tenantId,
@@ -48,13 +47,13 @@ exports.send_initial_email = (info) => {
         // 2. Use AWS SES to send the initial message to each user with the the from email as the email alias (from: emailAlias@renthero.cc), which is essentially our proxyEmailAddress
         // first to the TENANT
         return generateInitialEmail(
-                  [relationshipObj.tenant_email],
-                  relationshipObj.landlord_alias_email,
-                  { first_name: tenantFirstName, last_name: tenantLastName },
-                  message,
-                  { building_id: buildingId, building_address: buildingAddress, building_alias: buildingAlias },
-                  'tenant'
-                )
+          [relationshipObj.tenant_email],
+          relationshipObj.landlord_alias_email,
+          { first_name: tenantFirstName, last_name: tenantLastName },
+          message,
+          { building_id: buildingId, building_address: buildingAddress, building_alias: buildingAlias },
+          'tenant'
+        )
       })
       .then((data) => {
         // Save the message to Communications Log for TENANT
@@ -82,13 +81,13 @@ exports.send_initial_email = (info) => {
           'BUILDING_ADDRESS': buildingAddress,
         })
         return generateInitialEmail(
-                  [relationshipObj.landlord_email],
-                  relationshipObj.tenant_alias_email,
-                  { first_name: tenantFirstName, last_name: tenantLastName },
-                  message,
-                  { building_id: buildingId, building_address: buildingAddress, building_alias: buildingAlias },
-                  'landlord'
-                )
+          [relationshipObj.landlord_email],
+          relationshipObj.tenant_alias_email,
+          { first_name: tenantFirstName, last_name: tenantLastName },
+          message,
+          { building_id: buildingId, building_address: buildingAddress, building_alias: buildingAlias },
+          'landlord'
+        )
       })
       .then((data) => {
         // Save the message to Communications Log for TENANT
