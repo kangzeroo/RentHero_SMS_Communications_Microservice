@@ -176,5 +176,15 @@ exports.save_email_communications_log = (req, res, next) => {
     'SENDER_CONTACT_ID': sender_email,
     'RECEIVER_CONTACT_ID': receiver_email,
     'TEXT': message,
+  }).then((data) => {
+    console.log('======= EMAIL insertCommunicationsLog ========')
+    console.log(data)
+    res.json({
+      message: 'Successfully saved'
+    })
+  }).catch((err) => {
+    res.status(500).send({
+      message: 'FAILED TO SAVE'
+    })
   })
 }
