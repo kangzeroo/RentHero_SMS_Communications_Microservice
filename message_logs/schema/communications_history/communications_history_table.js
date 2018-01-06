@@ -19,6 +19,7 @@ const communicationsHistoryTableParams = {
         { AttributeName: "RECEIVER_ID", AttributeType: "S" },
         { AttributeName: "COMMUNICATION_ID", AttributeType: "S" },
         { AttributeName: "MEDIUM", AttributeType: "S" },
+        { AttributeName: "ACTION", AttributeType: "S" },
     ],
     ProvisionedThroughput: {
         ReadCapacityUnits: 1,
@@ -90,6 +91,21 @@ const communicationsHistoryTableParams = {
         IndexName: 'By_MEDIUM', /* required */
         KeySchema: [ /* required */
           {AttributeName: 'MEDIUM', KeyType: 'HASH'},
+          {AttributeName: 'COMMUNICATION_ID', KeyType: 'RANGE'}
+        ],
+        Projection: { /* required */
+          ProjectionType: 'ALL'
+        },
+        ProvisionedThroughput: { /* required */
+          ReadCapacityUnits: 5, /* required */
+          WriteCapacityUnits: 5 /* required */
+        }
+      },
+      {
+        // USE CASE: ALLOWS ME TO SEE ALL INTEL OF A SPECIFIC ACTION, GROUPED BY USERS. EG: SHOW ME ALL PRICE ADJUSTMENTS, AND NOW I CAN GROUP USER POPULATIONS INTO PRICE RANGES.
+        IndexName: 'By_ACTION', /* required */
+        KeySchema: [ /* required */
+          {AttributeName: 'ACTION', KeyType: 'HASH'},
           {AttributeName: 'COMMUNICATION_ID', KeyType: 'RANGE'}
         ],
         Projection: { /* required */
