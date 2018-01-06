@@ -41,7 +41,7 @@ exports.initial_inquiry = function(request, response, next) {
   return p
 }
 
-// GET /message_proof?id=989DSFH697
+// POST /message_proof
 exports.message_proof = function(request, resolve, next) {
   const p = new Promise((res, rej) => {
     const comm_id = request.body.comm_id

@@ -479,7 +479,7 @@ exports.send_group_invitation_sms = function(req, res, next) {
   console.log('Send group invitation sms')
   const info = req.body
   const twiml_client = new MessagingResponse()
-  const id = shortid.generate()
+  const comm_id = shortid.generate()
 
   const referrer = info.referrer
   const referrer_tenant_id = info.referrer_tenant_id
@@ -498,10 +498,13 @@ exports.send_group_invitation_sms = function(req, res, next) {
 
   const from = '+12268940470'
   const to   = formattedPhoneNumber(info.phone)
-  const longUrl = `http://localhost:4001/invitation?${encodeURIComponent(`name=${name}&phone=${phone}&email=${email}&group=${group_id}&referrer=${referrer}&magic=${magic_link_id}&invitation=${invitation}&group_alias=${group_alias}`)}&referralcredit=${referralcredit}`
+  const longUrl = `${req.get('origin')}/invitation?${encodeURIComponent(`name=${name}&phone=${phone}&email=${email}&group=${group_id}&referrer=${referrer}&magic=${magic_link_id}&invitation=${invitation}&group_alias=${group_alias}`)}&referralcredit=${referralcredit}`
 
   shortenUrl(longUrl).then((result) => {
-    const body = `Hello, You've been invited to join a group on RentHero. Please sign up using this link! ${result.id}     - RentHero.ca/m/${id}`
+    const body = `
+      Hello, You've been invited by your friend ${referrer} to join a group on RentHero. Please sign up using this link! ${result.id}
+      [ VERIFIED RENTHERO MESSAGE: RentHero.cc/m/${comm_id} ]
+    `
 
     console.log(from, to)
 
@@ -514,7 +517,7 @@ exports.send_group_invitation_sms = function(req, res, next) {
     insertCommunicationsLog({
       'ACTION': 'SENT_GROUP_INVITE',
       'DATE': new Date().getTime(),
-      'COMMUNICATION_ID': id,
+      'COMMUNICATION_ID': comm_id,
       'PROXY_CONTACT_ID': from,
       'SENDER_ID': referrer_tenant_id,
       'RECEIVER_ID': phone,
