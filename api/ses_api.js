@@ -5,27 +5,27 @@ const ses = new AWS_SES({
   region: 'us-east-1'
 })
 
-exports.generateInitialEmail = function(toEmailAddresses, proxyEmailAddress, tenant, message, building, tenantOrLandlord){
+exports.generateInitialEmail = function(toEmailAddresses, proxyFromEmailAddress, tenant, message, building, tenantOrLandlord){
   /*
     toEmailAddresses = ['personA@email.com', 'personB@email.com']
-    proxyEmailAddress = 'relationshipID@renthero.cc',
+    proxyFromEmailAddress = 'relationshipID@renthero.cc',
     tenant = { tenant_id: '89oOHDF9f', first_name: 'Mike' }
     message = 'Hello, Renthero has generated a lead for you...'
     building = { building_id, building_alias }
     tenantOrLandlord = 'landlord' || 'tenant'
   */
   console.log('======> toEmailAddresses: ', toEmailAddresses)
-  console.log('======> proxyEmailAddress: ', proxyEmailAddress)
+  console.log('======> proxyFromEmailAddress: ', proxyFromEmailAddress)
   console.log('======> tenant: ', tenant)
   console.log('======> message: ', message)
   console.log('======> building: ', building)
   console.log('======> tenantOrLandlord: ', tenantOrLandlord)
 
   const p = new Promise((res, rej) => {
-		if (!toEmailAddresses || toEmailAddresses.length === 0 || !proxyEmailAddress || !message) {
+		if (!toEmailAddresses || toEmailAddresses.length === 0 || !proxyFromEmailAddress || !message) {
 			rej('Missing from email, proxy email, or message')
 		} else {
-			const params = createInitialParams(toEmailAddresses, proxyEmailAddress, tenant, message, building, tenantOrLandlord)
+			const params = createInitialParams(toEmailAddresses, proxyFromEmailAddress, tenant, message, building, tenantOrLandlord)
 			// console.log('Sending email with attached params!')
 			AWS.config.credentials.refresh(function() {
 				// console.log(AWS.config.credentials)
@@ -47,7 +47,7 @@ exports.generateInitialEmail = function(toEmailAddresses, proxyEmailAddress, ten
 	return p
 }
 
-function createInitialParams(toEmailAddresses, proxyEmailAddress, tenant, message, building, tenantOrLandlord){
+function createInitialParams(toEmailAddresses, proxyFromEmailAddress, tenant, message, building, tenantOrLandlord){
   const params = {
 	  Destination: { /* required */
 	    BccAddresses: [
@@ -68,9 +68,9 @@ function createInitialParams(toEmailAddresses, proxyEmailAddress, tenant, messag
 	      Charset: 'UTF-8'
 	    }
 	  },
-	  Source: proxyEmailAddress,
-	  ReplyToAddresses: [ proxyEmailAddress ],
-	  ReturnPath: proxyEmailAddress,
+	  Source: proxyFromEmailAddress,
+	  ReplyToAddresses: [ proxyFromEmailAddress ],
+	  ReturnPath: proxyFromEmailAddress,
 	}
 	return params
 }
