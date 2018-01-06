@@ -27,6 +27,7 @@ module.exports = function(app){
 	// app.post('/use-sms', twilio.webhook({ validate: false }), Test.sms)
 
 	app.post('/initial_inquiry', [json_encoding], InquiryRoutes.initial_inquiry)
+	app.post('/message_proof', [json_encoding], InquiryRoutes.message_proof)
 	// app.post('/send_landlord_message', json_encoding, SMSRoutes.sendLandlordMessageFromTenant)
 
 	app.post('/use-sms', twilio.webhook({ validate: false }), SMSRoutes.sms_forwarder)
