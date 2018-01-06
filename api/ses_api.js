@@ -34,7 +34,7 @@ exports.generateInitialEmail = function(toEmailAddresses, proxyEmailAddress, ten
 				  	 console.log(err); // an error occurred
 				  	 rej(err)
 				  } else {
-				  	// console.log(data);           // successful response
+				  	console.log(data);           // successful response
   					res({
               message: 'Success! Initial mail sent',
               data: data,
