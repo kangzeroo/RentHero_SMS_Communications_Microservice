@@ -40,3 +40,19 @@ exports.get_tenant_id_from_phone = (phone) => {
     console.log(err)
   })
 }
+
+exports.get_tenant_from_id = (tenant_id) => {
+  const values = [tenant_id]
+
+  const get_tenant = `SELECT * FROM tenant WHERE tenant_id = $1
+                      `
+
+  return query(get_tenant, values)
+  .then((data) => {
+    console.log(data.rows[0])
+    return data.rows[0]
+  })
+  .catch((err) => {
+    console.log(err)
+  })
+}

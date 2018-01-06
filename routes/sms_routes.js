@@ -10,6 +10,7 @@ const messagingServiceSid = process.env.MESSAGE_SERVICE_ID
 
 const gatherOutgoingNumber = require('../api/sms_routing').gatherOutgoingNumber
 const getLandlordInfo = require('./PropertyDB/Queries/LandlordQuery').get_landlord_info
+const get_landlord_from_id = require('./PropertyDB/Queries/LandlordQuery').get_landlord_from_id
 const insert_sms_match = require('./LeasingDB/Queries/SMSQueries').insert_sms_match
 const update_sms_match = require('./LeasingDB/Queries/SMSQueries').update_sms_match
 const get_tenant_landlord_match = require('./LeasingDB/Queries/SMSQueries').get_tenant_landlord_match
@@ -365,30 +366,28 @@ exports.sms_forwarder = function(req, res, next) {
       const sender_id = getAppropriateId(data, original_from)
       const receiver_id = getAppropriateId(data, original_to)
       // log from, to, body, outgoingPhoneNumber
-      console.log('communication_log',{
-        'ACTION': 'FORWARDED_MESSAGE',
-        'DATE': new Date().getTime(),
-        'COMMUNICATION_ID': shortid.generate(),
-        'PROXY_CONTACT_ID': twilio_to,
-        'SENDER_ID': sender_id,
-        'RECEIVER_ID': receiver_id,
-        'SENDER_CONTACT_ID': original_from,
-        'RECEIVER_CONTACT_ID': original_to,
-        'TEXT': body,
-        'MEDIUM': 'SMS',
+      get_landlord_from_id(data.landlord_id)
+      .then((landlordData) => {
+        insertCommunicationsLog({
+          'ACTION': 'FORWARDED_MESSAGE',
+          'DATE': new Date().getTime(),
+          'COMMUNICATION_ID': shortid.generate(),
+          'PROXY_CONTACT_ID': twilio_to,
+          'SENDER_ID': sender_id,
+          'RECEIVER_ID': receiver_id,
+          'SENDER_CONTACT_ID': original_from,
+          'RECEIVER_CONTACT_ID': original_to,
+          'TEXT': body,
+          'MEDIUM': 'SMS',
+          'TENANT_ID': data.tenant_id,
+          'TENANT_NAME': [data.first_name, data.last_name].join(' '),
+          'TENANT_PHONE': data.tenant_phone,
+          'LANDLORD_ID': data.landlord_id,
+          'LANDLORD_NAME': landlordData.corporation_name,
+          'LANDLORD_PHONE': data.landlord_phone,
+        })
       })
-      insertCommunicationsLog({
-        'ACTION': 'FORWARDED_MESSAGE',
-        'DATE': new Date().getTime(),
-        'COMMUNICATION_ID': shortid.generate(),
-        'PROXY_CONTACT_ID': twilio_to,
-        'SENDER_ID': sender_id,
-        'RECEIVER_ID': receiver_id,
-        'SENDER_CONTACT_ID': original_from,
-        'RECEIVER_CONTACT_ID': original_to,
-        'TEXT': body,
-        'MEDIUM': 'SMS',
-      })
+
       console.log({
         to: original_to,
       })
