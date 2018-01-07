@@ -52,7 +52,7 @@ module.exports = function(app){
 	app.post('/fallback', [twilio.webhook({ validate: false })], SMSRoutes.fallback)
 	app.post('/speechtotext', [twilio.webhook({ validate: false })], SMSRoutes.speechtotext)
 
-	app.post('/email_relationship', [json_encoding, originCheck], EmailRoutes.email_relationship)
+	app.post('/email_relationship', [json_encoding], EmailRoutes.email_relationship)
 	app.post('/save_email_communications_log', [json_encoding, originCheck], EmailRoutes.save_email_communications_log)
 
 	// goodbye message
