@@ -45,32 +45,11 @@ if (process.env.NODE_ENV === 'production') {
   server.listen(port, function(){
     console.log("Server listening on http: ", port)
   })
-} else if (process.env.NODE_ENV === 'staging') {
-  const lex = require('greenlock-express').create({
-    server: 'https://acme-v01.api.letsencrypt.org/directory',
-    approveDomains: (opts, certs, cb) => {
-      if (certs) {
-        // change domain list here
-        opts.domains = ['ec2-34-227-117-38.compute-1.amazonaws.com']
-      } else {
-        // change default email to accept agreement
-        opts.email = 'email.records.rentburrow@gmail.com';
-        opts.agreeTos = true;
-      }
-      cb(null, { options: opts, certs: certs });
-    }
-  })
-  const middlewareWrapper = lex.middleware
-  const server = https.createServer(lex.httpsOptions, app.use(middlewareWrapper))
-  // listen to the server on port
-  server.listen(port, function(){
-    console.log("Server listening on https: ", port)
-  })
 } else {
   const options = {
-      ca: fs.readFileSync('./credentials/rentburrow_com.ca-bundle'),
-      key: fs.readFileSync('./credentials/rentburrow_com.key'),
-      cert: fs.readFileSync('./credentials/rentburrow_com.crt'),
+      ca: fs.readFileSync('./credentials/renthero_host.ca-bundle'),
+      key: fs.readFileSync('./credentials/renthero_host.key'),
+      cert: fs.readFileSync('./credentials/renthero_host.crt'),
       requestCert: false,
       rejectUnauthorized: false
   }
