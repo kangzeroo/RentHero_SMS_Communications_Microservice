@@ -124,6 +124,113 @@ exports.send_initial_email = (info) => {
   return p
 }
 
+exports.send_initial_corporate_email = (info) => {
+  console.log('---------------- Initial Email Message ----------------')
+  const p = new Promise((res, rej) => {
+    const tenant = info.tenant
+    const building = info.building
+    const message = info.message
+    const corporateEmployee = info.corporateEmployee
+
+    let relationshipObj
+
+    // MUST DO THE FOLLOWING
+
+    // 1. Create a relationship/get the existing relationship between this tenant_email and landlord_email
+        // a. get corporation object
+        // b. insert relationship
+
+    insert_email_relationship(
+        tenant.tenant_id,
+        tenant.email,
+        generateTenantAliasEmail(tenant.first_name, tenant.last_name),
+        corporateEmployee.corporation_id,
+        corporateEmployee.email,
+        corporateEmployee.alias_email
+    )
+    .then((relationship) => {
+      console.log(relationship)
+      relationshipObj = relationship
+      // 2. Use AWS SES to send the initial message to each user with the the from email as the email alias (from: emailAlias@renthero.cc), which is essentially our proxyEmailAddress
+      // first to the TENANT
+      return generateInitialEmail(
+        [relationshipObj.tenant_email],
+        relationshipObj.landlord_alias_email,
+        { first_name: tenant.first_name, last_name: tenant.last_name },
+        message,
+        { building_id: building.building_id, building_address: building.building_address, building_alias: building.building_alias },
+        'tenant'
+      )
+    })
+    .then((data) => {
+      // Save the message to Communications Log for TENANT
+      insertCommunicationsLog({
+        'ACTION': 'INITIAL_MESSAGE',
+        'DATE': new Date().getTime(),
+        'COMMUNICATION_ID': uuid.v4(),
+        'MEDIUM': 'EMAIL',
+
+        'TENANT_ID': tenant.tenant_id,
+        'TENANT_NAME': `${tenant.first_name} ${tenant.last_name}`,
+        'TENANT_EMAIL': tenant.email,
+        'LANDLORD_ID': corporateEmployee.corporation_id,
+        'LANDLORD_NAME': corporateEmployee.corporation_name,
+        'LANDLORD_EMAIL': corporateEmployee.email,
+
+        'PROXY_CONTACT_ID': relationshipObj.landlord_alias_email,
+        'SENDER_ID': corporateEmployee.corporation_id,
+        'RECEIVER_ID': tenant.tenant_id,
+        'SENDER_CONTACT_ID': relationshipObj.landlord_alias_email,
+        'RECEIVER_CONTACT_ID': relationshipObj.tenant_alias_email,
+
+        'TEXT': message,
+        'BUILDING_ID': building.building_id,
+        'BUILDING_ADDRESS': building.building_address,
+      })
+      return generateInitialEmail(
+        [relationshipObj.landlord_email],
+        relationshipObj.tenant_alias_email,
+        { first_name: tenant.first_name, last_name: tenant.last_name },
+        message,
+        { building_id: building.building_id, building_address: building.building_address, building_alias: building.building_alias },
+        'landlord'
+      )
+    })
+    .then((data) => {
+      // Save the message to Communications Log for TENANT
+      insertCommunicationsLog({
+        'ACTION': 'INITIAL_MESSAGE',
+        'DATE': new Date().getTime(),
+        'COMMUNICATION_ID': uuid.v4(),
+        'MEDIUM': 'EMAIL',
+
+        'TENANT_ID': tenant.tenant_id,
+        'TENANT_NAME': `${tenant.first_name} ${tenant.last_name}`,
+        'TENANT_EMAIL': tenant.email,
+        'LANDLORD_ID': corporateEmployee.corporation_id,
+        'LANDLORD_NAME': corporateEmployee.corporation_name,
+        'LANDLORD_EMAIL': corporateEmployee.email,
+
+        'PROXY_CONTACT_ID': relationshipObj.tenant_alias_email,
+        'SENDER_ID': tenant.tenant_id,
+        'RECEIVER_ID': corporateEmployee.corporation_id,
+        'SENDER_CONTACT_ID': relationshipObj.tenant_alias_email,
+        'RECEIVER_CONTACT_ID': relationshipObj.landlord_alias_email,
+
+        'TEXT': message,
+        'BUILDING_ID': building.building_id,
+        'BUILDING_ADDRESS': building.building_address,
+      })
+      res(corporateEmployee)
+    })
+    .catch((err) => {
+      console.log(err)
+      rej(err)
+    })
+  })
+  return p
+}
+
 // POST /email_relationship
 exports.email_relationship = (req, res, next) => {
   console.log('email_relationship')
