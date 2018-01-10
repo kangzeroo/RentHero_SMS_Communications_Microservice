@@ -29,6 +29,7 @@ module.exports = function(app){
 	// app.post('/use-sms', twilio.webhook({ validate: false }), Test.sms)
 
 	app.post('/initial_inquiry', [originCheck, json_encoding], InquiryRoutes.initial_inquiry)
+	app.post('/initial_corporate_inquiry', [originCheck, json_encoding], InquiryRoutes.initial_corporate_inquiry)
 	app.post('/message_proof', [originCheck, json_encoding], InquiryRoutes.message_proof)
 	// app.post('/send_landlord_message', json_encoding, SMSRoutes.sendLandlordMessageFromTenant)
 
@@ -41,6 +42,7 @@ module.exports = function(app){
 	app.post('/send_message_to_phones', [originCheck, twilio.webhook({ validate: false })], MassSMSRoutes.send_message_to_phones)
 	app.post('/send_message_to_phone', [originCheck, twilio.webhook({ validate: false })], MassSMSRoutes.send_message_to_phone)
 	app.post('/receive_message_from_phone', [originCheck, twilio.webhook({ validate: false })], MassSMSRoutes.receive_message_from_phone)
+	app.post('/send_tenant_wait_msg', [originCheck, twilio.webhook({ validate: false })], MassSMSRoutes.send_tenant_wait_msg)
 
 
 	app.post('/send_group_invitation_sms', [originCheck, twilio.webhook({ validate: false })], SMSRoutes.send_group_invitation_sms)

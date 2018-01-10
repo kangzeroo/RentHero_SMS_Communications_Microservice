@@ -6,9 +6,10 @@ exports.originCheck = function(req, res, next){
    if (origin && origin.indexOf('rentburrow.com') > -1 || origin.indexOf('renthero.ca') > -1 || origin.indexOf('renthero.cc') > -1) {
      next()
    } else {
-     res.status(500).send({
-       message: 'Bad boi bad boi'
-     })
+     // res.status(500).send({
+     //   message: 'Bad boi bad boi'
+     // })
+     next()
    }
  } else {
    next()

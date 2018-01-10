@@ -3,7 +3,7 @@ const notifyServicesSid = process.env.NOTIFY_SERVICE_ID
 const formattedPhoneNumber = require('../api/general_api').formattedPhoneNumber
 const shortid = require('shortid')
 const get_tenant_id_from_phone = require('./LeasingDB/Queries/TenantQueries').get_tenant_id_from_phone
-
+const generateInitialEmail = require('../api/ses_api').generateInitialEmail
 const insertCommunicationsLog = require('../message_logs/dynamodb_api').insertCommunicationsLog
 
 
@@ -115,6 +115,47 @@ exports.receive_message_from_phone = function(req, res, next) {
       })
     }
   })
+}
+
+exports.send_tenant_wait_msg = function(req, res, next) {
+  const info = req.body
+  const tenant = info.tenant
+  const building = info.building
+  const message = `Hello ${tenant.first_name}, an agent will contact you shortly regarding your inquiry for ${building.building_alias}. -- The Renthero Team`
+
+  twilio_client.notify.services(notifyServicesSid).notifications.create({
+    toBinding: JSON.stringify({ binding_type: 'sms', address: formattedPhoneNumber(tenant.phone), }),
+    body: message,
+  })
+  .then((notification) => {
+    const landlordMsg = `https://renthero.cc/inquiries/${info.inquiry_id}`
+    return generateInitialEmail([info.corporation_email], 'support@renthero.cc', tenant, landlordMsg, building, 'landlord')
+  })
+  .then((notification) => {
+    insertCommunicationsLog({
+      'ACTION': 'RENTHERO_SMS',
+      'DATE': new Date().getTime(),
+      'COMMUNICATION_ID': shortid.generate(),
+
+      'SENDER_ID': 'RentHeroSMS',
+      'SENDER_CONTACT_ID': 'RentHeroSMS',
+      'RECEIVER_CONTACT_ID': tenant.phone,
+      'RECEIVER_ID': tenant.tenant_id,
+      'PROXY_CONTACT_ID': 'RENTHERO SMS',
+      'TEXT': message,
+    })
+    res.json({
+      message: 'SMS sent',
+    //  notification_id: notification.id,
+    })
+  })
+  .catch(error => {
+    console.log(error)
+    res.status(500).send('Error occurred sending SMS notification')
+  })
+
+
+
 }
 
 // SmsSid=SM8884665161e8ab18b988fd4e7f3945d3
