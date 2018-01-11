@@ -50,7 +50,6 @@ module.exports = function(app){
 	app.post('/insert_tenant_landlord_sms', [json_encoding, originCheck], SMS_RDS_Queries.insert_tenant_landlord_sms)
 
 	app.post('/sms', [twilio.webhook({ validate: false })], SMSRoutes.sms_forwarder)
-	app.post('/stickysms', [twilio.webhook({ validate: false })], SMSRoutes.stickysms)
 	app.post('/fallback', [twilio.webhook({ validate: false })], SMSRoutes.fallback)
 	app.post('/speechtotext', [twilio.webhook({ validate: false })], SMSRoutes.speechtotext)
 

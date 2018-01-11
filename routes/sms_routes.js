@@ -540,29 +540,6 @@ exports.voice = function(req, res, next) {
     })
 }
 
-exports.stickysms = function(req, res, next) {
-  const accountSid = 'AC3cfc4b5a78368f2cdb70baf2c945aee7';
-  const authToken = 'fcba843d429e6b0f859075c7e413a99b';
-
-  const client = require('twilio')(accountSid, authToken);
-  // const service = client.messaging.services('MG7b2fbcc0003b6a821cc6e8f862e6b6e6');
-  //
-  // service.phoneNumbers.list()
-  //        .then(function(response) {
-  //          console.log(response);
-  //        }).catch(function(error) {
-  //          console.log(error);
-  //        });
-
-  client.messages.create({
-    messagingServiceSid: 'MG7b2fbcc0003b6a821cc6e8f862e6b6e6',
-    to: '+16475286355',
-    body: 'Hello World'
-  })
-  .then((message) => console.log(message))
-
-}
-
 exports.listener = function(req, res, next ) {
   const info = req.body
 
