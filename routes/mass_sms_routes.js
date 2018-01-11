@@ -4,6 +4,7 @@ const formattedPhoneNumber = require('../api/general_api').formattedPhoneNumber
 const shortid = require('shortid')
 const get_tenant_id_from_phone = require('./LeasingDB/Queries/TenantQueries').get_tenant_id_from_phone
 const generateInitialEmail = require('../api/ses_api').generateInitialEmail
+const generateInitialCorporateEmail = require('../api/corporate_landlord_api').generateInitialCorporateEmail
 const insertCommunicationsLog = require('../message_logs/dynamodb_api').insertCommunicationsLog
 
 
@@ -129,7 +130,7 @@ exports.send_tenant_wait_msg = function(req, res, next) {
   })
   .then((notification) => {
     const landlordMsg = `https://renthero.cc/inquiries/${info.inquiry_id}`
-    return generateInitialEmail([info.corporation_email], 'support@renthero.cc', tenant, landlordMsg, building, 'landlord')
+    return generateInitialCorporateEmail([info.corporation_email], 'support@renthero.cc', tenant, landlordMsg, building, 'landlord')
   })
   .then((notification) => {
     insertCommunicationsLog({
