@@ -28,17 +28,10 @@ const port = process.env.PORT || 3006
 // Server setup
 // if there is an environment variable of PORT already defined, use it. otherwise use port 3002
 if (process.env.NODE_ENV === 'production') {
-  // const options = {
-  //     ca: fs.readFileSync('./credentials/rentburrow_com.ca-bundle'),
-  //     key: fs.readFileSync('./credentials/rentburrow_com.key'),
-  //     cert: fs.readFileSync('./credentials/rentburrow_com.crt'),
-  //     requestCert: false,
-  //     rejectUnauthorized: false
-  // }
   const options = {
-      ca: fs.readFileSync('./credentials/renthero_host.ca-bundle'),
-      key: fs.readFileSync('./credentials/renthero_host.key'),
-      cert: fs.readFileSync('./credentials/renthero_host.crt'),
+      ca: fs.readFileSync('./credentials/rentburrow_com.ca-bundle'),
+      key: fs.readFileSync('./credentials/rentburrow_com.key'),
+      cert: fs.readFileSync('./credentials/rentburrow_com.crt'),
       requestCert: false,
       rejectUnauthorized: false
   }
@@ -53,17 +46,10 @@ if (process.env.NODE_ENV === 'production') {
     console.log("Server listening on http: ", port)
   })
 } else {
-  // const options = {
-  //     ca: fs.readFileSync('./credentials/renthero_host.ca-bundle'),
-  //     key: fs.readFileSync('./credentials/renthero_host.key'),
-  //     cert: fs.readFileSync('./credentials/renthero_host.crt'),
-  //     requestCert: false,
-  //     rejectUnauthorized: false
-  // }
   const options = {
-      ca: fs.readFileSync('./credentials/rentburrow_com.ca-bundle'),
-      key: fs.readFileSync('./credentials/rentburrow_com.key'),
-      cert: fs.readFileSync('./credentials/rentburrow_com.crt'),
+      ca: fs.readFileSync('./credentials/renthero_host.ca-bundle'),
+      key: fs.readFileSync('./credentials/renthero_host.key'),
+      cert: fs.readFileSync('./credentials/renthero_host.crt'),
       requestCert: false,
       rejectUnauthorized: false
   }
