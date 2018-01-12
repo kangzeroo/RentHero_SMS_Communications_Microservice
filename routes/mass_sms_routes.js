@@ -130,7 +130,7 @@ exports.send_tenant_wait_msg = function(req, res, next) {
   })
   .then((notification) => {
     const landlordMsg = `https://renthero.cc/inquiries/${info.inquiry_id}`
-    return generateInitialCorporateEmail([info.corporation_email], 'support@renthero.cc', tenant, landlordMsg, building, 'landlord')
+    return generateInitialCorporateEmail([info.corporation_email], 'inquiries@renthero.cc', tenant, info.group_notes, landlordMsg, building, 'landlord')
   })
   .then((notification) => {
     insertCommunicationsLog({
