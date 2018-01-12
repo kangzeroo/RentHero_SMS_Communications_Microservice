@@ -430,7 +430,7 @@ const buyNewTwilioNumber = () => {
     purchasedTwilioNumber = number.phoneNumber
     return twilio_client.incomingPhoneNumbers.create({
       phoneNumber: number.phoneNumber,
-      voiceUrl: 'https://f4cf5498.ngrok.io/use-voice',
+      voiceUrl: 'https://rentburrow.com:3006/use-voice',
     })
   })
   .then((purchasedNumber) => {
