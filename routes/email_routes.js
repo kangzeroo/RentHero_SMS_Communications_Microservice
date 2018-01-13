@@ -277,6 +277,14 @@ exports.save_email_communications_log = (req, res, next) => {
     'DATE': new Date().getTime(),
     'COMMUNICATION_ID': shortid.generate(),
     'MEDIUM': 'EMAIL',
+
+    'TENANT_ID': req.body.tenant_id,
+    // 'TENANT_NAME': `${tenant.first_name} ${tenant.last_name}`,
+    'TENANT_EMAIL': req.body.tenant_email,
+    'LANDLORD_ID': req.body.landlord_id,
+    // 'LANDLORD_NAME': corporateEmployee.corporation_name,
+    'LANDLORD_EMAIL': req.body.landlord_email,
+
     'PROXY_CONTACT_ID': proxyEmailAddress,
     'SENDER_ID': sender_id,
     'RECEIVER_ID': receiver_id,

@@ -71,6 +71,13 @@ exports.reference_items = [
       'RECEIVER_CONTACT_ID': '+14556485767',
 
       'TEXT': 'Yes there is availability...',
+
+      'TENANT_ID': 'data.tenant_id',
+      'TENANT_NAME': '[data.first_name, data.last_name]',
+      'TENANT_PHONE': 'data.tenant_phone',
+      'LANDLORD_ID': 'data.landlord_id',
+      'LANDLORD_NAME': 'landlordData.corporation_name',
+      'LANDLORD_PHONE': 'data.landlord_phone',
     }
   },
   {
