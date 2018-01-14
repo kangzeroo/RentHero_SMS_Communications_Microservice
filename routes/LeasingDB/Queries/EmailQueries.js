@@ -25,8 +25,8 @@ exports.get_email_forwarding_relationship = (sender_actual_email, receiver_alias
 
   const get_relationship = `SELECT *
                               FROM email_map
-                             WHERE (tenant_email = $1 AND landlord_alias_email = $2)
-                                OR (landlord_email = $1 AND tenant_alias_email = $2)
+                             WHERE (LOWER(tenant_email) = $1 AND LOWER(landlord_alias_email) = $2)
+                                OR (LOWER(landlord_email) = $1 AND LOWER(tenant_alias_email) = $2)
                             `
 
     const return_rows = (rows) => {
