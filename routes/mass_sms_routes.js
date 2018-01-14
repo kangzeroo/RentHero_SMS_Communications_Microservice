@@ -115,6 +115,14 @@ exports.receive_message_from_phone = function(req, res, next) {
         'TEXT': info.Body,
       })
     }
+    res.json({
+      message: 'success'
+    })
+  }).catch((err) => {
+    console.log(err)
+    res.status(500).send({
+      message: 'error'
+    })
   })
 }
 
