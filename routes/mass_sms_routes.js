@@ -30,8 +30,8 @@ exports.send_message_to_phones = function(req, res, next) {
 
         'SENDER_ID': 'RentHeroSMS',
         'SENDER_CONTACT_ID': 'RentHeroSMS',
-        'RECEIVER_CONTACT_ID': user.phone,
-        'RECEIVER_ID': user.tenant_id,
+        'RECEIVER_CONTACT_ID': user.phone || 'NONE',
+        'RECEIVER_ID': user.tenant_id || 'NONE',
         'PROXY_CONTACT_ID': 'RENTHERO_INITIAL',
         'TEXT': message,
       })
@@ -64,9 +64,9 @@ exports.send_message_to_phone = function(req, res, next) {
 
       'SENDER_ID': 'RentHeroSMS',
       'SENDER_CONTACT_ID': 'RentHeroSMS',
-      'RECEIVER_CONTACT_ID': recipient.phone,
-      'RECEIVER_ID': recipient.tenant_id,
-      'PROXY_CONTACT_ID': recipient.proxy_contact_id,
+      'RECEIVER_CONTACT_ID': recipient.phone || 'NONE',
+      'RECEIVER_ID': recipient.tenant_id || 'NONE',
+      'PROXY_CONTACT_ID': recipient.proxy_contact_id || 'NONE',
       'TEXT': message,
     })
     res.json({
@@ -94,12 +94,12 @@ exports.receive_message_from_phone = function(req, res, next) {
         'DATE': new Date().getTime(),
         'COMMUNICATION_ID': shortid.generate(),
 
-        'SENDER_CONTACT_ID': info.From,
-        'SENDER_ID': data.tenant_id,
+        'SENDER_CONTACT_ID': info.From || 'NONE',
+        'SENDER_ID': data.tenant_id || 'NONE',
         'RECEIVER_CONTACT_ID': 'RentHeroSMS',
-        'RECEIVER_ID': 'RentHeroSMS',
-        'PROXY_CONTACT_ID': info.To,
-        'TEXT': info.Body,
+        'RECEIVER_ID': 'RentHeroSMS' || 'NONE',
+        'PROXY_CONTACT_ID': info.To || 'NONE',
+        'TEXT': info.Body || 'NONE',
       })
     } else {
       insertCommunicationsLog({
@@ -107,12 +107,12 @@ exports.receive_message_from_phone = function(req, res, next) {
         'DATE': new Date().getTime(),
         'COMMUNICATION_ID': shortid.generate(),
 
-        'SENDER_CONTACT_ID': info.From,
+        'SENDER_CONTACT_ID': info.From || 'NONE',
         'SENDER_ID': 'NOT_A_TENANT',
         'RECEIVER_CONTACT_ID': 'RentHeroSMS',
         'RECEIVER_ID': 'RentHeroSMS',
-        'PROXY_CONTACT_ID': info.To,
-        'TEXT': info.Body,
+        'PROXY_CONTACT_ID': info.To || 'NONE',
+        'TEXT': info.Body || 'NONE',
       })
     }
     res.json({
@@ -148,8 +148,8 @@ exports.send_tenant_wait_msg = function(req, res, next) {
 
       'SENDER_ID': 'RentHeroSMS',
       'SENDER_CONTACT_ID': 'RentHeroSMS',
-      'RECEIVER_CONTACT_ID': tenant.phone,
-      'RECEIVER_ID': tenant.tenant_id,
+      'RECEIVER_CONTACT_ID': tenant.phone || 'NONE',
+      'RECEIVER_ID': tenant.tenant_id || 'NONE',
       'PROXY_CONTACT_ID': 'RENTHERO SMS',
       'TEXT': message,
     })
