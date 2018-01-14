@@ -2,7 +2,7 @@
 exports.generateInitialMessageBody_Tenant = function(info, landlord_name, message_id){
   const p = new Promise((res, rej) => {
     res(`
-      Hello ${info.first_name}, this is ${landlord_name}, the landlord of ${info.building_address}. Text or call me directly here.
+      Hello ${info.first_name}, this is ${landlord_name}, the landlord of ${info.building_address}. You can text or call me directly here.
       [ VERIFIED RENTHERO MESSAGE: RentHero.cc/m/${message_id} ]
     `)
   })
@@ -13,7 +13,7 @@ exports.generateInitialMessageBody_Tenant = function(info, landlord_name, messag
 exports.generateInitialMessageBody_Landlord = function(info, landlord_name, message_id){
   const p = new Promise((res, rej) => {
     res(`
-      ${`${info.group_notes}. `}My name is ${`${info.first_name} ${info.last_name ?  info.last_name : ''}`} and I saw your property ${info.building_address} on RentHero.ca. ${info.group_size === 1 ? 'I have a solo group' : `I have a group of ${info.group_size} roommates`}. Please can text or call me back directly here.
+      My name is ${`${info.first_name} ${info.last_name ?  info.last_name : ''}`} and I saw your property ${info.building_address} on RentHero.ca. ${info.group_size === 1 ? 'I have a solo group' : `I have a group of ${info.group_size} roommates`}. Student Notes: "${`${info.group_notes}.`}" Please text or call me back directly here.
       [ VERIFIED RENTHERO MESSAGE: RentHero.cc/m/${message_id} ]
     `)
   })
