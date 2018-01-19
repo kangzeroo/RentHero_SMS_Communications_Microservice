@@ -23,17 +23,25 @@ exports.send_message_to_phones = function(req, res, next) {
   .then((notification) => {
     console.log(info.users)
     info.users.forEach((user) => {
+      let message_id = shortid.generate()
+      let full_message = `
+        ${message}
+        [ VERIFIED RENTHERO MESSAGE: RentHero.cc/m/${message_id} ]
+      `
       insertCommunicationsLog({
         'ACTION': 'RENTHERO_SMS',
         'DATE': new Date().getTime(),
-        'COMMUNICATION_ID': shortid.generate(),
+        'COMMUNICATION_ID': message_id,
 
         'SENDER_ID': 'RentHeroSMS',
         'SENDER_CONTACT_ID': 'RentHeroSMS',
         'RECEIVER_CONTACT_ID': user.phone || 'NONE',
         'RECEIVER_ID': user.tenant_id || 'NONE',
         'PROXY_CONTACT_ID': 'RENTHERO_INITIAL',
-        'TEXT': message,
+        'TEXT': full_message,
+
+        'TENANT_ID': user.tenant_id,
+        'LANDLORD_ID': 'RentHeroSMS',
       })
     })
     res.json({
@@ -57,17 +65,25 @@ exports.send_message_to_phone = function(req, res, next) {
     body: message,
   })
   .then((notification) => {
+    let message_id = shortid.generate()
+    const full_message = `
+      ${message}
+      [ VERIFIED RENTHERO MESSAGE: RentHero.cc/m/${message_id} ]
+    `
     insertCommunicationsLog({
       'ACTION': 'RENTHERO_SMS',
       'DATE': new Date().getTime(),
-      'COMMUNICATION_ID': shortid.generate(),
+      'COMMUNICATION_ID': message_id,
 
       'SENDER_ID': 'RentHeroSMS',
       'SENDER_CONTACT_ID': 'RentHeroSMS',
       'RECEIVER_CONTACT_ID': recipient.phone || 'NONE',
       'RECEIVER_ID': recipient.tenant_id || 'NONE',
       'PROXY_CONTACT_ID': recipient.proxy_contact_id || 'NONE',
-      'TEXT': message,
+      'TEXT': full_message,
+
+      'TENANT_ID': recipient.tenant_id,
+      'LANDLORD_ID': 'RentHeroSMS',
     })
     res.json({
       message: 'SMS sent',
@@ -100,6 +116,9 @@ exports.receive_message_from_phone = function(req, res, next) {
         'RECEIVER_ID': 'RentHeroSMS' || 'NONE',
         'PROXY_CONTACT_ID': info.To || 'NONE',
         'TEXT': info.Body || 'NONE',
+
+        'TENANT_ID': data.tenant_id,
+        'LANDLORD_ID': 'RentHeroSMS',
       })
     } else {
       insertCommunicationsLog({
@@ -113,6 +132,9 @@ exports.receive_message_from_phone = function(req, res, next) {
         'RECEIVER_ID': 'RentHeroSMS',
         'PROXY_CONTACT_ID': info.To || 'NONE',
         'TEXT': info.Body || 'NONE',
+
+        'TENANT_ID': 'NOT_A_TENANT',
+        'LANDLORD_ID': 'RentHeroSMS',
       })
     }
     res.json({
@@ -130,10 +152,14 @@ exports.send_tenant_wait_msg = function(req, res, next) {
   const info = req.body
   const tenant = info.tenant
   const building = info.building
-  const message = `Hello ${tenant.first_name}, an agent will contact you shortly regarding your inquiry for ${building.building_alias}. -- The Renthero Team`
+  const message_id = shortid.generate()
+  const message = `
+    Hello ${tenant.first_name}, an agent of the landlord will contact you shortly regarding your inquiry for ${building.building_alias}. -- The Renthero Team
+    [ VERIFIED RENTHERO MESSAGE: RentHero.cc/m/${message_id} ]
+  `
 
   twilio_client.notify.services(notifyServicesSid).notifications.create({
-    toBinding: JSON.stringify({ binding_type: 'sms', address: formattedPhoneNumber(tenant.phone), }),
+    toBinding: JSON.stringify({ binding_type: 'sms', address: formattedPhoneNumber(tenant.phone) }),
     body: message,
   })
   .then((notification) => {
@@ -144,7 +170,7 @@ exports.send_tenant_wait_msg = function(req, res, next) {
     insertCommunicationsLog({
       'ACTION': 'RENTHERO_SMS',
       'DATE': new Date().getTime(),
-      'COMMUNICATION_ID': shortid.generate(),
+      'COMMUNICATION_ID': message_id,
 
       'SENDER_ID': 'RentHeroSMS',
       'SENDER_CONTACT_ID': 'RentHeroSMS',
@@ -152,6 +178,8 @@ exports.send_tenant_wait_msg = function(req, res, next) {
       'RECEIVER_ID': tenant.tenant_id || 'NONE',
       'PROXY_CONTACT_ID': 'RENTHERO SMS',
       'TEXT': message,
+
+      'LANDLORD_NAME': building.building_alias,
     })
     res.json({
       message: 'SMS sent',
