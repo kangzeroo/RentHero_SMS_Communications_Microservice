@@ -172,12 +172,13 @@ exports.send_tenant_wait_msg = function(req, res, next) {
       'DATE': new Date().getTime(),
       'COMMUNICATION_ID': message_id,
 
-      'SENDER_ID': 'RentHeroSMS',
+      'SENDER_ID': info.corporation_id,
       'SENDER_CONTACT_ID': 'RentHeroSMS',
       'RECEIVER_CONTACT_ID': tenant.phone || 'NONE',
       'RECEIVER_ID': tenant.tenant_id || 'NONE',
       'PROXY_CONTACT_ID': 'RENTHERO SMS',
       'TEXT': message,
+      'INQUIRY_ID': info.inquiry_id,
 
       'LANDLORD_NAME': building.building_alias,
     })
