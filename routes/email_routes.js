@@ -6,6 +6,7 @@ const get_email_forwarding_relationship = require('./LeasingDB/Queries/EmailQuer
 const insert_email_relationship = require('./LeasingDB/Queries/EmailQueries').insert_email_relationship
 const get_landlord_info = require('./PropertyDB/Queries/LandlordQuery').get_landlord_info
 const generateTenantAliasEmail = require('../api/generate_alias_emails').generateTenantAliasEmail
+const updateLandlordLastActive = require('../api/corporate_landlord_api').updateLandlordLastActive
 
 
 exports.send_initial_email = (info) => {
@@ -271,6 +272,10 @@ exports.save_email_communications_log = (req, res, next) => {
   const sender_email = req.body.sender_email
   const receiver_email = req.body.receiver_email
   const message = req.body.message
+
+  if (req.body.landlord_id === sender_id) {
+    updateLandlordLastActive(req.body.landlord_id)
+  }
 
   insertCommunicationsLog({
     'ACTION': 'FORWARDED_MESSAGE',

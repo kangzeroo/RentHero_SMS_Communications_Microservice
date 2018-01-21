@@ -5,7 +5,6 @@ const fs = require('fs')
 const morgan = require('morgan')
 const router = require('./router')
 const cors = require('cors')
-
 const app = express()
 require('./twilio_setup')
 
@@ -39,11 +38,6 @@ if (process.env.NODE_ENV === 'production') {
   // listen to the server on port
   server.listen(port, function(){
     console.log("Server listening on https: ", port)
-  })
-} else if (process.env.NODE_ENV === 'twilio') {
-  const server = http.createServer(app)
-  server.listen(port, function(){
-    console.log("Server listening on http: ", port)
   })
 } else {
   const options = {
