@@ -4,6 +4,14 @@ const AWS = require('aws-sdk/global')
 const ses = new AWS_SES({
   region: 'us-east-1'
 })
+const axios = require('axios')
+
+let LANDLORD_RESPONSIVENESS_MICROSERVICE = 'https://renthero.host:3009'
+if (process.env.NODE_ENV === 'production') {
+  LANDLORD_RESPONSIVENESS_MICROSERVICE = 'https://rentburrow.com:3009'
+} else {
+  LANDLORD_RESPONSIVENESS_MICROSERVICE = 'https://renthero.host:3009'
+}
 
 exports.generateInitialCorporateEmail = function(toEmailAddresses, proxyFromEmailAddress, tenant, tenantMessage, landlordMessage, building, tenantOrLandlord){
   /*
@@ -120,4 +128,19 @@ function generateHTMLInquiryEmail_Landlord(tenant, tenantMessage, landlordMessag
 		  </body>
 		</html>
 	`
+}
+
+exports.updateLandlordLastActive = function(landlord_id) {
+  console.log(`updateLandlordLastActive: ${landlord_id}`)
+  console.log(`${LANDLORD_RESPONSIVENESS_MICROSERVICE}/update_last_active`)
+  const p = new Promise((res, rej) => {
+    axios.post(`${LANDLORD_RESPONSIVENESS_MICROSERVICE}/update_last_active`, { landlord_id: landlord_id })
+      .then((data) => {
+        res(data.data)
+      })
+      .catch((err) => {
+        rej(err)
+      })
+  })
+  return p
 }

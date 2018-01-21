@@ -8,6 +8,7 @@ const VoiceResponse = require('twilio').twiml.VoiceResponse;
 const shortenUrl = require('../api/general_api').shortenUrl
 const messagingServiceSid = process.env.MESSAGE_SERVICE_ID
 
+const updateLandlordLastActive = require('../api/corporate_landlord_api').updateLandlordLastActive
 const gatherOutgoingNumber = require('../api/sms_routing').gatherOutgoingNumber
 const getLandlordInfo = require('./PropertyDB/Queries/LandlordQuery').get_landlord_info
 const get_landlord_from_id = require('./PropertyDB/Queries/LandlordQuery').get_landlord_from_id
@@ -470,6 +471,10 @@ exports.sms_forwarder = function(req, res, next) {
       console.log(data)
       const sender_id = getAppropriateId(data, original_from)
       const receiver_id = getAppropriateId(data, original_to)
+
+      if (data.landlord_id === sender_id) {
+        updateLandlordLastActive(data.landlord_id)
+      }
       // log from, to, body, outgoingPhoneNumber
       get_landlord_from_id(data.landlord_id)
       .then((landlordData) => {
