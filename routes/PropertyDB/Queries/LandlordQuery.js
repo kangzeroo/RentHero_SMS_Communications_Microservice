@@ -23,7 +23,7 @@ const log_through = data => {
 exports.get_landlord_info = (building_id) => {
   const values = [building_id]
 
-  const get_landlord = `SELECT a.corporation_id, b.corporation_name, b.phone, b.thumbnail, b.email,
+  const get_landlord = `SELECT a.corporation_id, b.corporation_name, b.phone, b.thumbnail, b.email, b.textable,
                                c.alias_email
                           FROM corporation_building a
                           INNER JOIN corporation b

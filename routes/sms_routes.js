@@ -41,6 +41,7 @@ exports.send_initial_sms = function(info) {
     let landlordId
     let landlordPhone = ''
     let landlordName = ''
+    let landlordTextable
     let totalServiceNumbers
     let serviceNumbers
     let twilioNumber
@@ -52,6 +53,7 @@ exports.send_initial_sms = function(info) {
       landlordId = landlord_details.corporation_id
       landlordPhone = formattedPhoneNumber(landlord_details.phone)
       landlordName = landlord_details.corporation_name
+      landlordTextable = landlord_details.textable
 
       const service = twilio_client.messaging.services(messagingServiceSid)
       return service.phoneNumbers.list()
@@ -71,7 +73,7 @@ exports.send_initial_sms = function(info) {
         twilioNumber = data.twilio_phone
         return sendInitialSMSForExistingTenantLandlordPair(
           info,
-          { landlordId: landlordId, landlordName: landlordName, landlordPhone: landlordPhone },
+          { landlordId: landlordId, landlordName: landlordName, landlordPhone: landlordPhone, textable: landlordTextable, },
           { tenantId: tenantId, tenantPhone: tenantPhone },
           data.twilio_phone
         )
@@ -93,7 +95,7 @@ exports.send_initial_sms = function(info) {
                           // log bought a new number: purchasedTwilioNumber for mapping tenantPhone and landlordPhone
                           return sendInitialSMSToTenantAndLandlord(
                             info,
-                            { landlordId: landlordId, landlordName: landlordName, landlordPhone: landlordPhone },
+                            { landlordId: landlordId, landlordName: landlordName, landlordPhone: landlordPhone, textable: landlordTextable, },
                             { tenantId: tenantId, tenantPhone: tenantPhone },
                             purchasedTwilioNumber
                           )
@@ -111,7 +113,7 @@ exports.send_initial_sms = function(info) {
                       twilioNumber = selected_twilio_number
                       return sendInitialSMSToTenantAndLandlord(
                         info,
-                        { landlordId: landlordId, landlordName: landlordName, landlordPhone: landlordPhone },
+                        { landlordId: landlordId, landlordName: landlordName, landlordPhone: landlordPhone, textable: landlordTextable, },
                         { tenantId: tenantId, tenantPhone: tenantPhone },
                         selected_twilio_number
                       )
@@ -241,7 +243,7 @@ exports.send_initial_corporate_sms = function(info) {
 const sendInitialSMSForExistingTenantLandlordPair = (info, landlord, tenant, twilioPhone) => {
   const id1 = shortid.generate()
   const id2 = shortid.generate()
-  return generateInitialMessageBody_Tenant_ForExistingPair(info, landlord.landlordName, id1)
+  return generateInitialMessageBody_Tenant_ForExistingPair(info, landlord, id1)
     .then((tenantBody) => {
       // step 3B: send initial message to tenant
       insertCommunicationsLog({
@@ -281,7 +283,7 @@ const sendInitialSMSForExistingTenantLandlordPair = (info, landlord, tenant, twi
     })
     .then(() => {
       // generate initial message to landlord
-      return generateInitialMessageBody_Landlord_ForExistingPair(info, landlord.landlordName, id2)
+      return generateInitialMessageBody_Landlord_ForExistingPair(info, landlord, id2)
     })
     .then((landlordBody) => {
       // send initial message to landlord
@@ -331,7 +333,7 @@ const sendInitialSMSForExistingTenantLandlordPair = (info, landlord, tenant, twi
 const sendInitialSMSToTenantAndLandlord = (info, landlord, tenant, twilioPhone) => {
   const id1 = shortid.generate()
   const id2 = shortid.generate()
-  generateInitialMessageBody_Tenant(info, landlord.landlordName, id1)
+  generateInitialMessageBody_Tenant(info, landlord, id1)
   .then((tenantBody) => {
     // step 3B: send initial message to tenant
     insertCommunicationsLog({
@@ -371,7 +373,7 @@ const sendInitialSMSToTenantAndLandlord = (info, landlord, tenant, twilioPhone) 
   })
   .then(() => {
     // generate initial message to landlord
-    return generateInitialMessageBody_Landlord(info, landlord.landlordName, id2)
+    return generateInitialMessageBody_Landlord(info, landlord, id2)
   })
   .then((landlordBody) => {
     // send initial message to landlord
