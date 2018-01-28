@@ -96,6 +96,7 @@ exports.get_calls_from = function(req, res, next) {
         endTime: call.endTime,
         phoneNumberSid: call.phoneNumberSid,
         sid: call.sid,
+        status: call.status,
       }
     })
 
@@ -129,6 +130,7 @@ exports.get_calls_to = function(req, res, next) {
         endTime: call.endTime,
         phoneNumberSid: call.phoneNumberSid,
         sid: call.sid,
+        status: call.status,
       }
     })
 
@@ -162,6 +164,7 @@ exports.get_calls_from_to = function(req, res, next) {
         endTime: call.endTime,
         phoneNumberSid: call.phoneNumberSid,
         sid: call.sid,
+        status: call.status,
       }
     })
 
