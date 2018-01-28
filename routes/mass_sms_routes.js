@@ -44,6 +44,7 @@ exports.send_message_to_phones = function(req, res, next) {
         'LANDLORD_ID': 'RentHeroSMS',
       })
     })
+    res.type('application/json')
     res.json({
       message: 'SMS sent',
       notification_id: notification.id,
@@ -85,6 +86,7 @@ exports.send_message_to_phone = function(req, res, next) {
       'TENANT_ID': recipient.tenant_id,
       'LANDLORD_ID': 'RentHeroSMS',
     })
+    res.type('application/json')
     res.json({
       message: 'SMS sent',
       notification_id: notification.id,
@@ -137,8 +139,10 @@ exports.receive_message_from_phone = function(req, res, next) {
         'LANDLORD_ID': 'RentHeroSMS',
       })
     }
-    res.type('text/xml');
-    res.send('Success')
+    res.type('application/json');
+    res.json({
+      message: 'success'
+    })
   }).catch((err) => {
     console.log(err)
     res.status(500).send({
@@ -181,6 +185,7 @@ exports.send_tenant_wait_msg = function(req, res, next) {
 
       'LANDLORD_NAME': building.building_alias,
     })
+    res.type('application/json')
     res.json({
       message: 'SMS sent',
     //  notification_id: notification.id,
