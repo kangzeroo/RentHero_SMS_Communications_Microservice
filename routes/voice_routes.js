@@ -91,12 +91,12 @@ exports.get_recordings_for_given_call = function(req, res, next) {
   .then((data) => {
     const arrayOfPromises = data.map((recording) => {
       return {
-        callSid: data.callSid,
-        sid: data.sid,
-        dateCreated: data.dateCreated,
-        dateUpdated: data.dateUpdated,
-        price: data.price,
-        uri: data.uri
+        callSid: recording.callSid,
+        sid: recording.sid,
+        dateCreated: recording.dateCreated,
+        dateUpdated: recording.dateUpdated,
+        price: recording.price,
+        uri: recording.uri
       }
     })
 
