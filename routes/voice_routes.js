@@ -50,7 +50,9 @@ exports.get_all_calls = function(req, res, next) {
   twilio_client.calls.list()
   .then((data) => {
     console.log(data)
-    res.send(data)
+    res.json({
+      calls: data,
+    })
   })
 }
 
@@ -65,6 +67,8 @@ exports.get_recordings_for_given_call = function(req, res, next) {
   twilio_client.api.calls(info.call_id).recordings.list()
   .then((data) => {
     console.log(data)
-    res.send(data)
+    res.json({
+      recordings: data,
+    })
   })
 }
