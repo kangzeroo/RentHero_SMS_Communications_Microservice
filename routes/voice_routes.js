@@ -49,24 +49,28 @@ exports.voice = function(req, res, next) {
 exports.get_all_calls = function(req, res, next) {
   twilio_client.calls
   .list({ status: 'completed' })
-  .map((call) => {
-    return {
-      from: call.from,
-      to: call.to,
-      dateCreated: call.dateCreated,
-      dateUpdated: call.dateUpdated,
-      direction: call.direction,
-      duration: call.duration,
-      startTime: call.startTime,
-      endTime: call.endTime,
-      phoneNumberSid: call.phoneNumberSid,
-      sid: call.sid,
-    }
-  })
   .then((data) => {
-    console.log(data)
-    res.json({
-      calls: data,
+    const arrayOfPromises = data.map((call) => {
+      return {
+        from: call.from,
+        to: call.to,
+        dateCreated: call.dateCreated,
+        dateUpdated: call.dateUpdated,
+        direction: call.direction,
+        duration: call.duration,
+        startTime: call.startTime,
+        endTime: call.endTime,
+        phoneNumberSid: call.phoneNumberSid,
+        sid: call.sid,
+      }
+    })
+
+    Promise.all(arrayOfPromises)
+    .then((callData) => {
+      console.log(callData)
+      res.json({
+        calls: callData,
+      })
     })
   })
   .catch((err) => {
