@@ -521,37 +521,6 @@ exports.sms_forwarder = function(req, res, next) {
   }
 }
 
-exports.voice = function(req, res, next) {
-  console.log('/voice')
-
-  // const addons = json.loads(request.values['AddOns'])
-  // const speechtotext = addons['results']['ibm_watson_speechtotext']
-  //
-  // console.log(speechtotext)
-
-  let from = req.body.From
-  let to   = req.body.To
-  let body = req.body.Body
-
-   gatherOutgoingNumber(from, to)
-    .then((outgoingPhoneNumber) => {
-      console.log(outgoingPhoneNumber)
-       const voiceResponse = new VoiceResponse()
-       voiceResponse.say({
-         voice: 'alice',
-         language: 'en',
-       },
-        'this call may be recorded for quality and training purposes'
-       )
-       const dial = voiceResponse.dial({ callerId: to, record: 'record-from-answer' })
-       dial.number(outgoingPhoneNumber)
-
-       console.log(voiceResponse.toString())
-       res.type('text/xml')
-       res.send(voiceResponse.toString())
-    })
-}
-
 exports.listener = function(req, res, next ) {
   const info = req.body
 

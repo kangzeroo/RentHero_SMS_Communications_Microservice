@@ -8,7 +8,9 @@ const EmailRoutes = require('./routes/email_routes')
 const MassSMSRoutes = require('./routes/mass_sms_routes')
 const goodbyeSMSRoutes = require('./routes/goodbye_sms_routes')
 const SMS_RDS_Queries = require('./routes/LeasingDB/Queries/SMSQueries')
+const VoiceRoutes = require('./routes/voice_routes')
 const originCheck = require('./auth/originCheck').originCheck
+const corpOriginCheck = require('./auth/corpOriginCheck').corpOriginCheck
 
 // bodyParser attempts to parse any request into JSON format
 const json_encoding = bodyParser.json({type:'*/*'})
@@ -34,9 +36,11 @@ module.exports = function(app){
 	// app.post('/send_landlord_message', json_encoding, SMSRoutes.sendLandlordMessageFromTenant)
 
 	app.post('/use-sms', [twilio.webhook({ validate: false })], SMSRoutes.sms_forwarder)
-	app.post('/use-voice', [twilio.webhook({ validate: false })], SMSRoutes.voice)
 	app.post('/listener', [twilio.webhook({ validate: false })], SMSRoutes.listener)
 	app.post('/voice_to_text', [twilio.webhook({ validate: false })], SMSRoutes.voice_to_text)
+
+	app.post('/use-voice', [twilio.webhook({ validate: false })], VoiceRoutes.voice)
+	app.post('/get_all_calls', [corpOriginCheck, json_encoding], VoiceRoutes.get_all_calls)
 
 
 	app.post('/send_message_to_phones', [originCheck, twilio.webhook({ validate: false })], MassSMSRoutes.send_message_to_phones)
