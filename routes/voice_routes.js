@@ -47,10 +47,17 @@ exports.voice = function(req, res, next) {
 
 
 exports.get_all_calls = function(req, res, next) {
-  twilio_client.calls.each((call) => console.log(call))
+  console.log(twilio_client.calls.list())
+  res.send(twilio_client.calls.each((call) => call))
 }
 
 exports.get_all_recordings = function(req, res, next) {
   twilio_client.recordings.each(recording => console.log(recording))
   res.send(twilio_client.recordings)
+}
+
+
+exports.get_recordings_for_given_call = function(req, res, next) {
+  const info = req.body
+  twilio_client.api.calls(info.call_id).recordings.list()
 }

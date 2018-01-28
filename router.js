@@ -42,6 +42,7 @@ module.exports = function(app){
 	app.post('/use-voice', [twilio.webhook({ validate: false })], VoiceRoutes.voice)
 	app.post('/get_all_calls', [corpOriginCheck, json_encoding], VoiceRoutes.get_all_calls)
 	app.post('/get_all_recordings', [corpOriginCheck, json_encoding], VoiceRoutes.get_all_recordings)
+	app.post('/get_recordings_for_given_call', [corpOriginCheck, json_encoding], VoiceRoutes.get_recordings_for_given_call)
 
 
 	app.post('/send_message_to_phones', [originCheck, twilio.webhook({ validate: false })], MassSMSRoutes.send_message_to_phones)
