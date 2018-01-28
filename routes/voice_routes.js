@@ -62,6 +62,7 @@ exports.get_all_calls = function(req, res, next) {
         endTime: call.endTime,
         phoneNumberSid: call.phoneNumberSid,
         sid: call.sid,
+        status: call.status,
       }
     })
 
