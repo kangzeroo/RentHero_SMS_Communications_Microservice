@@ -145,7 +145,7 @@ exports.get_calls_to = function(req, res, next) {
   })
 }
 
-exports.get_call_from_to = function(req, res, next) {
+exports.get_calls_from_to = function(req, res, next) {
   const info = req.body
   twilio_client.calls
   .list({ from: info.from, to: info.to })
