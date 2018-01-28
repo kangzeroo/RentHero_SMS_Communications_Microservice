@@ -2,6 +2,7 @@ const twilio_client = require('../twilio_setup').generate_twilio_client();
 const notifyServicesSid = process.env.NOTIFY_SERVICE_ID
 const formattedPhoneNumber = require('../api/general_api').formattedPhoneNumber
 const MessagingResponse = require('twilio').twiml.MessagingResponse
+
 const shortid = require('shortid')
 const get_tenant_id_from_phone = require('./LeasingDB/Queries/TenantQueries').get_tenant_id_from_phone
 const generateInitialEmail = require('../api/ses_api').generateInitialEmail
@@ -45,11 +46,8 @@ exports.send_message_to_phones = function(req, res, next) {
         'LANDLORD_ID': 'RentHeroSMS',
       })
     })
-    res.type('application/json')
-    res.json({
-      message: 'SMS sent',
-      notification_id: notification.id,
-    })
+    res.type('text/xml')
+    res.send(twilio_client.toString())
   })
   .catch(error => {
     console.log(error)
@@ -87,11 +85,8 @@ exports.send_message_to_phone = function(req, res, next) {
       'TENANT_ID': recipient.tenant_id,
       'LANDLORD_ID': 'RentHeroSMS',
     })
-    res.type('application/json')
-    res.json({
-      message: 'SMS sent',
-      notification_id: notification.id,
-    })
+    res.type('text/xml')
+    res.send(twilio_client.toString())
   })
   .catch(error => {
     console.log(error)
@@ -141,7 +136,7 @@ exports.receive_message_from_phone = function(req, res, next) {
         'LANDLORD_ID': 'RentHeroSMS',
       })
     }
-    res.type('text/xml');
+    res.type('text/xml')
     res.send(resp.toString())
   }).catch((err) => {
     console.log(err)
@@ -185,11 +180,8 @@ exports.send_tenant_wait_msg = function(req, res, next) {
 
       'LANDLORD_NAME': building.building_alias,
     })
-    res.type('application/json')
-    res.json({
-      message: 'SMS sent',
-    //  notification_id: notification.id,
-    })
+    res.type('text/xml')
+    res.send(twilio_client.toString())
   })
   .catch(error => {
     console.log(error)
