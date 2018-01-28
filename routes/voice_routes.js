@@ -51,5 +51,5 @@ exports.get_all_calls = function(req, res, next) {
 }
 
 exports.get_all_recordings = function(req, res, next) {
-  res(twilio_client.recordings)
+  res.send(twilio_client.recordings)
 }
