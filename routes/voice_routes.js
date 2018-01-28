@@ -193,7 +193,8 @@ exports.get_recordings_for_given_call = function(req, res, next) {
         dateCreated: recording.dateCreated,
         dateUpdated: recording.dateUpdated,
         price: recording.price,
-        uri: recording.uri
+        uri: recording.uri,
+        duration: recording.duration,
       }
     })
 

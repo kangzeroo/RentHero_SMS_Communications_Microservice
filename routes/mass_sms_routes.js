@@ -120,9 +120,6 @@ exports.receive_message_from_phone = function(req, res, next) {
         'TENANT_ID': data.tenant_id,
         'LANDLORD_ID': 'RentHeroSMS',
       })
-      res.json({
-        message: 'success'
-      })
     } else {
       insertCommunicationsLog({
         'ACTION': 'RENTHERO_SMS',
@@ -139,10 +136,9 @@ exports.receive_message_from_phone = function(req, res, next) {
         'TENANT_ID': 'NOT_A_TENANT',
         'LANDLORD_ID': 'RentHeroSMS',
       })
-      res.json({
-        message: 'success'
-      })
     }
+    res.type('text/xml');
+    res.send('Success')
   }).catch((err) => {
     console.log(err)
     res.status(500).send({
