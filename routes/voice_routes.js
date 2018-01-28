@@ -79,11 +79,104 @@ exports.get_all_calls = function(req, res, next) {
   })
 }
 
-exports.get_all_recordings = function(req, res, next) {
-  twilio_client.recordings.each(recording => console.log(recording))
-  res.send(twilio_client.recordings)
+exports.get_calls_from = function(req, res, next) {
+  const info = req.body
+  twilio_client.calls
+  .list({ from: info.from })
+  .then((data) => {
+    const arrayOfPromises = data.map((call) => {
+      return {
+        from: call.from,
+        to: call.to,
+        dateCreated: call.dateCreated,
+        dateUpdated: call.dateUpdated,
+        direction: call.direction,
+        duration: call.duration,
+        startTime: call.startTime,
+        endTime: call.endTime,
+        phoneNumberSid: call.phoneNumberSid,
+        sid: call.sid,
+      }
+    })
+
+    Promise.all(arrayOfPromises)
+    .then((callData) => {
+      res.json({
+        calls: callData,
+      })
+    })
+  })
+  .catch((err) => {
+    console.log(err)
+    res.status(500).send('Failed to retrieve all calls')
+  })
 }
 
+exports.get_calls_to = function(req, res, next) {
+  const info = req.body
+  twilio_client.calls
+  .list({ to: info.to })
+  .then((data) => {
+    const arrayOfPromises = data.map((call) => {
+      return {
+        from: call.from,
+        to: call.to,
+        dateCreated: call.dateCreated,
+        dateUpdated: call.dateUpdated,
+        direction: call.direction,
+        duration: call.duration,
+        startTime: call.startTime,
+        endTime: call.endTime,
+        phoneNumberSid: call.phoneNumberSid,
+        sid: call.sid,
+      }
+    })
+
+    Promise.all(arrayOfPromises)
+    .then((callData) => {
+      res.json({
+        calls: callData,
+      })
+    })
+  })
+  .catch((err) => {
+    console.log(err)
+    res.status(500).send('Failed to retrieve all calls')
+  })
+}
+
+exports.get_call_from_to = function(req, res, next) {
+  const info = req.body
+  twilio_client.calls
+  .list({ from: info.from, to: info.to })
+  .then((data) => {
+    const arrayOfPromises = data.map((call) => {
+      return {
+        from: call.from,
+        to: call.to,
+        dateCreated: call.dateCreated,
+        dateUpdated: call.dateUpdated,
+        direction: call.direction,
+        duration: call.duration,
+        startTime: call.startTime,
+        endTime: call.endTime,
+        phoneNumberSid: call.phoneNumberSid,
+        sid: call.sid,
+      }
+    })
+
+    Promise.all(arrayOfPromises)
+    .then((callData) => {
+      res.json({
+        calls: callData,
+      })
+    })
+  })
+  .catch((err) => {
+    console.log(err)
+    res.status(500).send('Failed to retrieve all calls')
+  })
+}
 
 exports.get_recordings_for_given_call = function(req, res, next) {
   const info = req.body

@@ -41,7 +41,9 @@ module.exports = function(app){
 
 	app.post('/use-voice', [twilio.webhook({ validate: false })], VoiceRoutes.voice)
 	app.post('/get_all_calls', [corpOriginCheck, json_encoding], VoiceRoutes.get_all_calls)
-	app.post('/get_all_recordings', [corpOriginCheck, json_encoding], VoiceRoutes.get_all_recordings)
+	app.post('/get_calls_from', [corpOriginCheck, json_encoding], VoiceRoutes.get_calls_from)
+	app.post('/get_calls_to', [corpOriginCheck, json_encoding], VoiceRoutes.get_calls_to)
+	app.post('/get_calls_from_to', [corpOriginCheck, json_encoding], VoiceRoutes.get_calls_from_to)
 	app.post('/get_recordings_for_given_call', [corpOriginCheck, json_encoding], VoiceRoutes.get_recordings_for_given_call)
 
 

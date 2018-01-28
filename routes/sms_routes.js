@@ -200,7 +200,7 @@ exports.send_initial_corporate_sms = function(info) {
                           // log bought a new number: purchasedTwilioNumber for mapping tenantPhone and landlordPhone
                           return sendInitialSMSToTenantAndLandlord(
                             infoObj,
-                            { landlordId: landlordId, landlordName: landlordName, landlordPhone: landlordPhone },
+                            { landlordId: landlordId, landlordName: landlordName, landlordPhone: landlordPhone, textable: false, },
                             { tenantId: tenantId, tenantPhone: tenantPhone },
                             purchasedTwilioNumber
                           )
@@ -218,7 +218,7 @@ exports.send_initial_corporate_sms = function(info) {
                       twilioNumber = selected_twilio_number
                       return sendInitialSMSToTenantAndLandlord(
                         infoObj,
-                        { landlordId: landlordId, landlordName: landlordName, landlordPhone: landlordPhone },
+                        { landlordId: landlordId, landlordName: landlordName, landlordPhone: landlordPhone, textable: false, },
                         { tenantId: tenantId, tenantPhone: tenantPhone },
                         selected_twilio_number
                       )
