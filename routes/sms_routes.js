@@ -537,7 +537,7 @@ exports.voice = function(req, res, next) {
     .then((outgoingPhoneNumber) => {
       console.log(outgoingPhoneNumber)
        const voiceResponse = new VoiceResponse()
-       voiceResponse.Say({
+       voiceResponse.say({
          voice: 'alice',
          language: 'en',
        },
