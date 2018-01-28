@@ -89,9 +89,27 @@ exports.get_recordings_for_given_call = function(req, res, next) {
   const info = req.body
   twilio_client.api.calls(info.call_id).recordings.list()
   .then((data) => {
-    console.log(data)
-    res.json({
-      recordings: data,
+    const arrayOfPromises = data.map((recording) => {
+      return {
+        callSid: data.callSid,
+        sid: data.sid,
+        dateCreated: data.dateCreated,
+        dateUpdated: data.dateUpdated,
+        price: data.price,
+        uri: data.uri
+      }
     })
+
+    Promise.all(arrayOfPromises)
+    .then((recordingData) => {
+      console.log(recordingData)
+      res.json({
+        recordings: recordingData,
+      })
+    })
+  })
+  .catch((err) => {
+    console.log(err)
+    res.status(500).send('Failed to get recordings for call')
   })
 }
