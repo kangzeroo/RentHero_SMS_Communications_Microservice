@@ -1,6 +1,7 @@
 const twilio_client = require('../twilio_setup').generate_twilio_client();
 const notifyServicesSid = process.env.NOTIFY_SERVICE_ID
 const formattedPhoneNumber = require('../api/general_api').formattedPhoneNumber
+const MessagingResponse = require('twilio').twiml.MessagingResponse
 const shortid = require('shortid')
 const get_tenant_id_from_phone = require('./LeasingDB/Queries/TenantQueries').get_tenant_id_from_phone
 const generateInitialEmail = require('../api/ses_api').generateInitialEmail
@@ -102,6 +103,7 @@ exports.send_message_to_phone = function(req, res, next) {
 exports.receive_message_from_phone = function(req, res, next) {
   const info = req.body
   console.log(info)
+  const resp = new MessagingResponse()
 
   get_tenant_id_from_phone(info.From)
   .then((data) => {
@@ -139,10 +141,8 @@ exports.receive_message_from_phone = function(req, res, next) {
         'LANDLORD_ID': 'RentHeroSMS',
       })
     }
-    res.type('application/json');
-    res.json({
-      message: 'success'
-    })
+    res.type('text/xml');
+    res.send(resp.toString())
   }).catch((err) => {
     console.log(err)
     res.status(500).send({
