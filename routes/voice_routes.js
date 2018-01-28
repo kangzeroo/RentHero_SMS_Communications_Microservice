@@ -47,12 +47,16 @@ exports.voice = function(req, res, next) {
 
 
 exports.get_all_calls = function(req, res, next) {
-  twilio_client.calls.list()
+  twilio_client.calls.list({ status: 'completed' })
   .then((data) => {
     console.log(data)
     res.json({
       calls: data,
     })
+  })
+  .catch((err) => {
+    console.log(err)
+    res.status(500).send('Failed to retrieve all calls')
   })
 }
 
