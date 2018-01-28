@@ -537,7 +537,12 @@ exports.voice = function(req, res, next) {
     .then((outgoingPhoneNumber) => {
       console.log(outgoingPhoneNumber)
        const voiceResponse = new VoiceResponse()
-      // voiceResponse.play('http://howtodocs.s3.amazonaws.com/howdy-tng.mp3')
+       voiceResponse.Say({
+         voice: 'alice',
+         language: 'en',
+       },
+        'this call may be recorded for quality and training purposes'
+       )
        const dial = voiceResponse.dial({ callerId: to, record: 'record-from-answer' })
        dial.number(outgoingPhoneNumber)
 
