@@ -122,7 +122,7 @@ exports.get_most_recent_messages = function(request, resolve, next) {
         "#DATE": "DATE"
       },
       "ExpressionAttributeValues": {
-        ":date": unixDateSince(30)
+        ":date": unixDateSince(10)
       }
     }
     let Items = []

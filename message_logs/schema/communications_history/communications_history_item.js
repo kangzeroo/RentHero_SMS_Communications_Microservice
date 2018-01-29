@@ -115,6 +115,23 @@ exports.reference_items = [
 
       'TEXT': 'Hello Sarah, check out this link for recommendations',
       'RECOMMENDATION_DETAILS': '4 bed places with ensuite - 110 columbia with id...',
-    }
+    },
+    {
+      'TableName': COMMUNICATIONS_HISTORY,
+      'Item': {
+        'ACTION': 'RENTHERO_SMS',
+        'DATE': new Date().getTime(),
+        'COMMUNICATION_ID': 'uuid.v4()',
+
+        'SENDER_ID': 'RentHeroSMS',
+        'SENDER_CONTACT_ID': 'RentHeroSMS',
+        'RECEIVER_CONTACT_ID': 'user.phone' || 'NONE',
+        'RECEIVER_ID': 'user.tenant_id' || 'NONE',
+        'PROXY_CONTACT_ID': 'RENTHERO_INITIAL',
+        'TEXT': 'full_message',
+
+        'TENANT_ID': 'user.tenant_id',
+        'LANDLORD_ID': 'RentHeroSMS',
+      }
   }
 ]
