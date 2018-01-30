@@ -9,22 +9,27 @@ exports.gatherOutgoingNumber = function(incomingPhoneNumber, anonymousPhoneNumbe
    .then((data) => {
      console.log('==========SMS MATCH QUERIED =========')
      console.log(data)
-     const tenantPhoneNumber = data.tenant_phone
-     const landlordPhoneNumber = data.landlord_phone
+     if (data && data.tenant_phone) {
+       const tenantPhoneNumber = data.tenant_phone
+       const landlordPhoneNumber = data.landlord_phone
 
-     let outgoingPhoneNumber
+       let outgoingPhoneNumber
 
 
-     // Connect from tenant to landlord
-     if (tenantPhoneNumber === incomingPhoneNumber) {
-        outgoingPhoneNumber = landlordPhoneNumber
-      }
+       // Connect from tenant to landlord
+       if (tenantPhoneNumber === incomingPhoneNumber) {
+          outgoingPhoneNumber = landlordPhoneNumber
+        }
 
-      // Connext from landlord to tenant
-     if (landlordPhoneNumber === incomingPhoneNumber) {
-        outgoingPhoneNumber = tenantPhoneNumber
-      }
-      res(outgoingPhoneNumber)
+        // Connext from landlord to tenant
+       if (landlordPhoneNumber === incomingPhoneNumber) {
+          outgoingPhoneNumber = tenantPhoneNumber
+        }
+        res(outgoingPhoneNumber)
+     } else {
+       res('')
+     }
+
    })
   })
   return p
