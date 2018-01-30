@@ -40,6 +40,7 @@ module.exports = function(app){
 	app.post('/voice_to_text', [twilio.webhook({ validate: false })], SMSRoutes.voice_to_text)
 
 	app.post('/use-voice', [twilio.webhook({ validate: false })], VoiceRoutes.voice)
+	app.post('/voice_fallback', [twilio.webhook({ validate: false })], VoiceRoutes.voice_fallback)
 	app.post('/get_all_calls', [corpOriginCheck, json_encoding], VoiceRoutes.get_all_calls)
 	app.post('/get_calls_from', [corpOriginCheck, json_encoding], VoiceRoutes.get_calls_from)
 	app.post('/get_calls_to', [corpOriginCheck, json_encoding], VoiceRoutes.get_calls_to)
