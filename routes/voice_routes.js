@@ -77,15 +77,15 @@ exports.voice = function(req, res, next) {
               voice: 'alice',
               language: 'en',
             }, 'Your number has not been assigned.')
-            const gather = voiceResponse.gather({
-              input: 'speech dtmf',
-              timeout: 3,
-              numDigits: 1,
-            })
-            gather.say({
-              voice: 'alice',
-              language: 'en',
-            }, 'Your number is not mapped. Please select your group leader')
+            // const gather = voiceResponse.gather({
+            //   input: 'speech dtmf',
+            //   timeout: 3,
+            //   numDigits: 1,
+            // })
+            // gather.say({
+            //   voice: 'alice',
+            //   language: 'en',
+            // }, 'Your number is not mapped. Please select your group leader')
             // tenants.map((tenant, index) => {
             //   return (
             //     gather.say(`Press ${index + 1} for ${tenant}`)
