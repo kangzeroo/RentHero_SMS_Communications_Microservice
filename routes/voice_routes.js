@@ -49,23 +49,42 @@ exports.voice = function(req, res, next) {
         console.log('FALLBACK')
         get_landlords_twilio(to)
         .then((landlordData) => {
-          console.log(landlordData)
-          const voiceResponse = new VoiceResponse()
-          const tenants = landlordData.map(a => { return a.first_name + ' ' + a.last_name })
-          console.log(tenants)
-          const gather = voiceResponse.gather({
-            input: 'speech dtmf',
-            timeout: 3,
-            numDigits: landlordData.length,
+          if (landlordData) {
+            console.log(landlordData)
+            const voiceResponse = new VoiceResponse()
+            const tenants = landlordData.map(a => { return a.first_name + ' ' + a.last_name })
+            console.log(tenants)
+            const gather = voiceResponse.gather({
+              input: 'speech dtmf',
+              timeout: 3,
+              numDigits: landlordData.length,
 
-          })
-          gather.say('Your number is not mapped. Please select your group leader')
-          tenants.map((tenant, index) => {
-            return (
-              gather.say(`Press ${index + 1} for ${tenant}`)
+            })
+            gather.say('Your number is not mapped. Please select your group leader')
+            tenants.map((tenant, index) => {
+              return (
+                gather.say(`Press ${index + 1} for ${tenant}`)
 
-            )
-          })
+              )
+            })
+          } else {
+            const voiceResponse = new VoiceResponse()
+            const tenants = ['Jimmy Guo', 'Kangze Huang', 'Vincent Chiang']
+            console.log(tenants)
+            const gather = voiceResponse.gather({
+              input: 'speech dtmf',
+              timeout: 3,
+              numDigits: landlordData.length,
+
+            })
+            gather.say('Your number is not mapped. Please select your group leader')
+            tenants.map((tenant, index) => {
+              return (
+                gather.say(`Press ${index + 1} for ${tenant}`)
+
+              )
+            })
+          }
         })
       }
     })
