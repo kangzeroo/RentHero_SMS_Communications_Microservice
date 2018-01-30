@@ -46,6 +46,18 @@ exports.voice = function(req, res, next) {
 }
 
 
+exports.voice_fallback = function(req, res, next) {
+  const voiceResponse = new VoiceResponse()
+
+  const gather = voiceResponse.gather({
+    input: 'speech dtmf',
+    timeout: 3,
+    numDigits: 1,
+  })
+  gather.say('Please say the name of the property you are here to visit.')
+}
+
+
 exports.get_all_calls = function(req, res, next) {
   twilio_client.calls
   .list({ status: 'completed' })
