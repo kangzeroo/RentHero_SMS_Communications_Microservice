@@ -73,7 +73,7 @@ exports.voice = function(req, res, next) {
             const voiceResponse = new VoiceResponse()
             const tenants = ['Jimmy Guo', 'Kangze Huang', 'Vincent Chiang']
             console.log(tenants)
-            voiceResponse.say('')
+            voiceResponse.say('Your number has not been assigned.')
             const gather = voiceResponse.gather({
               input: 'speech dtmf',
               timeout: 3,
