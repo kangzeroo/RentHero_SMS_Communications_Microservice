@@ -93,6 +93,8 @@ exports.voice = function(req, res, next) {
             //   )
             // })
             console.log(voiceResponse.toString())
+            res.type('text/xml')
+            res.send(voiceResponse.toString())
           }
         })
       }
