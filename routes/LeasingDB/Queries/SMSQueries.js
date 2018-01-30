@@ -100,6 +100,31 @@ exports.get_sms_match = (incoming_phone, twilio_phone) => {
     })
 }
 
+exports.get_landlords_twilio = (twilio_phone) => {
+
+  const values = [twilio_phone]
+  const get_match = `SELECT a.tenant_id, a.tenant_phone, a.landlord_id, a.landlord_phone, a.twilio_phone,
+                            b.first_name, last_name
+                       FROM sms_map a
+                      INNER JOIN tenant b
+                      ON a.tenant_id = b.tenant_id
+                      WHERE a.twilio_phone = $1`
+
+  const return_rows = (rows) => {
+          return rows
+        }
+  return query(get_match, values)
+    .then((data) => {
+      return stringify_rows(data)
+    })
+    .then((data) => {
+      return json_rows(data)
+    })
+    .then((data) => {
+      return return_rows(data)
+    })
+}
+
 exports.get_tenant_landlord_match = (tenantPhone, landlordPhone) => {
   const values = [tenantPhone, landlordPhone]
   const get_match = `SELECT twilio_phone FROM sms_map WHERE tenant_phone = $1 AND landlord_phone = $2`

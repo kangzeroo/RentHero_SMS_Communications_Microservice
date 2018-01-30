@@ -11,6 +11,8 @@ const gatherOutgoingNumber = require('../api/sms_routing').gatherOutgoingNumber
 
 const formattedPhoneNumber = require('../api/general_api').formattedPhoneNumber
 
+const get_landlords_twilio = require('./LeasingDB/Queries/SMSQueries').get_landlords_twilio
+
 
 exports.voice = function(req, res, next) {
   console.log('/voice')
@@ -27,21 +29,43 @@ exports.voice = function(req, res, next) {
    gatherOutgoingNumber(from, to)
     .then((outgoingPhoneNumber) => {
       console.log(outgoingPhoneNumber)
-       const voiceResponse = new VoiceResponse()
-       voiceResponse.say({
-         voice: 'alice',
-         language: 'en',
-       },
-        'this call may be recorded for quality and training purposes'
-       )
-       const dial = voiceResponse.dial({ callerId: to, record: 'record-from-answer' })
-       dial.number(outgoingPhoneNumber)
+      if (outgoingPhoneNumber && outgoingPhoneNumber.length > 0) {
+        const voiceResponse = new VoiceResponse()
+        voiceResponse.say({
+          voice: 'alice',
+          language: 'en',
+        },
+         'this call may be recorded for quality and training purposes'
+        )
+        const dial = voiceResponse.dial({ callerId: to, record: 'record-from-answer' })
+        dial.number(outgoingPhoneNumber)
 
 
-       console.log(dial)
-       console.log(voiceResponse.toString())
-       res.type('text/xml')
-       res.send(voiceResponse.toString())
+        console.log(dial)
+        console.log(voiceResponse.toString())
+        res.type('text/xml')
+        res.send(voiceResponse.toString())
+      } else {
+        get_landlords_twilio(to)
+        .then((landlordData) => {
+          console.log(landlordData)
+          const voiceResponse = new VoiceResponse()
+          const tenants = landlordData.map(a => { return a.first_name + ' ' + a.last_name })
+          console.log(tenants)
+          const gather = voiceResponse.gather({
+            input: 'speech dtmf',
+            timeout: 3,
+            numDigits: landlordData.length,
+
+          })
+          gather.say('Your number is not mapped. Please select your group leader')
+          tenants.map((tenant, index) => {
+            return (
+              gather.say(`Press ${index + 1} for ${tenant}`)
+            )
+          })
+        })
+      }
     })
 }
 
