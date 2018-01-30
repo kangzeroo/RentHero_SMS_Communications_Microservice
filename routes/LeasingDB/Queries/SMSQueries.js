@@ -111,6 +111,7 @@ exports.get_landlords_twilio = (twilio_phone) => {
                       WHERE a.twilio_phone = $1`
 
   const return_rows = (rows) => {
+          console.log(rows)
           return rows
         }
   return query(get_match, values)
