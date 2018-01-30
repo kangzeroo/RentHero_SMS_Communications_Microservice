@@ -46,6 +46,7 @@ exports.voice = function(req, res, next) {
         res.type('text/xml')
         res.send(voiceResponse.toString())
       } else {
+        console.log('FALLBACK')
         get_landlords_twilio(to)
         .then((landlordData) => {
           console.log(landlordData)
