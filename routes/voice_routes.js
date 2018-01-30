@@ -49,7 +49,8 @@ exports.voice = function(req, res, next) {
         console.log('FALLBACK')
         get_landlords_twilio(to)
         .then((landlordData) => {
-          if (landlordData) {
+          if (landlordData && landlordData.landlord_name) {
+            console.log('landlord data exists:')
             console.log(landlordData)
             const voiceResponse = new VoiceResponse()
             const tenants = landlordData.map(a => { return a.first_name + ' ' + a.last_name })
@@ -68,6 +69,7 @@ exports.voice = function(req, res, next) {
               )
             })
           } else {
+            console.log('we fucked up')
             const voiceResponse = new VoiceResponse()
             const tenants = ['Jimmy Guo', 'Kangze Huang', 'Vincent Chiang']
             console.log(tenants)
