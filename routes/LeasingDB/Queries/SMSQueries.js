@@ -104,7 +104,7 @@ exports.get_landlords_twilio = (twilio_phone) => {
 
   const values = [twilio_phone]
   const get_match = `SELECT a.tenant_id, a.tenant_phone, a.landlord_id, a.landlord_phone, a.twilio_phone,
-                            b.first_name, last_name
+                            b.first_name, b.last_name
                        FROM sms_map a
                       INNER JOIN tenant b
                       ON a.tenant_id = b.tenant_id
