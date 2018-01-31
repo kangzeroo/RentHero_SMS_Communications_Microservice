@@ -112,6 +112,39 @@ exports.initial_corporate_inquiry = function(request, response, next) {
   return p
 }
 
+exports.initial_corporate_mapping_inquiry = function(req, response, next) {
+    const p = new Promise((res, rej) => {
+      const info = req.body
+      const tenant = info.tenant // tenant_id, first_name, last_name, phone
+      const building = info.building // building_id, building_alias, building_address
+      const corporation = info.corporation // corporation_id, corporation_email, corporation_name
+      const group = info.group // group_notes, group_size
+      const inquiry_id = info.inquiry_id
+      const corporateEmployee = info.corporateEmployee
+
+      send_initial_corporate_sms(tenant, corporation, building, group, corporateEmployee)
+      .then((data) => {
+        // start the email thread
+        return send_initial_corporate_email(tenant, corporation, building, group.group_notes, corporateEmployee)
+      })
+      .then((data) => {
+        // now send an email to the corporation's general inbox
+        return sendEmployeeMappedEmail(corporation.corporation_email, corporateEmployee, tenant, building, group)
+      })
+      .then((data) => {
+        console.log(data)
+        response.json({
+          status: 'Success',
+        })
+      })
+      .catch((err) => {
+        console.log(err)
+        response.status(500).send(err)
+      })
+    })
+    return p
+}
+
 // const p = new Promise((res, rej) => {
 //   // 1. send an email to the landlord
 //   send_initial_corporate_email(request.body)

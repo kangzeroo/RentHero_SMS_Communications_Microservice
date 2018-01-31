@@ -32,6 +32,7 @@ module.exports = function(app){
 
 	app.post('/initial_inquiry', [originCheck, json_encoding], InquiryRoutes.initial_inquiry)
 	app.post('/initial_corporate_inquiry', [originCheck, json_encoding], InquiryRoutes.initial_corporate_inquiry)
+	app.post('/initial_corporate_mapping_inquiry', [originCheck, json_encoding], InquiryRoutes.initial_corporate_mapping_inquiry)
 	app.post('/message_proof', [originCheck, json_encoding], InquiryRoutes.message_proof)
 	// app.post('/send_landlord_message', json_encoding, SMSRoutes.sendLandlordMessageFromTenant)
 
