@@ -372,7 +372,7 @@ const sendInitialSMSForExistingTenantLandlordPair = (info, landlord, tenant, twi
         'TEXT': tenantBody,
         'BUILDING_ID': info.building_id,
         'BUILDING_ADDRESS': info.building_address,
-        'EMPLOYEE_ID': info.employee_id || '',
+        'EMPLOYEE_ID': info.employee_id || 'NONE',
       })
       return twilio_client.messages.create({
         body: tenantBody,
@@ -414,7 +414,7 @@ const sendInitialSMSForExistingTenantLandlordPair = (info, landlord, tenant, twi
         'TEXT': landlordBody,
         'BUILDING_ID': info.building_id,
         'BUILDING_ADDRESS': info.building_address,
-        'EMPLOYEE_ID': info.employee_id || '',
+        'EMPLOYEE_ID': info.employee_id || 'NONE',
       })
       return twilio_client.messages.create({
         body: landlordBody,
@@ -464,7 +464,7 @@ const sendInitialSMSToTenantAndLandlord = (info, landlord, tenant, twilioPhone) 
       'TEXT': tenantBody,
       'BUILDING_ID': info.building_id,
       'BUILDING_ADDRESS': info.building_address,
-      'EMPLOYEE_ID': info.employee_id || '',
+      'EMPLOYEE_ID': info.employee_id || 'NONE',
     })
     return twilio_client.messages.create({
       body: tenantBody,
@@ -506,7 +506,7 @@ const sendInitialSMSToTenantAndLandlord = (info, landlord, tenant, twilioPhone) 
       'TEXT': landlordBody,
       'BUILDING_ID': info.building_id,
       'BUILDING_ADDRESS': info.building_address,
-      'EMPLOYEE_ID': info.employee_id || '',
+      'EMPLOYEE_ID': info.employee_id || 'NONE',
     })
     return twilio_client.messages.create({
       body: landlordBody,
