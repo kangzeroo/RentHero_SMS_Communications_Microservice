@@ -57,10 +57,12 @@ exports.get_landlord_from_id = (landlord_id) => {
 
   const get_landlord = `SELECT a.corporation_id, a.corporation_name, a.email, a.phone,
                                a.website, a.thumbnail, a.created_at, a.corporate_landlord,
-                               b.employee_id
+                               b.employee_id, c.phone AS employee_phone
                           FROM corporation a
                           LEFT OUTER JOIN employee_corporation b
                           ON a.corporation_id = b.corporation_id
+                          LEFT OUTER JOIN employee c
+                          ON b.employee_id = c.employee_id
                           WHERE a.corporation_id = $1
                         `
 
