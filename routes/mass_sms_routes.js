@@ -148,134 +148,110 @@ exports.receive_message_from_phone = function(req, res, next) {
 
 
 exports.send_wait_msg_to_tenant = function(tenant, building, suite, corporation, group, inquiry_id) {
-  const message_id = shortid.generate()
-  const message = `Hello ${tenant.first_name}, an agent of the landlord will contact you shortly
-                   regarding your inquiry for ${building.building_alias}.
-                   [ VERIFIED RENTHERO MESSAGE: RentHero.cc/m/${message_id} ]
-                  `
-  return twilio_client.notify.services(notifyServicesSid)
-  .notifications.create({
-    toBinding: JSON.stringify({
-                  binding_type: 'sms',
-                  address: formattedPhoneNumber(tenant.phone),
-              }),
-    body: message,
+  const p = new Promise((res, rej) => {
+    const message_id = shortid.generate()
+    const message = `Hello ${tenant.first_name}, an agent of the landlord will contact you shortly
+                     regarding your inquiry for ${building.building_alias}.
+                     [ VERIFIED RENTHERO MESSAGE: RentHero.cc/m/${message_id} ]
+                    `
+    twilio_client.notify.services(notifyServicesSid).notifications.create({
+      toBinding: JSON.stringify({
+                    binding_type: 'sms',
+                    address: formattedPhoneNumber(tenant.phone),
+                }),
+      body: message,
+    })
+    .then((notification) => {
+      console.log('generating landlord email...')
+      const landlordMsg = `https://renthero.cc/inquiries/${inquiry_id}`
+      return generateInitialCorporateEmail(
+                    [corporation.corporation_email],    // toEmailAddresses
+                    'inquiries@renthero.cc',            // proxyFromEmailAddress
+                    tenant,                             // tenant Object
+                    group.group_notes,                  // Group Notes written by Tenant
+                    landlordMsg,                        // Message to be sent to Landlord
+                    building,                           // Building Object
+                    suite                               // Suite Object
+                  )
+    })
+    .then((notifications) => {
+      // insertCommunicationsLog({
+      //   'ACTION': 'RENTHERO_SMS',
+      //   'DATE': new Date().getTime(),
+      //   'COMMUNICATION_ID': message_id,
+      //
+      //   'SENDER_ID': corporation.corporation_id,
+      //   'SENDER_CONTACT_ID': 'RentHeroSMS',
+      //   'RECEIVER_CONTACT_ID': tenant.phone,
+      //   'RECEIVER_ID': tenant.tenant_id,
+      //   'PROXY_CONTACT_ID': 'RENTHERO SMS',
+      //   'TEXT': message,
+      //   'INQUIRY_ID': inquiry_id,
+      //
+      //   'LANDLORD_NAME': building.building_alias,
+      // })
+      res(inquiry_id)
+    })
+    .catch((error) => {
+      console.log(error)
+      rej(error)
+    })
+    .done()
   })
-  .then((notification) => {
-    console.log('generating landlord email...')
-    const landlordMsg = `https://renthero.cc/inquiries/${inquiry_id}`
-    return generateInitialCorporateEmail(
-                  [corporation.corporation_email],    // toEmailAddresses
-                  'inquiries@renthero.cc',            // proxyFromEmailAddress
-                  tenant,                             // tenant Object
-                  group.group_notes,                  // Group Notes written by Tenant
-                  landlordMsg,                        // Message to be sent to Landlord
-                  building,                           // Building Object
-                  suite                               // Suite Object
-                )
-  })
-  // .then((notifications) => {
-  //   insertCommunicationsLog({
-  //     'ACTION': 'RENTHERO_SMS',
-  //     'DATE': new Date().getTime(),
-  //     'COMMUNICATION_ID': message_id,
-  //
-  //     'SENDER_ID': corporation.corporation_id,
-  //     'SENDER_CONTACT_ID': 'RentHeroSMS',
-  //     'RECEIVER_CONTACT_ID': tenant.phone,
-  //     'RECEIVER_ID': tenant.tenant_id,
-  //     'PROXY_CONTACT_ID': 'RENTHERO SMS',
-  //     'TEXT': message,
-  //     'INQUIRY_ID': inquiry_id,
-  //
-  //     'LANDLORD_NAME': building.building_alias,
-  //   })
-  // })
-  .catch((error) => {
-    console.log(error)
-  })
-  .done()
+  return p
 }
 
 exports.callback = function(req, res, next) {
+  console.log('============== CALLBACK ==========')
   console.log(req.body)
+  res.json({
+    message: 'success'
+  })
 }
 
-exports.send_tenant_wait_msg = function(req, res, next) {
-  const info = req.body
-  const tenant = info.tenant
-  const building = info.building
-  const suite = info.suite
-  const message_id = shortid.generate()
-  const message = `
-    Hello ${tenant.first_name}, an agent of the landlord will contact you shortly regarding your inquiry for ${building.building_alias}.
-    [ VERIFIED RENTHERO MESSAGE: RentHero.cc/m/${message_id} ]
-  `
-
-  twilio_client.notify.services(notifyServicesSid).notifications.create({
-    toBinding: JSON.stringify({ binding_type: 'sms', address: formattedPhoneNumber(tenant.phone) }),
-    body: message,
-  })
-  .then((notification) => {
-    const landlordMsg = `https://renthero.cc/inquiries/${info.inquiry_id}`
-    return generateInitialCorporateEmail([info.corporation_email], 'inquiries@renthero.cc', tenant, info.group_notes, landlordMsg, building, suite, 'landlord')
-  })
-  .then((notification) => {
-    insertCommunicationsLog({
-      'ACTION': 'RENTHERO_SMS',
-      'DATE': new Date().getTime(),
-      'COMMUNICATION_ID': message_id,
-
-      'SENDER_ID': info.corporation_id,
-      'SENDER_CONTACT_ID': 'RentHeroSMS',
-      'RECEIVER_CONTACT_ID': tenant.phone || 'NONE',
-      'RECEIVER_ID': tenant.tenant_id || 'NONE',
-      'PROXY_CONTACT_ID': 'RENTHERO SMS',
-      'TEXT': message,
-      'INQUIRY_ID': info.inquiry_id,
-
-      'LANDLORD_NAME': building.building_alias,
-    })
-    res.type('text/xml')
-    res.send(twilio_client.toString())
-  })
-  .catch(error => {
-    console.log(error)
-    res.status(500).send('Error occurred sending SMS notification')
-  })
-
-
-
-}
-
-// SmsSid=SM8884665161e8ab18b988fd4e7f3945d3
-// &SmsStatus=sent
-// &MessageStatus=sent
-// &To=%2B16475286355
-// &MessagingServiceSid=MG4f645b25e4396614a92e6377ba73aff2
-// &MessageSid=SM8884665161e8ab18b988fd4e7f3945d3
-// &AccountSid=AC3cfc4b5a78368f2cdb70baf2c945aee7
-// &From=%2B12892746748
-// &ApiVersion=2010-04-01
-
-// ToCountry=CA
-// &ToState=ON
-// &SmsMessageSid=SMbf505253cd06a3991e7274ba563dcf6e
-// &NumMedia=0
-// &ToCity=OSHAWA
-// &FromZip=
-// &SmsSid=SMbf505253cd06a3991e7274ba563dcf6e
-// &FromState=ON
-// &SmsStatus=received
-// &FromCity=Toronto
-// &Body=Shsjsjskksk
-// &FromCountry=CA
-// &To=%2B12892746748
-// &MessagingServiceSid=MG4f645b25e4396614a92e6377ba73aff2
-// &ToZip=
-// &AddOns=%7B%22status%22%3A%22successful%22%2C%22message%22%3Anull%2C%22code%22%3Anull%2C%22results%22%3A%7B%22ibm_watson_sentiment%22%3A%7B%22request_sid%22%3A%22XR57eb9566574b2a88396ed8be632a07bf%22%2C%22status%22%3A%22successful%22%2C%22message%22%3Anull%2C%22code%22%3Anull%2C%22result%22%3A%7B%22status%22%3A%22OK%22%2C%22language%22%3A%22english%22%2C%22docSentiment%22%3A%7B%22type%22%3A%22neutral%22%7D%7D%7D%7D%7D
-// &NumSegments=1
-// &MessageSid=SMbf505253cd06a3991e7274ba563dcf6e
-// &AccountSid=AC3cfc4b5a78368f2cdb70baf2c945aee7
-// &From=%2B16475286355
-// &ApiVersion=2010-04-01
+// exports.send_tenant_wait_msg = function(req, res, next) {
+//   const info = req.body
+//   const tenant = info.tenant
+//   const building = info.building
+//   const suite = info.suite
+//   const message_id = shortid.generate()
+//   const message = `
+//     Hello ${tenant.first_name}, an agent of the landlord will contact you shortly regarding your inquiry for ${building.building_alias}.
+//     [ VERIFIED RENTHERO MESSAGE: RentHero.cc/m/${message_id} ]
+//   `
+//
+//   twilio_client.notify.services(notifyServicesSid).notifications.create({
+//     toBinding: JSON.stringify({ binding_type: 'sms', address: formattedPhoneNumber(tenant.phone) }),
+//     body: message,
+//   })
+//   .then((notification) => {
+//     const landlordMsg = `https://renthero.cc/inquiries/${info.inquiry_id}`
+//     return generateInitialCorporateEmail([info.corporation_email], 'inquiries@renthero.cc', tenant, info.group_notes, landlordMsg, building, suite, 'landlord')
+//   })
+//   .then((notification) => {
+//     insertCommunicationsLog({
+//       'ACTION': 'RENTHERO_SMS',
+//       'DATE': new Date().getTime(),
+//       'COMMUNICATION_ID': message_id,
+//
+//       'SENDER_ID': info.corporation_id,
+//       'SENDER_CONTACT_ID': 'RentHeroSMS',
+//       'RECEIVER_CONTACT_ID': tenant.phone || 'NONE',
+//       'RECEIVER_ID': tenant.tenant_id || 'NONE',
+//       'PROXY_CONTACT_ID': 'RENTHERO SMS',
+//       'TEXT': message,
+//       'INQUIRY_ID': info.inquiry_id,
+//
+//       'LANDLORD_NAME': building.building_alias,
+//     })
+//     res.type('text/xml')
+//     res.send(twilio_client.toString())
+//   })
+//   .catch(error => {
+//     console.log(error)
+//     res.status(500).send('Error occurred sending SMS notification')
+//   })
+//
+//
+//
+// }
