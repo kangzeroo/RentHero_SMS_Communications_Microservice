@@ -47,7 +47,7 @@ function createStaffConfirmationParamsConfig(email, employee, tenant, building, 
         }
       },
       Subject: {
-        Data: `Agent ${employee.name} assigned to lead for ${building.building_alias}`,
+        Data: `Agent ${employee.first_name} assigned to lead for ${building.building_alias}`,
         Charset: 'UTF-8'
       }
     },
