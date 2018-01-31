@@ -107,7 +107,8 @@ function generateHTMLInquiryEmail_Landlord(tenant, tenantMessage, landlordMessag
                                 </tr>
 		                            <tr>
 		                                <td align='center' valign='top' style='color:#337ab7;'>
-		                                    <h2>${building.building_address} ${suite && suite.suite_id ? suite.suite_alias : ''}</h2>
+		                                    <h2>${building.building_address}</h2>
+                                        <h3>${suite && suite.suite_id ? suite.suite_alias : ''}</h3>
 		                                    <h3>${tenant.first_name} ${tenant.last_name} sent a message:</h3>
                                         <p>${tenantMessage}</p>
 		                                </td>
@@ -115,7 +116,7 @@ function generateHTMLInquiryEmail_Landlord(tenant, tenantMessage, landlordMessag
 		                            <tr style='border: 1px solid red; font-size: 1.2rem'>
 		                                <td align='center' valign='top'>
                                         <p>Please go to the link below to contact the tenant.</p>
-		                                    <p>${landlordMessage}</p>
+		                                    <a href=${landlordMessage}>${landlordMessage}</a>
 		                                </td>
 		                            </tr>
 		                        </table>

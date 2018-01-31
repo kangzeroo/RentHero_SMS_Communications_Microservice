@@ -55,7 +55,13 @@ exports.get_landlord_info = (building_id) => {
 exports.get_landlord_from_id = (landlord_id) => {
   const values = [landlord_id]
 
-  const get_landlord = `SELECT * FROM corporation WHERE corporation_id = $1
+  const get_landlord = `SELECT a.corporation_id, a.corporation_name, a.email, a.phone,
+                               a.website, a.thumbnail, a.created_at, a.corporate_landlord,
+                               b.employee_id
+                          FROM corporation a
+                          LEFT OUTER JOIN employee_corporation b
+                          ON a.corporation_id = b.corporation_id
+                          WHERE a.corporation_id = $1
                         `
 
   const return_rows = (rows) => {
