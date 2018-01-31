@@ -32,7 +32,7 @@ exports.voice = function(req, res, next) {
       if (outgoingPhoneNumber && outgoingPhoneNumber.length > 0) {
         const voiceResponse = new VoiceResponse()
         voiceResponse.say({
-          voice: 'alice',
+          voice: 'man',
           language: 'en',
         },
          'this call may be recorded for quality and training purposes'
@@ -79,7 +79,7 @@ exports.voice = function(req, res, next) {
         //       numDigits: 1,
         //     })
         //     gather.say({
-        //       voice: 'alice',
+        //       voice: 'man',
         //       language: 'en',
         //     }, 'Your number is not mapped. Please select your group leader')
         //     tenants.map((tenant, index) => {
@@ -95,7 +95,7 @@ exports.voice = function(req, res, next) {
         // })
         const voiceResponse = new VoiceResponse()
         voiceResponse.say({
-          voice: 'alice',
+          voice: 'man',
           language: 'en',
         }, 'This number is not assigned to you. Goodbye.')
         voiceResponse.hangup()
