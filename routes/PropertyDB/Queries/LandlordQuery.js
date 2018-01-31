@@ -85,7 +85,7 @@ exports.get_landlord_from_id = (landlord_id) => {
 exports.get_employee_assigned_to_building = (builing_id) => {
   const values = [builing_id]
 
-  const get_employee = `SELECT b.employee_id, b.first_name, b.last_name, b.email, b.alias_email, b.phone, b.calvary
+  const get_employee = `SELECT b.employee_id, b.first_name, b.last_name, b.email, b.alias_email, b.phone, b.cavalry
                           FROM employee_assignments a
                           INNER JOIN employee b
                           ON a.employee_id = b.employee_id
