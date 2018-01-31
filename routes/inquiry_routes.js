@@ -20,7 +20,6 @@ const send_wait_msg_to_tenant = require('./mass_sms_routes').send_wait_msg_to_te
 // Landlord Queries
 const get_employee_assigned_to_building = require('./PropertyDB/Queries/LandlordQuery').get_employee_assigned_to_building
 
-
 // POST /initial_inquiry
 exports.initial_inquiry = function(request, response, next) {
   const p = new Promise((res, rej) => {
@@ -107,7 +106,7 @@ exports.initial_corporate_inquiry = function(request, response, next) {
   //       response.status(500).send(err)
   //     })
   // })
-  // return p
+  return p
 }
 
 // POST /message_proof

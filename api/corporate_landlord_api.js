@@ -14,6 +14,14 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 exports.generateInitialCorporateEmail = function(toEmailAddresses, proxyFromEmailAddress, tenant, tenantMessage, landlordMessage, building, suite){
+  /*
+    toEmailAddresses = ['personA@email.com', 'personB@email.com']
+    proxyFromEmailAddress = 'relationshipID@renthero.cc',
+    tenant = { tenant_id: '89oOHDF9f', first_name: 'Mike' }
+    message = 'Hello, Renthero has generated a lead for you...'
+    building = { building_id, building_alias }
+    tenantOrLandlord = 'landlord' || 'tenant'
+  */
   console.log('======> toEmailAddresses: ', toEmailAddresses)
   console.log('======> proxyFromEmailAddress: ', proxyFromEmailAddress)
   console.log('======> tenant: ', tenant)
