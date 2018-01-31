@@ -75,3 +75,31 @@ exports.get_landlord_from_id = (landlord_id) => {
       console.log(error)
     })
 }
+
+exports.get_employee_assigned_to_building = (builing_id) => {
+  const values = [builing_id]
+
+  const get_employee = `SELECT b.employee_id, b.first_name, b.last_name, b.email, b.alias_email, b.phone, b.calvary
+                          FROM employee_assignments a
+                          INNER JOIN employee b
+                          ON a.employee_id = b.employee_id
+                          WHERE a.building_id = $1
+                       `
+
+  const return_rows = (rows) => {
+    return rows[0]
+  }
+  return query(get_employee, values)
+    .then((data) => {
+      return stringify_rows(data)
+    })
+    .then((data) => {
+      return json_rows(data)
+    })
+    .then((data) => {
+      return return_rows(data)
+    })
+    .catch((error) => {
+      console.log(error)
+    })
+}

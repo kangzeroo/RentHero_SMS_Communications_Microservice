@@ -51,8 +51,9 @@ module.exports = function(app){
 	app.post('/send_message_to_phones', [originCheck, twilio.webhook({ validate: false })], MassSMSRoutes.send_message_to_phones)
 	app.post('/send_message_to_phone', [originCheck, twilio.webhook({ validate: false })], MassSMSRoutes.send_message_to_phone)
 	app.post('/receive_message_from_phone', [twilio.webhook({ validate: false })], MassSMSRoutes.receive_message_from_phone)
-	app.post('/send_tenant_wait_msg', [originCheck, twilio.webhook({ validate: false })], MassSMSRoutes.send_tenant_wait_msg)
-	app.post('/get_most_recent_messages', [originCheck, json_encoding], InquiryRoutes.get_most_recent_messages)
+	// app.post('/send_tenant_wait_msg', [originCheck, twilio.webhook({ validate: false })], MassSMSRoutes.send_tenant_wait_msg)
+	// app.post('/get_most_recent_messages', [originCheck, json_encoding], InquiryRoutes.get_most_recent_messages)
+	app.post('/callback', [originCheck, twilio.webhook({ validate: false })], MassSMSRoutes.callback)
 
 	app.post('/send_group_invitation_sms', [originCheck, twilio.webhook({ validate: false })], SMSRoutes.send_group_invitation_sms)
 
