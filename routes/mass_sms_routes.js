@@ -175,21 +175,21 @@ exports.send_wait_msg_to_tenant = function(tenant, building, suite, corporation,
                   )
     })
     .then((notifications) => {
-      // insertCommunicationsLog({
-      //   'ACTION': 'RENTHERO_SMS',
-      //   'DATE': new Date().getTime(),
-      //   'COMMUNICATION_ID': message_id,
-      //
-      //   'SENDER_ID': corporation.corporation_id,
-      //   'SENDER_CONTACT_ID': 'RentHeroSMS',
-      //   'RECEIVER_CONTACT_ID': tenant.phone,
-      //   'RECEIVER_ID': tenant.tenant_id,
-      //   'PROXY_CONTACT_ID': 'RENTHERO SMS',
-      //   'TEXT': message,
-      //   'INQUIRY_ID': inquiry_id,
-      //
-      //   'LANDLORD_NAME': building.building_alias,
-      // })
+      insertCommunicationsLog({
+        'ACTION': 'RENTHERO_SMS',
+        'DATE': new Date().getTime(),
+        'COMMUNICATION_ID': message_id,
+
+        'SENDER_ID': corporation.corporation_id,
+        'SENDER_CONTACT_ID': 'RentHeroSMS',
+        'RECEIVER_CONTACT_ID': tenant.phone,
+        'RECEIVER_ID': tenant.tenant_id,
+        'PROXY_CONTACT_ID': 'RENTHERO SMS',
+        'TEXT': message,
+        'INQUIRY_ID': inquiry_id,
+
+        'LANDLORD_NAME': building.building_alias,
+      })
       res(inquiry_id)
     })
     .catch((error) => {

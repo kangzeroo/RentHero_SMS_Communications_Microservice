@@ -125,17 +125,10 @@ exports.send_initial_email = (info) => {
   return p
 }
 
-exports.send_initial_corporate_email = (info) => {
+exports.send_initial_corporate_email = (tenant, corporation, building, message, employee) => {
   console.log('---------------- Initial Email Message ----------------')
   const p = new Promise((res, rej) => {
-    const tenant = info.tenant
-    const building = info.building
-    const message = info.message
-    const corporateEmployee = info.corporateEmployee
-
     let relationshipObj
-
-    // MUST DO THE FOLLOWING
 
     // 1. Create a relationship/get the existing relationship between this tenant_email and landlord_email
         // a. get corporation object
@@ -145,9 +138,9 @@ exports.send_initial_corporate_email = (info) => {
         tenant.tenant_id,
         tenant.email,
         generateTenantAliasEmail(tenant.first_name, tenant.last_name),
-        corporateEmployee.corporation_id,
-        corporateEmployee.email,
-        corporateEmployee.alias_email
+        employee.corporation_id,
+        employee.email,
+        employee.alias_email
     )
     .then((relationship) => {
       console.log(relationship)
@@ -174,12 +167,12 @@ exports.send_initial_corporate_email = (info) => {
         'TENANT_ID': tenant.tenant_id,
         'TENANT_NAME': `${tenant.first_name} ${tenant.last_name}`,
         'TENANT_EMAIL': tenant.email,
-        'LANDLORD_ID': corporateEmployee.corporation_id,
-        'LANDLORD_NAME': corporateEmployee.corporation_name,
-        'LANDLORD_EMAIL': corporateEmployee.email,
+        'LANDLORD_ID': corporation.corporation_id,
+        'LANDLORD_NAME': corporation.corporation_name,
+        'LANDLORD_EMAIL': employee.email,
 
         'PROXY_CONTACT_ID': relationshipObj.landlord_alias_email,
-        'SENDER_ID': corporateEmployee.corporation_id,
+        'SENDER_ID': corporation.corporation_id,
         'RECEIVER_ID': tenant.tenant_id,
         'SENDER_CONTACT_ID': relationshipObj.landlord_alias_email,
         'RECEIVER_CONTACT_ID': relationshipObj.tenant_alias_email,
@@ -187,6 +180,7 @@ exports.send_initial_corporate_email = (info) => {
         'TEXT': message,
         'BUILDING_ID': building.building_id,
         'BUILDING_ADDRESS': building.building_address,
+        'EMPLOYEE_ID': employee.employee_id,
       })
       return generateInitialEmail(
         [relationshipObj.landlord_email],
@@ -208,21 +202,22 @@ exports.send_initial_corporate_email = (info) => {
         'TENANT_ID': tenant.tenant_id,
         'TENANT_NAME': `${tenant.first_name} ${tenant.last_name}`,
         'TENANT_EMAIL': tenant.email,
-        'LANDLORD_ID': corporateEmployee.corporation_id,
-        'LANDLORD_NAME': corporateEmployee.corporation_name,
-        'LANDLORD_EMAIL': corporateEmployee.email,
+        'LANDLORD_ID': corporation.corporation_id,
+        'LANDLORD_NAME': corporation.corporation_name,
+        'LANDLORD_EMAIL': employee.email,
 
         'PROXY_CONTACT_ID': relationshipObj.tenant_alias_email,
         'SENDER_ID': tenant.tenant_id,
-        'RECEIVER_ID': corporateEmployee.corporation_id,
+        'RECEIVER_ID': corporation.corporation_id,
         'SENDER_CONTACT_ID': relationshipObj.tenant_alias_email,
         'RECEIVER_CONTACT_ID': relationshipObj.landlord_alias_email,
 
         'TEXT': message,
         'BUILDING_ID': building.building_id,
         'BUILDING_ADDRESS': building.building_address,
+        'EMPLOYEE_ID': employee.employee_id,
       })
-      res(corporateEmployee)
+      res(employee)
     })
     .catch((err) => {
       console.log(err)

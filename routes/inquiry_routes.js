@@ -17,6 +17,8 @@ const send_initial_corporate_email = require('./email_routes').send_initial_corp
 const send_initial_corporate_sms = require('./sms_routes').send_initial_corporate_sms
 const send_wait_msg_to_tenant = require('./mass_sms_routes').send_wait_msg_to_tenant
 
+const sendEmployeeMappedEmail = require('../api/employee_email_api').sendEmployeeMappedEmail
+
 // Landlord Queries
 const get_employee_assigned_to_building = require('./PropertyDB/Queries/LandlordQuery').get_employee_assigned_to_building
 
@@ -53,7 +55,7 @@ exports.initial_corporate_inquiry = function(request, response, next) {
     const tenant = info.tenant // tenant_id, first_name, last_name, phone
     const building = info.building // building_id, building_alias, building_address
     const suite = info.suite // suite_id, suite_alias
-    const corporation = info.corporation // corporation_id, corporation_email
+    const corporation = info.corporation // corporation_id, corporation_email, corporation_name
     const group = info.group // group_notes, group_size
     const inquiry_id = info.inquiry_id
 
@@ -63,7 +65,31 @@ exports.initial_corporate_inquiry = function(request, response, next) {
         if (employeeData && employeeData.employee_id) {
           // if there is an employee asssigned to this building already
           console.log('Employee Exists!')
+
+          const employee = employeeData     // employee_id, first_name, last_name, email, alias_email, phone, calvary
+
+          // start the chat thread
+          send_initial_corporate_sms(tenant, corporation, building, group, employee)
+          .then((data) => {
+            // start the email thread
+            return send_initial_corporate_email(tenant, corporation, building, group.group_notes, employee)
+          })
+          .then((data) => {
+            // now send an email to the corporation's general inbox
+            return sendEmployeeMappedEmail(corporation.corporation_email, employee, tenant, building, group)
+          })
+          .then((data) => {
+            console.log(data)
+            response.json({
+              status: 'Success',
+            })
+          })
+          .catch((err) => {
+            console.log(err)
+            response.status(500).send(err)
+          })
         } else {
+          console.log('Employee Does Not Exist')
           // if there is no employee assigned to this building
           // send_wait_msg_to_tenant, which accomplishes the following:
           //    1. Send a wait message to the tenant
@@ -83,31 +109,31 @@ exports.initial_corporate_inquiry = function(request, response, next) {
         }
     })
   })
-
-  // const p = new Promise((res, rej) => {
-  //   // 1. send an email to the landlord
-  //   send_initial_corporate_email(request.body)
-  //     .then((landlordObj) => {
-  //       // 2. check if the landlord has a phone, and if so, send an SMS
-  //       if (landlordObj.phone) {
-  //         return send_initial_corporate_sms(request.body)
-  //       } else {
-  //         return Promise.resolve()
-  //       }
-  //     })
-  //     .then((data) => {
-  //       console.log(data)
-  //       response.json({
-  //         status: 'Success'
-  //       })
-  //     })
-  //     .catch((err) => {
-  //       console.log(err)
-  //       response.status(500).send(err)
-  //     })
-  // })
   return p
 }
+
+// const p = new Promise((res, rej) => {
+//   // 1. send an email to the landlord
+//   send_initial_corporate_email(request.body)
+//     .then((landlordObj) => {
+//       // 2. check if the landlord has a phone, and if so, send an SMS
+//       if (landlordObj.phone) {
+//         return send_initial_corporate_sms(request.body)
+//       } else {
+//         return Promise.resolve()
+//       }
+//     })
+//     .then((data) => {
+//       console.log(data)
+//       response.json({
+//         status: 'Success'
+//       })
+//     })
+//     .catch((err) => {
+//       console.log(err)
+//       response.status(500).send(err)
+//     })
+// })
 
 // POST /message_proof
 exports.message_proof = function(request, resolve, next) {
