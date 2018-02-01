@@ -119,7 +119,7 @@ exports.initial_corporate_mapping_inquiry = function(req, response, next) {
       const building = info.building // building_id, building_alias, building_address
       const corporation = info.corporation // corporation_id, corporation_email, corporation_name
       const group = info.group // group_notes, group_size
-      const inquiry_id = info.inquiry_id
+      // const inquiry_id = info.inquiry_id
       const corporateEmployee = info.corporateEmployee
 
       send_initial_corporate_sms(tenant, corporation, building, group, corporateEmployee)

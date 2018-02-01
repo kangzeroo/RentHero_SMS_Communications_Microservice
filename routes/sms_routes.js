@@ -181,8 +181,9 @@ exports.send_initial_corporate_sms = function(tenant, corporation, building, gro
         )
       } else {
         // if there is not a match, get all twilio numbers that are either associated with the landlord or the tenant
-        return get_tenant_landlord_twilio_numbers(tenant.phone, employee.phone)
+        return get_tenant_landlord_twilio_numbers(tenantPhone, employeePhone)
         .then((twilioData) => {
+          console.log('twilioData', twilioData)
           let dbtwilio_numbers
           if (twilioData && twilioData.length > 0) {
             dbtwilio_numbers = twilioData.map(s => s.twilio_phone)
