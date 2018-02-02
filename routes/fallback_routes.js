@@ -104,7 +104,8 @@ exports.stranger_message = function(req, res, next) {
              }
           })
         } else {
-          const determinedBuilding = compare_message_to_buildings(message, allBuildingData)
+          const allTwilioBuildings = allBuildingData.map(s => s.building_address).concat(allBuildingData.map(x => x.building_alias))
+          const determinedBuilding = compare_message_to_buildings(message, allTwilioBuildings)
           const selectedBuilding = allBuildingData.filter((bd) => {
             return bd.building_alias.toLowerCase() === determinedBuilding.toLowerCase() || bd.building_address.toLowerCase() === determinedBuilding.toLowerCase()
           })[0].building_id
