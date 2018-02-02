@@ -283,3 +283,7 @@ exports.get_recordings_for_given_call = function(req, res, next) {
     res.status(500).send('Failed to get recordings for call')
   })
 }
+
+exports.stranger_call = function(req, res, next) {
+  console.log(req.body)
+}

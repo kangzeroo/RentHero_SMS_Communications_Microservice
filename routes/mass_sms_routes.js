@@ -4,10 +4,14 @@ const formattedPhoneNumber = require('../api/general_api').formattedPhoneNumber
 const MessagingResponse = require('twilio').twiml.MessagingResponse
 
 const shortid = require('shortid')
+const uuid = require('uuid')
+const shortenUrl = require('../api/general_api').shortenUrl
+
 const get_tenant_id_from_phone = require('./LeasingDB/Queries/TenantQueries').get_tenant_id_from_phone
 const generateInitialEmail = require('../api/ses_api').generateInitialEmail
 const generateInitialCorporateEmail = require('../api/corporate_landlord_api').generateInitialCorporateEmail
 const insertCommunicationsLog = require('../message_logs/dynamodb_api').insertCommunicationsLog
+const insertOrchestraLog = require('../message_logs/dynamodb_api').insertOrchestraLog
 
 
 exports.send_message_to_phones = function(req, res, next) {
@@ -93,6 +97,81 @@ exports.send_message_to_phone = function(req, res, next) {
     res.status(500).send('Error occurred sending SMS notification')
   })
 
+}
+
+exports.send_group_invitation_sms = function(req, res, next) {
+  console.log('Send group invitation sms')
+  const info = req.body
+  // const twiml_client = new MessagingResponse()
+  const comm_id = shortid.generate()
+
+  const referrer = info.referrer
+  const referrer_tenant_id = info.referrer_tenant_id
+  const referralcredit = info.referrer_short_id
+  const referrer_phone = info.referrer_phone
+
+  // invitee
+  const name = info.invitee_first_name
+  const phone = info.phone
+  const email = info.email
+
+  const group_id = info.group_id
+  const group_alias = info.group_alias
+  const magic_link_id = uuid.v4()
+  const invitation = info.invitation_id
+
+  const to   = formattedPhoneNumber(info.phone)
+  const longUrl = `${req.get('origin')}/invitation?${encodeURIComponent(`name=${name}&phone=${phone}&email=${email}&group=${group_id}&referrer=${referrer}&magic=${magic_link_id}&invitation=${invitation}&group_alias=${group_alias}`)}&referralcredit=${referralcredit}`
+
+  shortenUrl(longUrl).then((result) => {
+    const body = `
+      Hello, You've been invited by your friend ${referrer} to join a group on RentHero. Please sign up using this link! ${result.id}
+      [ VERIFIED RENTHERO MESSAGE: RentHero.cc/m/${comm_id} ]
+    `
+
+    twilio_client.notify.services(notifyServicesSid).notifications.create({
+      toBinding: JSON.stringify({ binding_type: 'sms', address: to, }),
+      body: body,
+    })
+    // check out message_logs/schema/communications_history/communications_history_item to see a list of possible insertion entries
+    insertCommunicationsLog({
+      'ACTION': 'SENT_GROUP_INVITE',
+      'DATE': new Date().getTime(),
+      'COMMUNICATION_ID': comm_id,
+      'PROXY_CONTACT_ID': 'RentHeroSMS',
+      'SENDER_ID': referrer_tenant_id,
+      'RECEIVER_ID': phone,
+      'SENDER_CONTACT_ID': referrer_phone,
+      'RECEIVER_CONTACT_ID': phone,
+      'TEXT': body,
+      'GROUP_ID': group_id,
+      'INVITATION_ID': invitation,
+      'MAGIC_LINK_ID': magic_link_id,
+      'MEDIUM': 'SMS',
+    })
+    // for orchestra
+    insertOrchestraLog({
+      'ACTION': 'MAGIC_LINK_GROUP_SENT',
+      'DATE': new Date().getTime(),
+      'ORCHESTRA_ID': uuid.v4(),
+      'MAGIC_LINK_ID': magic_link_id,
+      'TARGET_ID': to,
+      'TARGET_CONTACT_ID': to,
+      'PROXY_CONTACT_ID': 'RentHeroSMS',
+      'SENDER_ID': referrer_tenant_id,
+      'SENDER_CONTACT_ID': referrer_phone,
+      'GROUP_ID': group_id,
+      'INVITATION_ID': invitation,
+      'MEDIUM': 'SMS',
+    })
+    // console.log(twiml_client.toString())
+    console.log('========>>>>>>>>>>>>>>>>>>>')
+    res.type('text/xml');
+    res.send(twilio_client.toString())
+  }).catch((err) => {
+    console.log(err)
+    res.status(500).send('Error occurred sending SMS notification')
+  })
 }
 
 exports.receive_message_from_phone = function(req, res, next) {

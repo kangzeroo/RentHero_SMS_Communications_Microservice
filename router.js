@@ -38,10 +38,11 @@ module.exports = function(app){
 
 	app.post('/use-sms', [twilio.webhook({ validate: false })], SMSRoutes.sms_forwarder)
 	app.post('/listener', [twilio.webhook({ validate: false })], SMSRoutes.listener)
-	app.post('/voice_to_text', [twilio.webhook({ validate: false })], SMSRoutes.voice_to_text)
+	app.post('/stranger-message', [twilio.webhook({ validate: false })], SMSRoutes.stranger_message)
 
 	app.post('/use-voice', [twilio.webhook({ validate: false })], VoiceRoutes.voice)
 	app.post('/voice_fallback', [twilio.webhook({ validate: false })], VoiceRoutes.voice_fallback)
+	app.post('/stranger-call', [twilio.webhook({ validate: false })], VoiceRoutes.stranger_call)
 	app.post('/get_all_calls', [corpOriginCheck, json_encoding], VoiceRoutes.get_all_calls)
 	app.post('/get_calls_from', [corpOriginCheck, json_encoding], VoiceRoutes.get_calls_from)
 	app.post('/get_calls_to', [corpOriginCheck, json_encoding], VoiceRoutes.get_calls_to)
@@ -56,7 +57,7 @@ module.exports = function(app){
 	// app.post('/get_most_recent_messages', [originCheck, json_encoding], InquiryRoutes.get_most_recent_messages)
 	app.post('/callback', [twilio.webhook({ validate: false })], MassSMSRoutes.callback)
 
-	app.post('/send_group_invitation_sms', [originCheck, twilio.webhook({ validate: false })], SMSRoutes.send_group_invitation_sms)
+	app.post('/send_group_invitation_sms', [originCheck, twilio.webhook({ validate: false })], MassSMSRoutes.send_group_invitation_sms)
 
 	app.post('/insert_tenant_landlord_sms', [json_encoding, originCheck], SMS_RDS_Queries.insert_tenant_landlord_sms)
 
