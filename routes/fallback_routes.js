@@ -55,7 +55,6 @@ exports.stranger_message = function(req, res, next) {
 
   get_all_building_addresses()
   .then((allBuildingData) => {
-    allBuildingData = allBuildingData
     const allTwilioBuildings = allBuildingData.map(s => s.building_address).concat(allBuildingData.map(x => x.building_alias))
     const matches = stringSimilarity.findBestMatch(message, allTwilioBuildings)
     if (matches.bestMatch.rating > 0.5) {
@@ -108,6 +107,7 @@ exports.stranger_message = function(req, res, next) {
             return bd.building_alias.toLowerCase() === determinedBuilding.toLowerCase() || bd.building_address.toLowerCase() === determinedBuilding.toLowerCase()
           })[0].building_id
           building_id = selectedBuilding.building_id
+          console.log(selectedBuilding.building_id)
           get_employee_assigned_to_building(selectedBuilding.building_id)
           .then((employeeData) => {
             console.log('LINE 87: ', employeeData)
