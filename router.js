@@ -10,6 +10,7 @@ const FallbackRoutes = require('./routes/fallback_routes')
 const goodbyeSMSRoutes = require('./routes/goodbye_sms_routes')
 const SMS_RDS_Queries = require('./routes/LeasingDB/Queries/SMSQueries')
 const VoiceRoutes = require('./routes/voice_routes')
+const StaffMessaging = require('./routes/staff_messaging')
 const originCheck = require('./auth/originCheck').originCheck
 const corpOriginCheck = require('./auth/corpOriginCheck').corpOriginCheck
 
@@ -70,6 +71,10 @@ module.exports = function(app){
 
 	app.post('/email_relationship', [json_encoding], EmailRoutes.email_relationship)
 	app.post('/save_email_communications_log', [json_encoding], EmailRoutes.save_email_communications_log)
+
+
+	// Staff To Tenant Mappings
+	app.post('/set_mapping_with_tenant', [json_encoding, corpOriginCheck], StaffMessaging.set_mapping_with_tenant)
 
 	// goodbye message
 	app.post('/send_goodbye_message_sms', [json_encoding, originCheck], goodbyeSMSRoutes.send_goodbye_message_sms)
