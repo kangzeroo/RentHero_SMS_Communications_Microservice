@@ -631,6 +631,10 @@ exports.sms_forwarder = function(req, res, next) {
   }
 }
 
+exports.stranger_message = function(req, res, next) {
+  console.log(req.body)
+}
+
 exports.listener = function(req, res, next ) {
   const info = req.body
 
@@ -640,11 +644,6 @@ exports.listener = function(req, res, next ) {
   console.log(phone, sid)
 
   // update_sms_match(phone, sid)
-}
-
-exports.voice_to_text = function(req, res, next) {
-  console.log('voice_to_text')
-  console.log(req.body)
 }
 
 // exports.send_group_invitation_sms = function(req, res, next) {
@@ -730,29 +729,3 @@ exports.fallback = function(req, res, next) {
   console.log('FALLBACK')
   console.log(req.body)
 }
-
-// exports.send_mass_text_message = function(req, res, next) {
-//   console.log('/sms')
-//   const twiml_client = new MessagingResponse();
-//
-//   let from = req.body.From
-//   let to   = req.body.To
-//   let body = req.body.Body
-//
-//   const outgoingPhoneNumber
-//
-//    gatherOutgoingNumber(from, to)
-//     .then((outgoingPhoneNumber) => {
-//       console.log('outgoingPhoneNumber: ', outgoingPhoneNumber)
-//       console.log('messaging...')
-//
-//       twiml_client.message({
-//         to: outgoingPhoneNumber,
-//       }, body)
-//       insertCommunicationsLog(req.body)
-//       console.log(twiml_client.toString())
-//       console.log('========>>>>>>>>>>>>>>>>>>>')
-//       res.type('text/xml');
-//       res.send(twiml_client.toString())
-//     })
-// }
