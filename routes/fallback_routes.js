@@ -105,8 +105,10 @@ exports.stranger_message = function(req, res, next) {
           })
         } else {
           const allTwilioBuildings = allBuildingData.map(s => s.building_address).concat(allBuildingData.map(x => x.building_alias))
+          console.log('allTwilioBuildings: ', allTwilioBuildings)
           const determinedBuilding = compare_message_to_buildings(message, allTwilioBuildings)
-          const selectedBuilding = allBuildingData.filter((bd) => {
+          console.log('determinedBuilding: ', determinedBuilding)
+          selectedBuilding = allBuildingData.filter((bd) => {
             return bd.building_alias.toLowerCase() === determinedBuilding.toLowerCase() || bd.building_address.toLowerCase() === determinedBuilding.toLowerCase()
           })[0].building_id
           building_id = selectedBuilding.building_id
