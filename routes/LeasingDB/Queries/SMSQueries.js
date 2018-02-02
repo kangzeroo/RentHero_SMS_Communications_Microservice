@@ -195,3 +195,31 @@ exports.get_tenant_landlord_sms_match = (sender_phone, receiver_phone) => {
  })
  return p
 }
+
+exports.get_landlord_from_twilio_phone = (twilio_phone) => {
+  const p = new Promise((res, rej) => {
+    const values = [twilio_phone]
+    const get_landlord = `SELECT landlord_id, landlord_phone
+                            FROM sms_map WHERE twilio_phone = $1
+                          `
+
+    const return_rows = (rows) => {
+      res(rows)
+    }
+
+    query(get_landlord, values)
+    .then((data) => {
+      return stringify_rows(data)
+    })
+    .then((data) => {
+      return json_rows(data)
+    })
+    .then((data) => {
+      return return_rows(data)
+    })
+    .catch((error) => {
+        rej('Failed to get landlord from twilio phone')
+    })
+  })
+  return p
+}
