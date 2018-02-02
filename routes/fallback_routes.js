@@ -86,7 +86,7 @@ exports.stranger_message = function(req, res, next) {
                  const message = `Hello, this is ${employeeData.first_name}, I'm a representative of ${lData.corporation_name}.
                                   Please text or call me regarding your interest in ${selectedBuilding.building_alias}
                                   `
-                 return send_initial(from, formattedPhoneNumber(employeeData.phone), message)
+                 return send_initial(from, formattedPhoneNumber(employeeData.phone), message, building_id)
                })
              } else {
                get_landlord_info(building_id)
@@ -96,7 +96,7 @@ exports.stranger_message = function(req, res, next) {
                  const message = `Hello, this is ${landlordData.corporation_name},
                                   Please text or call me regarding your interest in ${selectedBuilding.building_alias}.
                                   `
-                 return send_initial(from, formattedPhoneNumber(landlordData.phone), message)
+                 return send_initial(from, formattedPhoneNumber(landlordData.phone), message, building_id)
                })
              }
           })
@@ -117,7 +117,7 @@ exports.stranger_message = function(req, res, next) {
                 const message = `Hello, this is ${employeeData.first_name}, I'm a representative of ${lData.corporation_name}.
                                  Please text or call me regarding your interest in ${selectedBuilding.building_alias}
                                  `
-                return send_initial(from, formattedPhoneNumber(employeeData.phone), message)
+                return send_initial(from, formattedPhoneNumber(employeeData.phone), message, building_id)
               })
             } else {
               get_landlord_info(building_id)
@@ -127,7 +127,7 @@ exports.stranger_message = function(req, res, next) {
                 const message = `Hello, this is ${landlordData.corporation_name},
                                  Please text or call me regarding your interest in ${selectedBuilding.building_alias}.
                                  `
-                return send_initial(from, formattedPhoneNumber(landlordData.phone), message)
+                return send_initial(from, formattedPhoneNumber(landlordData.phone), message, building_id)
               })
             }
           })
@@ -152,11 +152,6 @@ exports.stranger_message = function(req, res, next) {
         'PROXY_CONTACT_ID': 'RENTHERO_FALLBACK',
         'TEXT': 'Please enter the building name',
       })
-      console.log({
-        to: from,
-        from: to,
-        body: 'Please enter the building name',
-      })
       twilio_client.messages.create({
         to: from,
         from: to,
@@ -168,7 +163,7 @@ exports.stranger_message = function(req, res, next) {
   })
 }
 
-const send_initial = (tenantPhone, landlordPhone, message) => {
+const send_initial = (tenantPhone, landlordPhone, message, building_id) => {
   const twilioNumber = determine_new_twilio_number(tenantPhone, landlordPhone)
   // const twilio_client = new MessagingResponse()
   insertCommunicationsLog({
@@ -182,11 +177,16 @@ const send_initial = (tenantPhone, landlordPhone, message) => {
     'RECEIVER_ID': tenantPhone,
     'PROXY_CONTACT_ID': twilioNumber,
     'TEXT': message,
+    'BUILDING_ID': building_id,
   })
+  // insert_sms_match(null, tenantPhone, null, landlordPhone, twilioNumber)
   twilio_client.messages.create({
     to: tenantPhone,
     from: twilioNumber,
     body: message,
+  })
+  .then((data) => {
+    console.log(data)
   })
   // res.type('text/xml')
   // res.send(twilio_client.toString())
