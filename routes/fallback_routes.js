@@ -48,7 +48,6 @@ exports.stranger_message = function(req, res, next) {
     'RECEIVER_CONTACT_ID': to,
     'RECEIVER_ID': to,
     'PROXY_CONTACT_ID': 'RENTHERO_FALLBACK',
-    'TEXT': 'Please enter the building name',
   })
 
   console.log(to, message)
@@ -120,6 +119,7 @@ exports.stranger_message = function(req, res, next) {
                 return send_initial(from, formattedPhoneNumber(employeeData.phone), message, building_id)
               })
             } else {
+              console.log(building_id)
               get_landlord_info(building_id)
               .then((landlordData) => {
                 console.log('LINE 95: ', landlordData)
