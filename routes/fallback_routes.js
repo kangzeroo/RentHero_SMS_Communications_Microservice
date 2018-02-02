@@ -15,6 +15,7 @@ const get_all_buildings_from_landlord_ids = require('./PropertyDB/Queries/Buildi
 const get_tenant_landlord_match = require('./LeasingDB/Queries/SMSQueries').get_tenant_landlord_match
 const get_tenant_landlord_sms_match = require('./LeasingDB/Queries/SMSQueries').get_tenant_landlord_sms_match
 const get_tenant_landlord_twilio_numbers = require('./LeasingDB/Queries/SMSQueries').get_tenant_landlord_twilio_numbers
+const insert_sms_match = require('./LeasingDB/Queries/SMSQueries').insert_sms_match
 
 const get_landlord_from_twilio_phone = require('./LeasingDB/Queries/SMSQueries').get_landlord_from_twilio_phone
 
@@ -36,6 +37,19 @@ exports.stranger_message = function(req, res, next) {
   const message = info.Body.toLowerCase()
   let building_id
   let selectedBuilding
+
+  insertCommunicationsLog({
+    'ACTION': 'RENTHERO_FALLBACK',
+    'DATE': new Date().getTime(),
+    'COMMUNICATION_ID': shortid.generate(),
+
+    'SENDER_ID': from,
+    'SENDER_CONTACT_ID': from,
+    'RECEIVER_CONTACT_ID': to,
+    'RECEIVER_ID': to,
+    'PROXY_CONTACT_ID': 'RENTHERO_FALLBACK',
+    'TEXT': 'Please enter the building name',
+  })
 
   console.log(to, message)
 
@@ -127,7 +141,7 @@ exports.stranger_message = function(req, res, next) {
       console.log('PROMPT the user to type a building')
       const twiml_client = new MessagingResponse()
       insertCommunicationsLog({
-        'ACTION': 'RENTHERO_SMS',
+        'ACTION': 'RENTHERO_FALLBACK',
         'DATE': new Date().getTime(),
         'COMMUNICATION_ID': shortid.generate(),
 
@@ -136,12 +150,17 @@ exports.stranger_message = function(req, res, next) {
         'RECEIVER_CONTACT_ID': from,
         'RECEIVER_ID': from,
         'PROXY_CONTACT_ID': 'RENTHERO_FALLBACK',
-        'TEXT': message,
+        'TEXT': 'Please enter the building name',
+      })
+      console.log({
+        to: from,
+        from: to,
+        body: 'Please enter the building name',
       })
       twiml_client.message({
         to: from,
         from: to,
-        body: 'Please enter the building name',
+        body: 'Please type the building name',
       })
       res.type('text/xml')
       res.send(twiml_client.toString())
@@ -153,7 +172,7 @@ const send_initial = (tenantPhone, landlordPhone, message) => {
   const twilioNumber = determine_new_twilio_number(tenantPhone, landlordPhone)
   const twiml_client = new MessagingResponse()
   insertCommunicationsLog({
-    'ACTION': 'RENTHERO_SMS',
+    'ACTION': 'RENTHERO_FALLBACK',
     'DATE': new Date().getTime(),
     'COMMUNICATION_ID': shortid.generate(),
 
