@@ -188,14 +188,14 @@ const send_initial = (tenantPhone, landlordPhone, message, building_id) => {
       'TEXT': message,
       'BUILDING_ID': building_id,
     })
-    insert_sms_match(null, tenantPhone, null, landlordPhone, twilioNumber)
+
     twilio_client.messages.create({
       to: tenantPhone,
       from: twilioNumber,
       body: message,
     })
     .then((data) => {
-      console.log(data)
+      insert_sms_match('', tenantPhone, '', landlordPhone, data.sid, twilioNumber)
     })
     // res.type('text/xml')
     // res.send(twilio_client.toString())
