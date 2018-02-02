@@ -103,6 +103,7 @@ exports.stranger_message = function(req, res, next) {
           })
         } else {
           const determinedBuilding = compare_message_to_buildings(message, allTwilioBuildings)
+          console.log(allBuildingData)
           const selectedBuilding = allBuildingData.filter((bd) => {
             return bd.building_alias.toLowerCase() === determinedBuilding.toLowerCase() || bd.building_address.toLowerCase() === determinedBuilding.toLowerCase()
           })[0].building_id
