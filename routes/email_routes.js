@@ -268,8 +268,8 @@ exports.save_email_communications_log = (req, res, next) => {
   const receiver_email = req.body.receiver_email
   const message = req.body.message
 
-  if (req.body.landlord_id === sender_id) {
-    updateLandlordLastActive(req.body.landlord_id)
+  if (req.body.corporation_id === sender_id) {
+    updateLandlordLastActive(req.body.corporation_id)
   }
 
   insertCommunicationsLog({
