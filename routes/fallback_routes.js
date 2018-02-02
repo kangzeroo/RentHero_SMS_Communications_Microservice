@@ -110,7 +110,7 @@ exports.stranger_message = function(req, res, next) {
           console.log('determinedBuilding: ', determinedBuilding)
           selectedBuilding = allBuildingData.filter((bd) => {
             return bd.building_alias.toLowerCase() === determinedBuilding.toLowerCase() || bd.building_address.toLowerCase() === determinedBuilding.toLowerCase()
-          })[0].building_id
+          })[0]
           building_id = selectedBuilding.building_id
           console.log(selectedBuilding.building_id)
           get_employee_assigned_to_building(selectedBuilding.building_id)
