@@ -135,95 +135,95 @@ exports.send_initial_sms = function(info) {
   return p
 }
 
-exports.send_initial_corporate_sms = function(info) {
+
+exports.send_initial_corporate_sms = function(tenant, corporation, building, group, employee) {
   const p = new Promise((res, rej) => {
-    console.log('---------------- Initial SMS Message ----------------')
-    // console.log(info)
-    const tenant = info.tenant
-    const tenantId = tenant.tenant_id
-    const tenantPhone = formattedPhoneNumber(tenant.phone)
-    const landlordId = info.corporateEmployee.corporation_id
-    const landlordPhone = formattedPhoneNumber(info.corporateEmployee.phone)
-    const landlordName = info.corporateEmployee.corporation_name
-    const building = info.building
     let totalServiceNumbers
     let serviceNumbers
     let twilioNumber
 
-    // respond with twilio number if match already exists
+    let tenantPhone = formattedPhoneNumber(tenant.phone)
+    let employeePhone = formattedPhoneNumber(employee.phone)
+
     const infoObj = {
       first_name: tenant.first_name,
       last_name: tenant.last_name,
       building_id: building.building_id,
       building_address: building.building_address,
       building_alias: building.building_alias,
-      group_notes: info.message,
-      group_size: info.group_size,
+      group_notes: group.group_notes,
+      group_size: group.group_size,
+      employee_id: employee.employee_id,
     }
 
     const service = twilio_client.messaging.services(messagingServiceSid)
+
+    // First we gotta see all our twilio numbers
     service.phoneNumbers.list()
-    .then((data) => {
-      // console.log('=========service.phoneNumbers.list(): ', data)
-      serviceNumbers = data.map(s => s.phoneNumber)
-      totalServiceNumbers = data.length
-      return get_tenant_landlord_match(tenantPhone, landlordPhone)
+    .then((numbers) => {
+      serviceNumbers = numbers.map(n => n.phoneNumber)
+      totalServiceNumbers = numbers.length
+      return get_tenant_landlord_match(tenantPhone, employeePhone)
     })
-    .then((data) => {
-      // console.log(data)
-      if (data && data.twilio_phone) {
-        console.log('MATCH ALREADY EXISTS')
-        console.log('EXISTING TWILIO NUMBER: ', data.twilio_phone)
-        // log that user and landlord mapping already exist. log(tenantPhone, [info.first_name, info.last_name].join(' '), landlordPhone, landlordName)
-        twilioNumber = data.twilio_phone
+    .then((matchData) => {
+      // Check if there is a match between the tenant phone and the employee phone
+
+      if (matchData && matchData.twilio_phone) {
+        // if there is a match, send an intitial message between the tenant and landlord pair
+        console.log('MATCH ALREADY EXISTS', 'EXISTING TWILIO NUMBER: ', matchData.twilio_phone)
+        twilioNumber = matchData.twilio_phone
         return sendInitialSMSForExistingTenantLandlordPair(
           infoObj,
-          { landlordId: landlordId, landlordName: landlordName, landlordPhone: landlordPhone },
-          { tenantId: tenantId, tenantPhone: tenantPhone },
-          data.twilio_phone
+          { landlordId: corporation.corporation_id, landlordName: corporation.corporation_name, landlordPhone: employeePhone },
+          { tenantId: tenant.tenant_id, tenantPhone: tenantPhone },
+          matchData.twilio_phone,
+          employee
         )
       } else {
-        return get_tenant_landlord_twilio_numbers(tenantPhone, landlordPhone)
-                  .then((data) => {
-                    let dbtwilio_numbers
-                    if (data && data.length > 0) {
-                      dbtwilio_numbers = data.map(s => s.twilio_phone)
-                    } else {
-                      dbtwilio_numbers = []
-                    }
-                    if (dbtwilio_numbers.length >= totalServiceNumbers) {
-                      console.log('BUY A NEW NUMBER')
-                      return buyNewTwilioNumber()
-                        .then((purchasedTwilioNumber) => {
-                          console.log('PURCHASED TWILIO NUMBER: ', purchasedTwilioNumber)
-                          twilioNumber = purchasedTwilioNumber
-                          // log bought a new number: purchasedTwilioNumber for mapping tenantPhone and landlordPhone
-                          return sendInitialSMSToTenantAndLandlord(
-                            infoObj,
-                            { landlordId: landlordId, landlordName: landlordName, landlordPhone: landlordPhone, textable: false, },
-                            { tenantId: tenantId, tenantPhone: tenantPhone },
-                            purchasedTwilioNumber
-                          )
-                        })
-                    } else {
-                      console.log('USE EXISTING NUMBER')
-                      let selected_twilio_number
-                      console.log(serviceNumbers)
-                      if (dbtwilio_numbers && dbtwilio_numbers.length > 0 && serviceNumbers && serviceNumbers.length > 0) {
-                        selected_twilio_number = serviceNumbers.filter(val => !dbtwilio_numbers.includes(val))[0]
-                      } else {
-                        selected_twilio_number = serviceNumbers[0]
-                      }
-                      console.log('SELECTED TWILIO NUMBER: ', selected_twilio_number)
-                      twilioNumber = selected_twilio_number
-                      return sendInitialSMSToTenantAndLandlord(
-                        infoObj,
-                        { landlordId: landlordId, landlordName: landlordName, landlordPhone: landlordPhone, textable: false, },
-                        { tenantId: tenantId, tenantPhone: tenantPhone },
-                        selected_twilio_number
-                      )
-                    }
-                  })
+        // if there is not a match, get all twilio numbers that are either associated with the landlord or the tenant
+        return get_tenant_landlord_twilio_numbers(tenantPhone, employeePhone)
+        .then((twilioData) => {
+          console.log('twilioData', twilioData)
+          let dbtwilio_numbers
+          if (twilioData && twilioData.length > 0) {
+            dbtwilio_numbers = twilioData.map(s => s.twilio_phone)
+          } else {
+            dbtwilio_numbers = []
+          }
+
+          // if the number of associated twilio numbers are greater than the total serviceable numbers, then buy a new number
+          if (dbtwilio_numbers.length >= totalServiceNumbers) {
+            // greater, so lets buy a new twilio number
+            console.log('BUY A NEW NUMBER')
+            return buyNewTwilioNumber()
+              .then((purchasedTwilioNumber) => {
+                console.log('PURCHASED TWILIO NUMBER: ', purchasedTwilioNumber)
+                twilioNumber = purchasedTwilioNumber
+                return sendInitialSMSToTenantAndLandlord(
+                  infoObj,
+                  { landlordId: corporation.corporation_id, landlordName: corporation.corporation_name, landlordPhone: employeePhone, textable: false, },
+                  { tenantId: tenant.tenant_id, tenantPhone: tenantPhone },
+                  purchasedTwilioNumber
+                )
+              })
+          } else {
+            console.log('USE EXISTING NUMBER')
+            let selected_twilio_number
+            if (dbtwilio_numbers && dbtwilio_numbers.length > 0 && serviceNumbers && serviceNumbers.length > 0) {
+              selected_twilio_number = serviceNumbers.filter(val => !dbtwilio_numbers.includes(val))[0]
+            } else {
+              selected_twilio_number = serviceNumbers[0]
+            }
+            console.log('SELECTED TWILIO NUMBER: ', selected_twilio_number)
+            twilioNumber = selected_twilio_number
+            return sendInitialSMSToTenantAndLandlord(
+              infoObj,
+              { landlordId: corporation.corporation_id, landlordName: corporation.corporation_name, landlordPhone: employeePhone, textable: false, },
+              { tenantId: tenant.tenant_id, tenantPhone: tenantPhone },
+              selected_twilio_number
+            )
+          }
+        })
       }
     })
     .then((data) => {
@@ -239,6 +239,111 @@ exports.send_initial_corporate_sms = function(info) {
   })
   return p
 }
+
+// exports.send_initial_corporate_sms = function(info) {
+//   const p = new Promise((res, rej) => {
+//     console.log('---------------- Initial SMS Message ----------------')
+//     // console.log(info)
+//     const tenant = info.tenant
+//     const tenantId = tenant.tenant_id
+//     const tenantPhone = formattedPhoneNumber(tenant.phone)
+//     const landlordId = info.corporateEmployee.corporation_id
+//     const landlordPhone = formattedPhoneNumber(info.corporateEmployee.phone)
+//     const landlordName = info.corporateEmployee.corporation_name
+//     const building = info.building
+//     let totalServiceNumbers
+//     let serviceNumbers
+//     let twilioNumber
+//
+//     // respond with twilio number if match already exists
+//     const infoObj = {
+//       first_name: tenant.first_name,
+//       last_name: tenant.last_name,
+//       building_id: building.building_id,
+//       building_address: building.building_address,
+//       building_alias: building.building_alias,
+//       group_notes: info.message,
+//       group_size: info.group_size,
+//     }
+//
+//     const service = twilio_client.messaging.services(messagingServiceSid)
+//     service.phoneNumbers.list()
+//     .then((data) => {
+//       // console.log('=========service.phoneNumbers.list(): ', data)
+//       serviceNumbers = data.map(s => s.phoneNumber)
+//       totalServiceNumbers = data.length
+//       return get_tenant_landlord_match(tenantPhone, landlordPhone)
+//     })
+//     .then((data) => {
+//       // console.log(data)
+//       if (data && data.twilio_phone) {
+//         console.log('MATCH ALREADY EXISTS')
+//         console.log('EXISTING TWILIO NUMBER: ', data.twilio_phone)
+//         // log that user and landlord mapping already exist. log(tenantPhone, [info.first_name, info.last_name].join(' '), landlordPhone, landlordName)
+//         twilioNumber = data.twilio_phone
+//         return sendInitialSMSForExistingTenantLandlordPair(
+//           infoObj,
+//           { landlordId: landlordId, landlordName: landlordName, landlordPhone: landlordPhone },
+//           { tenantId: tenantId, tenantPhone: tenantPhone },
+//           data.twilio_phone
+//         )
+//       } else {
+//         return get_tenant_landlord_twilio_numbers(tenantPhone, landlordPhone)
+//                   .then((data) => {
+//                     let dbtwilio_numbers
+//                     if (data && data.length > 0) {
+//                       dbtwilio_numbers = data.map(s => s.twilio_phone)
+//                     } else {
+//                       dbtwilio_numbers = []
+//                     }
+//                     if (dbtwilio_numbers.length >= totalServiceNumbers) {
+//                       console.log('BUY A NEW NUMBER')
+//                       return buyNewTwilioNumber()
+//                         .then((purchasedTwilioNumber) => {
+//                           console.log('PURCHASED TWILIO NUMBER: ', purchasedTwilioNumber)
+//                           twilioNumber = purchasedTwilioNumber
+//                           // log bought a new number: purchasedTwilioNumber for mapping tenantPhone and landlordPhone
+//                           return sendInitialSMSToTenantAndLandlord(
+//                             infoObj,
+//                             { landlordId: landlordId, landlordName: landlordName, landlordPhone: landlordPhone, textable: false, },
+//                             { tenantId: tenantId, tenantPhone: tenantPhone },
+//                             purchasedTwilioNumber
+//                           )
+//                         })
+//                     } else {
+//                       console.log('USE EXISTING NUMBER')
+//                       let selected_twilio_number
+//                       console.log(serviceNumbers)
+//                       if (dbtwilio_numbers && dbtwilio_numbers.length > 0 && serviceNumbers && serviceNumbers.length > 0) {
+//                         selected_twilio_number = serviceNumbers.filter(val => !dbtwilio_numbers.includes(val))[0]
+//                       } else {
+//                         selected_twilio_number = serviceNumbers[0]
+//                       }
+//                       console.log('SELECTED TWILIO NUMBER: ', selected_twilio_number)
+//                       twilioNumber = selected_twilio_number
+//                       return sendInitialSMSToTenantAndLandlord(
+//                         infoObj,
+//                         { landlordId: landlordId, landlordName: landlordName, landlordPhone: landlordPhone, textable: false, },
+//                         { tenantId: tenantId, tenantPhone: tenantPhone },
+//                         selected_twilio_number
+//                       )
+//                     }
+//                   })
+//       }
+//     })
+//     .then((data) => {
+//       res({
+//         message: 'Success',
+//         twilioNumber: twilioNumber,
+//       })
+//     })
+//     .catch((error) => {
+//       console.log(error)
+//       rej(error)
+//     })
+//   })
+//   return p
+// }
 
 const sendInitialSMSForExistingTenantLandlordPair = (info, landlord, tenant, twilioPhone) => {
   const id1 = shortid.generate()
@@ -268,6 +373,7 @@ const sendInitialSMSForExistingTenantLandlordPair = (info, landlord, tenant, twi
         'TEXT': tenantBody,
         'BUILDING_ID': info.building_id,
         'BUILDING_ADDRESS': info.building_address,
+        'EMPLOYEE_ID': info.employee_id || 'NONE',
       })
       return twilio_client.messages.create({
         body: tenantBody,
@@ -309,6 +415,7 @@ const sendInitialSMSForExistingTenantLandlordPair = (info, landlord, tenant, twi
         'TEXT': landlordBody,
         'BUILDING_ID': info.building_id,
         'BUILDING_ADDRESS': info.building_address,
+        'EMPLOYEE_ID': info.employee_id || 'NONE',
       })
       return twilio_client.messages.create({
         body: landlordBody,
@@ -358,6 +465,7 @@ const sendInitialSMSToTenantAndLandlord = (info, landlord, tenant, twilioPhone) 
       'TEXT': tenantBody,
       'BUILDING_ID': info.building_id,
       'BUILDING_ADDRESS': info.building_address,
+      'EMPLOYEE_ID': info.employee_id || 'NONE',
     })
     return twilio_client.messages.create({
       body: tenantBody,
@@ -399,6 +507,7 @@ const sendInitialSMSToTenantAndLandlord = (info, landlord, tenant, twilioPhone) 
       'TEXT': landlordBody,
       'BUILDING_ID': info.building_id,
       'BUILDING_ADDRESS': info.building_address,
+      'EMPLOYEE_ID': info.employee_id || 'NONE',
     })
     return twilio_client.messages.create({
       body: landlordBody,
@@ -494,9 +603,10 @@ exports.sms_forwarder = function(req, res, next) {
           'TENANT_ID': data.tenant_id,
           'TENANT_NAME': [data.first_name, data.last_name].join(' '),
           'TENANT_PHONE': data.tenant_phone,
-          'LANDLORD_ID': data.landlord_id,
+          'LANDLORD_ID': landlordData.corporation_id,
           'LANDLORD_NAME': landlordData.corporation_name,
-          'LANDLORD_PHONE': data.landlord_phone,
+          'LANDLORD_PHONE': landlordData.employee_phone || landlordData.phone,
+          'EMPLOYEE_ID': landlordData.employee_id || 'NONE',
         })
       })
 
@@ -521,6 +631,10 @@ exports.sms_forwarder = function(req, res, next) {
   }
 }
 
+exports.stranger_message = function(req, res, next) {
+  console.log(req.body)
+}
+
 exports.listener = function(req, res, next ) {
   const info = req.body
 
@@ -532,121 +646,86 @@ exports.listener = function(req, res, next ) {
   // update_sms_match(phone, sid)
 }
 
-exports.voice_to_text = function(req, res, next) {
-  console.log('voice_to_text')
-  console.log(req.body)
-}
-
-exports.send_group_invitation_sms = function(req, res, next) {
-  console.log('Send group invitation sms')
-  const info = req.body
-  const twiml_client = new MessagingResponse()
-  const comm_id = shortid.generate()
-
-  const referrer = info.referrer
-  const referrer_tenant_id = info.referrer_tenant_id
-  const referralcredit = info.referrer_short_id
-  const referrer_phone = info.referrer_phone
-
-  // invitee
-  const name = info.invitee_first_name
-  const phone = info.phone
-  const email = info.email
-
-  const group_id = info.group_id
-  const group_alias = info.group_alias
-  const magic_link_id = uuid.v4()
-  const invitation = info.invitation_id
-
-  const from = '+12268940470'
-  const to   = formattedPhoneNumber(info.phone)
-  const longUrl = `${req.get('origin')}/invitation?${encodeURIComponent(`name=${name}&phone=${phone}&email=${email}&group=${group_id}&referrer=${referrer}&magic=${magic_link_id}&invitation=${invitation}&group_alias=${group_alias}`)}&referralcredit=${referralcredit}`
-
-  shortenUrl(longUrl).then((result) => {
-    const body = `
-      Hello, You've been invited by your friend ${referrer} to join a group on RentHero. Please sign up using this link! ${result.id}
-      [ VERIFIED RENTHERO MESSAGE: RentHero.cc/m/${comm_id} ]
-    `
-
-    console.log(from, to)
-
-    twilio_client.messages.create({
-      body: body,
-      from: from,
-      to: to,
-    })
-    // check out message_logs/schema/communications_history/communications_history_item to see a list of possible insertion entries
-    insertCommunicationsLog({
-      'ACTION': 'SENT_GROUP_INVITE',
-      'DATE': new Date().getTime(),
-      'COMMUNICATION_ID': comm_id,
-      'PROXY_CONTACT_ID': from,
-      'SENDER_ID': referrer_tenant_id,
-      'RECEIVER_ID': phone,
-      'SENDER_CONTACT_ID': referrer_phone,
-      'RECEIVER_CONTACT_ID': phone,
-      'TEXT': body,
-      'GROUP_ID': group_id,
-      'INVITATION_ID': invitation,
-      'MAGIC_LINK_ID': magic_link_id,
-      'MEDIUM': 'SMS',
-    })
-    // for orchestra
-    insertOrchestraLog({
-      'ACTION': 'MAGIC_LINK_GROUP_SENT',
-      'DATE': new Date().getTime(),
-      'ORCHESTRA_ID': uuid.v4(),
-      'MAGIC_LINK_ID': magic_link_id,
-      'TARGET_ID': to,
-      'TARGET_CONTACT_ID': to,
-      'PROXY_CONTACT_ID': from,
-      'SENDER_ID': referrer_tenant_id,
-      'SENDER_CONTACT_ID': referrer_phone,
-      'GROUP_ID': group_id,
-      'INVITATION_ID': invitation,
-      'MEDIUM': 'SMS',
-    })
-    // console.log(twiml_client.toString())
-    console.log('========>>>>>>>>>>>>>>>>>>>')
-    res.type('text/xml');
-    res.send(twiml_client.toString())
-  }).catch((err) => {
-    console.log(err)
-    res.status(500).send('Error occurred sending SMS notification')
-  })
-}
+// exports.send_group_invitation_sms = function(req, res, next) {
+//   console.log('Send group invitation sms')
+//   const info = req.body
+//   const twiml_client = new MessagingResponse()
+//   const comm_id = shortid.generate()
+//
+//   const referrer = info.referrer
+//   const referrer_tenant_id = info.referrer_tenant_id
+//   const referralcredit = info.referrer_short_id
+//   const referrer_phone = info.referrer_phone
+//
+//   // invitee
+//   const name = info.invitee_first_name
+//   const phone = info.phone
+//   const email = info.email
+//
+//   const group_id = info.group_id
+//   const group_alias = info.group_alias
+//   const magic_link_id = uuid.v4()
+//   const invitation = info.invitation_id
+//
+//   const from = '+12268940470'
+//   const to   = formattedPhoneNumber(info.phone)
+//   const longUrl = `${req.get('origin')}/invitation?${encodeURIComponent(`name=${name}&phone=${phone}&email=${email}&group=${group_id}&referrer=${referrer}&magic=${magic_link_id}&invitation=${invitation}&group_alias=${group_alias}`)}&referralcredit=${referralcredit}`
+//
+//   shortenUrl(longUrl).then((result) => {
+//     const body = `
+//       Hello, You've been invited by your friend ${referrer} to join a group on RentHero. Please sign up using this link! ${result.id}
+//       [ VERIFIED RENTHERO MESSAGE: RentHero.cc/m/${comm_id} ]
+//     `
+//
+//     console.log(from, to)
+//
+//     twilio_client.messages.create({
+//       body: body,
+//       from: from,
+//       to: to,
+//     })
+//     // check out message_logs/schema/communications_history/communications_history_item to see a list of possible insertion entries
+//     insertCommunicationsLog({
+//       'ACTION': 'SENT_GROUP_INVITE',
+//       'DATE': new Date().getTime(),
+//       'COMMUNICATION_ID': comm_id,
+//       'PROXY_CONTACT_ID': from,
+//       'SENDER_ID': referrer_tenant_id,
+//       'RECEIVER_ID': phone,
+//       'SENDER_CONTACT_ID': referrer_phone,
+//       'RECEIVER_CONTACT_ID': phone,
+//       'TEXT': body,
+//       'GROUP_ID': group_id,
+//       'INVITATION_ID': invitation,
+//       'MAGIC_LINK_ID': magic_link_id,
+//       'MEDIUM': 'SMS',
+//     })
+//     // for orchestra
+//     insertOrchestraLog({
+//       'ACTION': 'MAGIC_LINK_GROUP_SENT',
+//       'DATE': new Date().getTime(),
+//       'ORCHESTRA_ID': uuid.v4(),
+//       'MAGIC_LINK_ID': magic_link_id,
+//       'TARGET_ID': to,
+//       'TARGET_CONTACT_ID': to,
+//       'PROXY_CONTACT_ID': from,
+//       'SENDER_ID': referrer_tenant_id,
+//       'SENDER_CONTACT_ID': referrer_phone,
+//       'GROUP_ID': group_id,
+//       'INVITATION_ID': invitation,
+//       'MEDIUM': 'SMS',
+//     })
+//     // console.log(twiml_client.toString())
+//     console.log('========>>>>>>>>>>>>>>>>>>>')
+//     res.type('text/xml');
+//     res.send(twiml_client.toString())
+//   }).catch((err) => {
+//     console.log(err)
+//     res.status(500).send('Error occurred sending SMS notification')
+//   })
+// }
 // POST /fallback
 exports.fallback = function(req, res, next) {
   console.log('FALLBACK')
   console.log(req.body)
 }
-
-exports.speechtotext = function(req, res, next) {
-  console.log(req.body)
-}
-
-// exports.send_mass_text_message = function(req, res, next) {
-//   console.log('/sms')
-//   const twiml_client = new MessagingResponse();
-//
-//   let from = req.body.From
-//   let to   = req.body.To
-//   let body = req.body.Body
-//
-//   const outgoingPhoneNumber
-//
-//    gatherOutgoingNumber(from, to)
-//     .then((outgoingPhoneNumber) => {
-//       console.log('outgoingPhoneNumber: ', outgoingPhoneNumber)
-//       console.log('messaging...')
-//
-//       twiml_client.message({
-//         to: outgoingPhoneNumber,
-//       }, body)
-//       insertCommunicationsLog(req.body)
-//       console.log(twiml_client.toString())
-//       console.log('========>>>>>>>>>>>>>>>>>>>')
-//       res.type('text/xml');
-//       res.send(twiml_client.toString())
-//     })
-// }

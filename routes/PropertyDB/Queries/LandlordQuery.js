@@ -55,13 +55,49 @@ exports.get_landlord_info = (building_id) => {
 exports.get_landlord_from_id = (landlord_id) => {
   const values = [landlord_id]
 
-  const get_landlord = `SELECT * FROM corporation WHERE corporation_id = $1
+  const get_landlord = `SELECT a.corporation_id, a.corporation_name, a.email, a.phone,
+                               a.website, a.thumbnail, a.created_at, a.corporate_landlord,
+                               b.employee_id, c.phone AS employee_phone
+                          FROM corporation a
+                          LEFT OUTER JOIN employee_corporation b
+                          ON a.corporation_id = b.corporation_id
+                          LEFT OUTER JOIN employee c
+                          ON b.employee_id = c.employee_id
+                          WHERE a.corporation_id = $1
                         `
 
   const return_rows = (rows) => {
     return rows[0]
   }
   return query(get_landlord, values)
+    .then((data) => {
+      return stringify_rows(data)
+    })
+    .then((data) => {
+      return json_rows(data)
+    })
+    .then((data) => {
+      return return_rows(data)
+    })
+    .catch((error) => {
+      console.log(error)
+    })
+}
+
+exports.get_employee_assigned_to_building = (builing_id) => {
+  const values = [builing_id]
+
+  const get_employee = `SELECT b.employee_id, b.first_name, b.last_name, b.email, b.alias_email, b.phone, b.cavalry
+                          FROM employee_assignments a
+                          INNER JOIN employee b
+                          ON a.employee_id = b.employee_id
+                          WHERE a.building_id = $1
+                       `
+
+  const return_rows = (rows) => {
+    return rows[0]
+  }
+  return query(get_employee, values)
     .then((data) => {
       return stringify_rows(data)
     })

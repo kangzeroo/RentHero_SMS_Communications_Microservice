@@ -11,6 +11,8 @@ const gatherOutgoingNumber = require('../api/sms_routing').gatherOutgoingNumber
 
 const formattedPhoneNumber = require('../api/general_api').formattedPhoneNumber
 
+const get_landlords_twilio = require('./LeasingDB/Queries/SMSQueries').get_landlords_twilio
+
 
 exports.voice = function(req, res, next) {
   console.log('/voice')
@@ -27,22 +29,92 @@ exports.voice = function(req, res, next) {
    gatherOutgoingNumber(from, to)
     .then((outgoingPhoneNumber) => {
       console.log(outgoingPhoneNumber)
-       const voiceResponse = new VoiceResponse()
-       voiceResponse.say({
-         voice: 'alice',
-         language: 'en',
-       },
-        'this call may be recorded for quality and training purposes'
-       )
-       const dial = voiceResponse.dial({ callerId: to, record: 'record-from-answer' })
-       dial.number(outgoingPhoneNumber)
+      if (outgoingPhoneNumber && outgoingPhoneNumber.length > 0) {
+        const voiceResponse = new VoiceResponse()
+        voiceResponse.say({
+          voice: 'man',
+          language: 'en',
+        },
+         'this call may be recorded for quality and training purposes'
+        )
+        const dial = voiceResponse.dial({ callerId: to, record: 'record-from-answer' })
+        dial.number(outgoingPhoneNumber)
 
 
-       console.log(dial)
-       console.log(voiceResponse.toString())
-       res.type('text/xml')
-       res.send(voiceResponse.toString())
+        console.log(dial)
+        console.log(voiceResponse.toString())
+        res.type('text/xml')
+        res.send(voiceResponse.toString())
+      } else {
+        console.log('FALLBACK')
+        // get_landlords_twilio(to)
+        // .then((landlordData) => {
+        //   if (landlordData && landlordData.landlord_name) {
+        //     console.log('landlord data exists:')
+        //     console.log(landlordData)
+        //     const voiceResponse = new VoiceResponse()
+        //     const tenants = landlordData.map(a => { return a.first_name + ' ' + a.last_name })
+        //     console.log(tenants)
+        //     const gather = voiceResponse.gather({
+        //       input: 'speech dtmf',
+        //       timeout: 3,
+        //       numDigits: landlordData.length,
+        //
+        //     })
+        //     gather.say('Your number is not mapped. Please select your group leader')
+        //     tenants.map((tenant, index) => {
+        //       return (
+        //         gather.say(`Press ${index + 1} for ${tenant}`)
+        //
+        //       )
+        //     })
+        //   } else {
+        //     console.log('we fucked up')
+        //     const voiceResponse = new VoiceResponse()
+        //     const tenants = ['Jimmy Guo', 'Kangze Huang', 'Vincent Chiang']
+        //     console.log(tenants)
+        //     const gather = voiceResponse.gather({
+        //       input: 'speech dtmf',
+        //       timeout: 3,
+        //       numDigits: 1,
+        //     })
+        //     gather.say({
+        //       voice: 'man',
+        //       language: 'en',
+        //     }, 'Your number is not mapped. Please select your group leader')
+        //     tenants.map((tenant, index) => {
+        //       return (
+        //         gather.say(`Press ${index + 1} for ${tenant}`)
+        //
+        //       )
+        //     })
+        //     console.log(voiceResponse.toString())
+        //     res.type('text/xml')
+        //     res.send(voiceResponse.toString())
+        //   }
+        // })
+        const voiceResponse = new VoiceResponse()
+        voiceResponse.say({
+          voice: 'man',
+          language: 'en',
+        }, 'This number is not assigned to you. Goodbye.')
+        voiceResponse.hangup()
+        res.type('text/xml')
+        res.send(voiceResponse.toString())
+      }
     })
+}
+
+
+exports.voice_fallback = function(req, res, next) {
+  const voiceResponse = new VoiceResponse()
+
+  const gather = voiceResponse.gather({
+    input: 'speech dtmf',
+    timeout: 3,
+    numDigits: 1,
+  })
+  gather.say('Please say the name of the property you are here to visit.')
 }
 
 
@@ -210,4 +282,8 @@ exports.get_recordings_for_given_call = function(req, res, next) {
     console.log(err)
     res.status(500).send('Failed to get recordings for call')
   })
+}
+
+exports.stranger_call = function(req, res, next) {
+  console.log(req.body)
 }

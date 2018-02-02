@@ -13,7 +13,7 @@ if (process.env.NODE_ENV === 'production') {
   LANDLORD_RESPONSIVENESS_MICROSERVICE = 'https://renthero.host:3009'
 }
 
-exports.generateInitialCorporateEmail = function(toEmailAddresses, proxyFromEmailAddress, tenant, tenantMessage, landlordMessage, building, tenantOrLandlord){
+exports.generateInitialCorporateEmail = function(toEmailAddresses, proxyFromEmailAddress, tenant, tenantMessage, landlordMessage, building, suite){
   /*
     toEmailAddresses = ['personA@email.com', 'personB@email.com']
     proxyFromEmailAddress = 'relationshipID@renthero.cc',
@@ -33,7 +33,7 @@ exports.generateInitialCorporateEmail = function(toEmailAddresses, proxyFromEmai
 		if (!toEmailAddresses || toEmailAddresses.length === 0 || !proxyFromEmailAddress || !landlordMessage) {
 			rej('Missing from email, proxy email, or message')
 		} else {
-			const params = createInitialParams(toEmailAddresses, proxyFromEmailAddress, tenant, tenantMessage, landlordMessage, building)
+			const params = createInitialParams(toEmailAddresses, proxyFromEmailAddress, tenant, tenantMessage, landlordMessage, building, suite)
 			// console.log('Sending email with attached params!')
 			AWS.config.credentials.refresh(function() {
 				// console.log(AWS.config.credentials)
@@ -55,7 +55,7 @@ exports.generateInitialCorporateEmail = function(toEmailAddresses, proxyFromEmai
 	return p
 }
 
-function createInitialParams(toEmailAddresses, proxyFromEmailAddress, tenant, tenantMessage, landlordMessage, building){
+function createInitialParams(toEmailAddresses, proxyFromEmailAddress, tenant, tenantMessage, landlordMessage, building, suite){
   const params = {
 	  Destination: { /* required */
 	    BccAddresses: [
@@ -67,7 +67,7 @@ function createInitialParams(toEmailAddresses, proxyFromEmailAddress, tenant, te
 	  Message: { /* required */
 	    Body: { /* required */
 	      Html: {
-	        Data: generateHTMLInquiryEmail_Landlord(tenant, tenantMessage, landlordMessage, building),
+	        Data: generateHTMLInquiryEmail_Landlord(tenant, tenantMessage, landlordMessage, building, suite),
 	        Charset: 'UTF-8'
 	      },
 	    },
@@ -84,7 +84,7 @@ function createInitialParams(toEmailAddresses, proxyFromEmailAddress, tenant, te
 }
 
 // generate the HTML email
-function generateHTMLInquiryEmail_Landlord(tenant, tenantMessage, landlordMessage, building){
+function generateHTMLInquiryEmail_Landlord(tenant, tenantMessage, landlordMessage, building, suite){
 	return `
 		<!DOCTYPE html>
 		<html>
@@ -108,6 +108,7 @@ function generateHTMLInquiryEmail_Landlord(tenant, tenantMessage, landlordMessag
 		                            <tr>
 		                                <td align='center' valign='top' style='color:#337ab7;'>
 		                                    <h2>${building.building_address}</h2>
+                                        <h3>${suite && suite.suite_id ? suite.suite_alias : ''}</h3>
 		                                    <h3>${tenant.first_name} ${tenant.last_name} sent a message:</h3>
                                         <p>${tenantMessage}</p>
 		                                </td>
@@ -115,7 +116,7 @@ function generateHTMLInquiryEmail_Landlord(tenant, tenantMessage, landlordMessag
 		                            <tr style='border: 1px solid red; font-size: 1.2rem'>
 		                                <td align='center' valign='top'>
                                         <p>Please go to the link below to contact the tenant.</p>
-		                                    <p>${landlordMessage}</p>
+		                                    <a href=${landlordMessage}>${landlordMessage}</a>
 		                                </td>
 		                            </tr>
 		                        </table>
