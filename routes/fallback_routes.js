@@ -64,10 +64,12 @@ exports.stranger_message = function(req, res, next) {
       // if there is a best match, find the right person to connect to
       get_landlord_from_twilio_phone(to)
       .then((landlordData) => {
+        console.log('get_landlord_from_twilio_phone: ', landlordData)
         if (landlordData && landlordData.length > 0) {
           const landlord_ids = landlordData.map(s => s.landlord_id)
           get_all_buildings_from_landlord_ids(landlord_ids)
           .then((buildingData) => {
+            console.log('get_all_buildings_from_landlord_ids: ', buildingData)
             const twilioBuildings = buildingData.map(s => s.building_address).concat(buildingData.map(x => x.building_alias))
             const determinedBuilding = compare_message_to_buildings(message, twilioBuildings)
             selectedBuilding = buildingData.filter((bd) => {
@@ -102,8 +104,7 @@ exports.stranger_message = function(req, res, next) {
              }
           })
         } else {
-          const determinedBuilding = compare_message_to_buildings(message, allTwilioBuildings)
-          console.log(allBuildingData)
+          const determinedBuilding = compare_message_to_buildings(message, allBuildingData)
           const selectedBuilding = allBuildingData.filter((bd) => {
             return bd.building_alias.toLowerCase() === determinedBuilding.toLowerCase() || bd.building_address.toLowerCase() === determinedBuilding.toLowerCase()
           })[0].building_id
