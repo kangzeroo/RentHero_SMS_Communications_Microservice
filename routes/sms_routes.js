@@ -3,6 +3,7 @@ const twilio_client = require('../twilio_setup').generate_twilio_client();
 const RENTHERO_SENDER_ID = require('../message_logs/schema/dynamodb_tablenames').RENTHERO_SENDER_ID
 const uuid = require('uuid')
 const shortid = require('shortid')
+
 const MessagingResponse = require('twilio').twiml.MessagingResponse;
 const VoiceResponse = require('twilio').twiml.VoiceResponse;
 const shortenUrl = require('../api/general_api').shortenUrl
@@ -28,7 +29,6 @@ const insertCommunicationsLog = require('../message_logs/dynamodb_api').insertCo
 const insertOrchestraLog = require('../message_logs/dynamodb_api').insertOrchestraLog
 // const json = require('json')
 const formattedPhoneNumber = require('../api/general_api').formattedPhoneNumber
-
 
 
 // for those initial sms messages
@@ -631,9 +631,6 @@ exports.sms_forwarder = function(req, res, next) {
   }
 }
 
-exports.stranger_message = function(req, res, next) {
-  console.log(req.body)
-}
 
 exports.listener = function(req, res, next ) {
   const info = req.body

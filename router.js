@@ -6,6 +6,7 @@ const InquiryRoutes = require('./routes/inquiry_routes')
 const SMSRoutes = require('./routes/sms_routes')
 const EmailRoutes = require('./routes/email_routes')
 const MassSMSRoutes = require('./routes/mass_sms_routes')
+const FallbackRoutes = require('./routes/fallback_routes')
 const goodbyeSMSRoutes = require('./routes/goodbye_sms_routes')
 const SMS_RDS_Queries = require('./routes/LeasingDB/Queries/SMSQueries')
 const VoiceRoutes = require('./routes/voice_routes')
@@ -38,7 +39,9 @@ module.exports = function(app){
 
 	app.post('/use-sms', [twilio.webhook({ validate: false })], SMSRoutes.sms_forwarder)
 	app.post('/listener', [twilio.webhook({ validate: false })], SMSRoutes.listener)
-	app.post('/stranger-message', [twilio.webhook({ validate: false })], SMSRoutes.stranger_message)
+
+	// FallBack Routes
+	app.post('/stranger-message', [twilio.webhook({ validate: false })], FallbackRoutes.stranger_message)
 
 	app.post('/use-voice', [twilio.webhook({ validate: false })], VoiceRoutes.voice)
 	app.post('/voice_fallback', [twilio.webhook({ validate: false })], VoiceRoutes.voice_fallback)
