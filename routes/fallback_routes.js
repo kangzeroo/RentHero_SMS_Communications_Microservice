@@ -139,7 +139,7 @@ exports.stranger_message = function(req, res, next) {
       console.log('Best Match: ', matches.bestMatch.target)
       // assume the tenant hasn't said anything, send a message to prompt the tenant to type in the building name
       console.log('PROMPT the user to type a building')
-      const twiml_client = new MessagingResponse()
+      // const twilio_client = new MessagingResponse()
       insertCommunicationsLog({
         'ACTION': 'RENTHERO_FALLBACK',
         'DATE': new Date().getTime(),
@@ -157,20 +157,20 @@ exports.stranger_message = function(req, res, next) {
         from: to,
         body: 'Please enter the building name',
       })
-      twiml_client.messages.create({
+      twilio_client.messages.create({
         to: from,
         from: to,
         body: 'Please type the building name',
       })
       res.type('text/xml')
-      res.send(twiml_client.toString())
+      res.send(twilio_client.toString())
     }
   })
 }
 
 const send_initial = (tenantPhone, landlordPhone, message) => {
   const twilioNumber = determine_new_twilio_number(tenantPhone, landlordPhone)
-  const twiml_client = new MessagingResponse()
+  // const twilio_client = new MessagingResponse()
   insertCommunicationsLog({
     'ACTION': 'RENTHERO_FALLBACK',
     'DATE': new Date().getTime(),
@@ -183,13 +183,13 @@ const send_initial = (tenantPhone, landlordPhone, message) => {
     'PROXY_CONTACT_ID': twilioNumber,
     'TEXT': message,
   })
-  twiml_client.messages.create({
+  twilio_client.messages.create({
     to: tenantPhone,
     from: twilioNumber,
     body: message,
   })
   // res.type('text/xml')
-  // res.send(twiml_client.toString())
+  // res.send(twilio_client.toString())
 }
 
 
