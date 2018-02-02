@@ -198,9 +198,9 @@ const send_initial = (tenantPhone, landlordPhone, message, building_id) => {
       console.log(data)
     })
     // res.type('text/xml')
-    // res.send(twilio_c
+    // res.send(twilio_client.toString())
   })
-  lient.toString())
+
 }
 
 
