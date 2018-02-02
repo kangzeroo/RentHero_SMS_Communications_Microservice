@@ -157,7 +157,7 @@ exports.stranger_message = function(req, res, next) {
         from: to,
         body: 'Please enter the building name',
       })
-      twiml_client.message({
+      twiml_client.messages.create({
         to: from,
         from: to,
         body: 'Please type the building name',
@@ -183,7 +183,7 @@ const send_initial = (tenantPhone, landlordPhone, message) => {
     'PROXY_CONTACT_ID': twilioNumber,
     'TEXT': message,
   })
-  twiml_client.message({
+  twiml_client.messages.create({
     to: tenantPhone,
     from: twilioNumber,
     body: message,
