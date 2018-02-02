@@ -584,7 +584,7 @@ exports.sms_forwarder = function(req, res, next) {
       const receiver_id = getAppropriateId(data, original_to)
 
       if (data.corporation_id === sender_id) {
-        updateLandlordLastActive(data.landlord_id)
+        updateLandlordLastActive(data.corporation_id)
       }
       // log from, to, body, outgoingPhoneNumber
       get_landlord_from_id(data.landlord_id)
