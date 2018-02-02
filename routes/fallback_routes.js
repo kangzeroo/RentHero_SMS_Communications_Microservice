@@ -37,6 +37,7 @@ exports.stranger_message = function(req, res, next) {
   const message = info.Body.toLowerCase()
   let building_id
   let selectedBuilding
+  let allBuildingData
 
   insertCommunicationsLog({
     'ACTION': 'RENTHERO_FALLBACK',
@@ -54,6 +55,7 @@ exports.stranger_message = function(req, res, next) {
 
   get_all_building_addresses()
   .then((allBuildingData) => {
+    allBuildingData = allBuildingData
     const allTwilioBuildings = allBuildingData.map(s => s.building_address).concat(allBuildingData.map(x => x.building_alias))
     const matches = stringSimilarity.findBestMatch(message, allTwilioBuildings)
     if (matches.bestMatch.rating > 0.5) {
