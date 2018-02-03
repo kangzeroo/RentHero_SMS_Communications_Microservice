@@ -97,7 +97,12 @@ exports.voice = function(req, res, next) {
         voiceResponse.say({
           voice: 'man',
           language: 'en',
-        }, 'You are calling from an unrecognized number. Please send a message to this number of the property name')
+        }, 'You are calling from an unrecognized number. Please send a text message of the property name')
+        twilio_client.messages.create({
+          to: from,
+          from: to,
+          body: 'Hello, please respond to this message with a property name, and we will connect you with the landlord. Cheers! -- The RentHero Team',
+        })
         voiceResponse.hangup()
         res.type('text/xml')
         res.send(voiceResponse.toString())
@@ -108,13 +113,13 @@ exports.voice = function(req, res, next) {
 
 exports.voice_fallback = function(req, res, next) {
   const voiceResponse = new VoiceResponse()
-
-  const gather = voiceResponse.gather({
-    input: 'speech dtmf',
-    timeout: 3,
-    numDigits: 1,
-  })
-  gather.say('Please say the name of the property you are here to visit.')
+  voiceResponse.say({
+    voice: 'man',
+    language: 'en',
+  }, 'You are calling from an unrecognized number. Please send a message to this number of the property name')
+  voiceResponse.hangup()
+  res.type('text/xml')
+  res.send(voiceResponse.toString())
 }
 
 
