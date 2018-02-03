@@ -97,7 +97,7 @@ exports.voice = function(req, res, next) {
         voiceResponse.say({
           voice: 'man',
           language: 'en',
-        }, 'This number is not assigned to you. Goodbye.')
+        }, 'You are calling from an unrecognized number. Please send a message to this number of the property name')
         voiceResponse.hangup()
         res.type('text/xml')
         res.send(voiceResponse.toString())
