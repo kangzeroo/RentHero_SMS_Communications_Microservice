@@ -149,22 +149,25 @@ exports.stranger_message = function(req, res, next) {
       // assume the tenant hasn't said anything, send a message to prompt the tenant to type in the building name
       console.log('PROMPT the user to type a building')
       // const twilio_client = new MessagingResponse()
+
+      const message_id = shortid.generate()
+      const message = `Hello, please respond to this message with a property name, and we will connect you with the landlord. Cheers! [ VERIFIED RENTHERO MESSAGE: RentHero.cc/m/${message_id} ]`
       insertCommunicationsLog({
         'ACTION': 'RENTHERO_FALLBACK',
         'DATE': new Date().getTime(),
-        'COMMUNICATION_ID': shortid.generate(),
+        'COMMUNICATION_ID': message_id,
 
         'SENDER_ID': 'RENTHERO_FALLBACK',
         'SENDER_CONTACT_ID': 'RENTHERO_FALLBACK',
         'RECEIVER_CONTACT_ID': from,
         'RECEIVER_ID': from,
         'PROXY_CONTACT_ID': 'RENTHERO_FALLBACK',
-        'TEXT': 'Please enter the building name',
+        'TEXT': message,
       })
       twilio_client.messages.create({
         to: from,
         from: to,
-        body: 'Please type the building name',
+        body: message,
       })
       res.type('text/xml')
       res.send(twilio_client.toString())
