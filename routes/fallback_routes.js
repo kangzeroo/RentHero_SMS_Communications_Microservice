@@ -36,8 +36,6 @@ exports.stranger_message = function(req, res, next) {
   const from = info.From
   const to = info.To // twilio number
   const message = info.Body.toLowerCase()
-  let building_id
-  let selectedBuilding
   let allBuildingData
 
   insertCommunicationsLog({
@@ -67,6 +65,8 @@ exports.stranger_message = function(req, res, next) {
       .then((landlordData) => {
         console.log('get_landlord_from_twilio_phone: ', landlordData)
         if (landlordData && landlordData.length > 0) {
+          let building_id
+          let selectedBuilding
           const landlord_ids = landlordData.map(s => s.landlord_id)
           get_all_buildings_from_landlord_ids(landlord_ids)
           .then((buildingData) => {
@@ -105,6 +105,8 @@ exports.stranger_message = function(req, res, next) {
              }
           })
         } else {
+          let building_id
+          let selectedBuilding
           const allTwilioBuildings = allBuildingData.map(s => s.building_address).concat(allBuildingData.map(x => x.building_alias))
           console.log('allTwilioBuildings: ', allTwilioBuildings)
           const determinedBuilding = compare_message_to_buildings(message, allTwilioBuildings)
