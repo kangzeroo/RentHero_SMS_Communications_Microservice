@@ -29,7 +29,7 @@ const send_renthero_inital_message = function(tenant, staff, message) {
     console.log('send_renthero_inital_message: ', tenant, staff, message)
     const tenantPhone = formattedPhoneNumber(tenant.phone)
     const staffPhone = formattedPhoneNumber(staff.phone)
-    determine_new_twilio_number(tenant.phone, staff.phone)
+    determine_new_twilio_number(tenantPhone, staffPhone)
     .then((twilioPhone) => {
       insertCommunicationsLog({
         'ACTION': 'RENTHERO_SMS',
