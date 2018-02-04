@@ -170,40 +170,68 @@ exports.initial_corporate_mapping_inquiry = function(req, response, next) {
 
 // POST /message_proof
 exports.message_proof = function(request, resolve, next) {
-  const p = new Promise((res, rej) => {
-    const comm_id = request.body.comm_id
-    const params = {
-      "TableName": COMMUNICATIONS_HISTORY,
-      "FilterExpression": "#COMMUNICATION_ID = :comm_id",
-      "ExpressionAttributeNames": {
-        "#COMMUNICATION_ID": "COMMUNICATION_ID",
-        "#DATE": "DATE",
-        "#TEXT": "TEXT"
-      },
-      "ExpressionAttributeValues": {
-        ":comm_id": comm_id,
-      },
-      "ProjectionExpression": "#COMMUNICATION_ID, #DATE, #TEXT"
-    }
-    docClient.scan(params, (err, data) => {
-      if (err){
-        console.log(err, err.stack); // an error occurred
-        resolve.status(500).send({
-          message: 'ERROR'
-        })
-      }else{
-        console.log(data);           // successful response
-        if (data.Items.length > 0 && data.Items[0].ACTION !== 'FORWARDED_MESSAGE') {
-          resolve.json(data.Items[0])
-        } else {
-          resolve.status(500).send({
-            message: 'NO SUCH COMMUNICATION'
-          })
+  const comm_id = request.body.comm_id
+  const params = {
+    "TableName": COMMUNICATIONS_HISTORY,
+    "FilterExpression": "#COMMUNICATION_ID = :comm_id",
+    "ExpressionAttributeNames": {
+      "#COMMUNICATION_ID": "COMMUNICATION_ID",
+      "#DATE": "DATE",
+      "#TEXT": "TEXT"
+    },
+    "ExpressionAttributeValues": {
+      ":comm_id": comm_id,
+    },
+    "ProjectionExpression": "#COMMUNICATION_ID, #DATE, #TEXT"
+  }
+  let Items = []
+  const onNext = ({ obs, params }) => {
+    setTimeout(() => {
+      console.log('OBSERVABLE NEXT')
+      console.log('=========== accumlated size: ' + Items.length)
+      docClient.scan(params, (err, data) => {
+        if (err){
+          console.log(err, err.stack); // an error occurred
+          obs.error(err)
+        }else{
+          console.log(data);           // successful response
+          Items = Items.concat(data.Items)
+          if (data.LastEvaluatedKey) {
+            params.ExclusiveStartKey = data.LastEvaluatedKey
+            obs.next({
+              obs,
+              params
+            })
+          } else {
+            obs.complete(data)
+          }
         }
-      }
+      })
+    }, 1500)
+  }
+  Rx.Observable.create((obs) => {
+    obs.next({
+      obs,
+      params
     })
+  }).subscribe({
+    next: onNext,
+    error: (err) => {
+      console.log('OBSERVABLE ERROR')
+      console.log(err)
+    },
+    complete: (y) => {
+      console.log('OBSERVABLE COMPLETE')
+      console.log(Items.length)
+      if (Items.length > 0 && Items[0].ACTION !== 'FORWARDED_MESSAGE') {
+        resolve.json(Items[0])
+      } else {
+        resolve.status(500).send({
+          message: 'NO SUCH COMMUNICATION'
+        })
+      }
+    }
   })
-  return p
 }
 
 // POST /get_most_recent_messages
