@@ -181,7 +181,7 @@ exports.stranger_message = function(req, res, next) {
       // })
     } else {
       console.log('stranger_message <-- Rating: ', matches.bestMatch.rating)
-      console.log('Message: ', message)
+      // console.log('Message: ', message)
       console.log('Best Match: ', matches.bestMatch.target)
       // assume the tenant hasn't said anything, send a message to prompt the tenant to type in the building name
       console.log('PROMPT the user to type a building')
