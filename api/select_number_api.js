@@ -40,6 +40,8 @@ exports.determine_new_twilio_number = (tenantPhone, landlordPhone) => {
           } else {
             console.log('USE EXISTING NUMBER')
             let selected_twilio_number
+            console.log(dbtwilio_numbers)
+            console.log(serviceNumbers)
             if (dbtwilio_numbers && dbtwilio_numbers.length > 0 && serviceNumbers && serviceNumbers.length > 0) {
               selected_twilio_number = serviceNumbers.filter(val => !dbtwilio_numbers.includes(val))[0]
               console.log('selected_twilio_number-1', selected_twilio_number)
