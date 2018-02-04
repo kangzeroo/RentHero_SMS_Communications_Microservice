@@ -60,90 +60,124 @@ exports.stranger_message = function(req, res, next) {
       console.log('stranger_message --> Rating: ', matches.bestMatch.rating)
       console.log('Message: ', message)
       console.log('Match: ', matches.bestMatch.target)
-      // if there is a best match, find the right person to connect to
-      get_landlord_from_twilio_phone(to)
-      .then((landlordData) => {
-        console.log('get_landlord_from_twilio_phone: ', landlordData)
-        if (landlordData && landlordData.length > 0) {
-          let building_id
-          let selectedBuilding
-          const landlord_ids = landlordData.map(s => s.landlord_id)
-          get_all_buildings_from_landlord_ids(landlord_ids)
-          .then((buildingData) => {
-            console.log('get_all_buildings_from_landlord_ids: ', buildingData)
-            const twilioBuildings = buildingData.map(s => s.building_address).concat(buildingData.map(x => x.building_alias))
-            const determinedBuilding = compare_message_to_buildings(message, twilioBuildings)
-            selectedBuilding = buildingData.filter((bd) => {
-              return bd.building_alias.toLowerCase() === determinedBuilding.toLowerCase() || bd.building_address.toLowerCase() === determinedBuilding.toLowerCase()
-            })[0].building_id
-            building_id = selectedBuilding.building_id
-            console.log(building_id, selectedBuilding.building_id)
-            return get_employee_assigned_to_building(selectedBuilding.building_id)
-          })
-          .then((employeeData) => {
-             console.log('LINE 65: ', employeeData)
-             if (employeeData) {
-               console.log('LINE 67: ', employeeData)
-               // call initial on the tenant and employee using the employee number
-               get_landlord_info(building_id)
-               .then((lData) => {
-                 const message = `Hello, this is ${employeeData.first_name}, I'm a representative of ${lData.corporation_name}.
-                                  Please text or call me regarding your interest in ${selectedBuilding.building_alias}
-                                  `
-                 return send_initial(from, formattedPhoneNumber(employeeData.phone), message, building_id)
-               })
-             } else {
-               get_landlord_info(building_id)
-               .then((landlordData) => {
-                 console.log('LINE 73: ', landlordData)
-                 // call initial on the tenant and employee using the corporation phone number
-                 const message = `Hello, this is ${landlordData.corporation_name},
-                                  Please text or call me regarding your interest in ${selectedBuilding.building_alias}.
-                                  `
-                 return send_initial(from, formattedPhoneNumber(landlordData.phone), message, building_id)
-               })
-             }
+
+      const twilioBuildings = allBuildingData.map(s => s.building_address).concat(allBuildingData.map(x => x.building_alias))
+      const determinedBuilding = compare_message_to_buildings(message, twilioBuildings)
+      const selectedBuilding = allBuildingData.filter((bd) => {
+        return bd.building_alias.toLowerCase() === determinedBuilding.toLowerCase() || bd.building_address.toLowerCase() === determinedBuilding.toLowerCase()
+      })[0].building_id
+      const building_id = selectedBuilding.building_id
+
+      console.log(building_id, selectedBuilding.building_id)
+      return get_employee_assigned_to_building(selectedBuilding.building_id)
+      .then((employeeData) => {
+        console.log('employee data: ', employeeData)
+
+        if (employeeData) {
+          get_landlord_info(building_id)
+          .then((lData) => {
+            const message = `Hello, this is ${employeeData.first_name}, I'm a representative of ${lData.corporation_name}.
+                             Please text or call me regarding your interest in ${selectedBuilding.building_alias}
+                             `
+            return send_initial(from, formattedPhoneNumber(employeeData.phone), message, building_id)
           })
         } else {
-          let building_id
-          let selectedBuilding
-          const allTwilioBuildings = allBuildingData.map(s => s.building_address).concat(allBuildingData.map(x => x.building_alias))
-          console.log('allTwilioBuildings: ', allTwilioBuildings)
-          const determinedBuilding = compare_message_to_buildings(message, allTwilioBuildings)
-          console.log('determinedBuilding: ', determinedBuilding)
-          selectedBuilding = allBuildingData.filter((bd) => {
-            return bd.building_alias.toLowerCase() === determinedBuilding.toLowerCase() || bd.building_address.toLowerCase() === determinedBuilding.toLowerCase()
-          })[0]
-          building_id = selectedBuilding.building_id
-          console.log(selectedBuilding.building_id)
-          get_employee_assigned_to_building(selectedBuilding.building_id)
-          .then((employeeData) => {
-            console.log('LINE 87: ', employeeData)
-            if (employeeData) {
-              console.log('LINE 89: ', employeeData)
-              // call initial on the tenant and employee using the employee number
-              get_landlord_info(building_id)
-              .then((lData) => {
-                const message = `Hello, this is ${employeeData.first_name}, I'm a representative of ${lData.corporation_name}.
-                                 Please text or call me regarding your interest in ${selectedBuilding.building_alias}
-                                 `
-                return send_initial(from, formattedPhoneNumber(employeeData.phone), message, building_id)
-              })
-            } else {
-              console.log(building_id)
-              get_landlord_info(building_id)
-              .then((landlordData) => {
-                console.log('LINE 95: ', landlordData)
-                // call initial on the tenant and employee using the corporation phone number
-                const message = `Hello, this is ${landlordData.corporation_name},
-                                 Please text or call me regarding your interest in ${selectedBuilding.building_alias}.
-                                 `
-                return send_initial(from, formattedPhoneNumber(landlordData.phone), message, building_id)
-              })
-            }
+          get_landlord_info(building_id)
+          .then((landlordData) => {
+            console.log('LINE 73: ', landlordData)
+            // call initial on the tenant and employee using the corporation phone number
+            const message = `Hello, this is ${landlordData.corporation_name},
+                             Please text or call me regarding your interest in ${selectedBuilding.building_alias}.
+                             `
+            return send_initial(from, formattedPhoneNumber(landlordData.phone), message, building_id)
           })
         }
       })
+
+      // if there is a best match, find the right person to connect to
+      // get_landlord_from_twilio_phone(to)
+      // .then((landlordData) => {
+      //   console.log('get_landlord_from_twilio_phone: ', landlordData)
+      //   if (landlordData && landlordData.length > 0) {
+      //     let building_id
+      //     let selectedBuilding
+      //     const landlord_ids = landlordData.map(s => s.landlord_id)
+      //     get_all_buildings_from_landlord_ids(landlord_ids)
+      //     .then((buildingData) => {
+      //       console.log('get_all_buildings_from_landlord_ids: ', buildingData)
+      //       const twilioBuildings = buildingData.map(s => s.building_address).concat(buildingData.map(x => x.building_alias))
+      //       const determinedBuilding = compare_message_to_buildings(message, twilioBuildings)
+      //       selectedBuilding = buildingData.filter((bd) => {
+      //         return bd.building_alias.toLowerCase() === determinedBuilding.toLowerCase() || bd.building_address.toLowerCase() === determinedBuilding.toLowerCase()
+      //       })[0].building_id
+      //       building_id = selectedBuilding.building_id
+      //       console.log(building_id, selectedBuilding.building_id)
+      //       return get_employee_assigned_to_building(selectedBuilding.building_id)
+      //     })
+      //     .then((employeeData) => {
+      //        console.log('LINE 65: ', employeeData)
+      //        if (employeeData) {
+      //          console.log('LINE 67: ', employeeData)
+      //          // call initial on the tenant and employee using the employee number
+      //          get_landlord_info(building_id)
+      //          .then((lData) => {
+      //            const message = `Hello, this is ${employeeData.first_name}, I'm a representative of ${lData.corporation_name}.
+      //                             Please text or call me regarding your interest in ${selectedBuilding.building_alias}
+      //                             `
+      //            return send_initial(from, formattedPhoneNumber(employeeData.phone), message, building_id)
+      //          })
+      //        } else {
+      //          get_landlord_info(building_id)
+      //          .then((landlordData) => {
+      //            console.log('LINE 73: ', landlordData)
+      //            // call initial on the tenant and employee using the corporation phone number
+      //            const message = `Hello, this is ${landlordData.corporation_name},
+      //                             Please text or call me regarding your interest in ${selectedBuilding.building_alias}.
+      //                             `
+      //            return send_initial(from, formattedPhoneNumber(landlordData.phone), message, building_id)
+      //          })
+      //        }
+      //     })
+      //   } else {
+      //     let building_id
+      //     let selectedBuilding
+      //     const allTwilioBuildings = allBuildingData.map(s => s.building_address).concat(allBuildingData.map(x => x.building_alias))
+      //     console.log('allTwilioBuildings: ', allTwilioBuildings)
+      //     const determinedBuilding = compare_message_to_buildings(message, allTwilioBuildings)
+      //     console.log('determinedBuilding: ', determinedBuilding)
+      //     selectedBuilding = allBuildingData.filter((bd) => {
+      //       return bd.building_alias.toLowerCase() === determinedBuilding.toLowerCase() || bd.building_address.toLowerCase() === determinedBuilding.toLowerCase()
+      //     })[0]
+      //     building_id = selectedBuilding.building_id
+      //     console.log(selectedBuilding.building_id)
+      //     get_employee_assigned_to_building(selectedBuilding.building_id)
+      //     .then((employeeData) => {
+      //       console.log('LINE 87: ', employeeData)
+      //       if (employeeData) {
+      //         console.log('LINE 89: ', employeeData)
+      //         // call initial on the tenant and employee using the employee number
+      //         get_landlord_info(building_id)
+      //         .then((lData) => {
+      //           const message = `Hello, this is ${employeeData.first_name}, I'm a representative of ${lData.corporation_name}.
+      //                            Please text or call me regarding your interest in ${selectedBuilding.building_alias}
+      //                            `
+      //           return send_initial(from, formattedPhoneNumber(employeeData.phone), message, building_id)
+      //         })
+      //       } else {
+      //         console.log(building_id)
+      //         get_landlord_info(building_id)
+      //         .then((landlordData) => {
+      //           console.log('LINE 95: ', landlordData)
+      //           // call initial on the tenant and employee using the corporation phone number
+      //           const message = `Hello, this is ${landlordData.corporation_name},
+      //                            Please text or call me regarding your interest in ${selectedBuilding.building_alias}.
+      //                            `
+      //           return send_initial(from, formattedPhoneNumber(landlordData.phone), message, building_id)
+      //         })
+      //       }
+      //     })
+      //   }
+      // })
     } else {
       console.log('stranger_message <-- Rating: ', matches.bestMatch.rating)
       console.log('Message: ', message)
