@@ -63,9 +63,10 @@ exports.stranger_message = function(req, res, next) {
 
       const twilioBuildings = allBuildingData.map(s => s.building_address).concat(allBuildingData.map(x => x.building_alias))
       const determinedBuilding = compare_message_to_buildings(message, twilioBuildings)
+      console.log(determinedBuilding)
       const selectedBuilding = allBuildingData.filter((bd) => {
         return bd.building_alias.toLowerCase() === determinedBuilding.toLowerCase() || bd.building_address.toLowerCase() === determinedBuilding.toLowerCase()
-      })[0].building_id
+      })[0]
       const building_id = selectedBuilding.building_id
 
       console.log(building_id, selectedBuilding.building_id)
