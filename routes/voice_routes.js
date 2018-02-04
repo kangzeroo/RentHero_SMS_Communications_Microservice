@@ -50,7 +50,7 @@ exports.voice = function(req, res, next) {
         console.log('FALLBACK')
         const voiceResponse = new VoiceResponse()
         const message_id = shortid.generate()
-        const message = `Hello, please respond to this message with a property name, and we will connect you with the landlord. Cheers! [ VERIFIED RENTHERO MESSAGE: RentHero.cc/m/${message_id} ]`
+        const message = `Hello, please respond to this message with a property name, and we will connect you with the landlord. Cheers! [ RENTHERO TERMS OF USE: RentHero.cc/m/${message_id} ]`
 
         voiceResponse.say({
           voice: 'man',
