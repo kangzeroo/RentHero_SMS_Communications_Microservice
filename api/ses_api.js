@@ -108,10 +108,12 @@ function generateHTMLInquiryEmail_Landlord(tenant, message, building){
 		                                    <p>${message}</p>
 		                                </td>
 		                            </tr>
-		                            <tr style='border: 1px solid red; font-size: 1.2rem'>
+		                            <tr style='font-size: 1.2rem'>
 		                                <td align='center' valign='top'>
 		                                    <h3>You can respond to the tenant by directly replying to this email.</h3>
+                                        <br /><br />
                                         <h3>View your ad on https://renthero.ca/${building.building_alias.replace(/ /g, '-')}</h3>
+                                        <h5>By using RentHero you agree to our <a href='https://renthero.ca/termsandconditions'>terms of use</a></h5>
 		                                </td>
 		                            </tr>
 		                        </table>
@@ -163,6 +165,11 @@ function generateHTMLInquiryEmail_Tenant(tenant, message, building){
                                 <tr style='border: 1px solid red; font-size: 1.2rem'>
 		                                <td align='center' valign='top'>
 		                                    <h3>You can speak with the landlord by directly replying to this email.</h3>
+		                                </td>
+		                            </tr>
+                                <tr style='font-size: 1.2rem'>
+		                                <td align='center' valign='top'>
+                                      <h5>By using RentHero you agree to our <a href='https://renthero.ca/termsandconditions'>terms of use</a></h5>
 		                                </td>
 		                            </tr>
 		                        </table>

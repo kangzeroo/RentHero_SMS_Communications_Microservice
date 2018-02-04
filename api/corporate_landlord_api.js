@@ -119,6 +119,11 @@ function generateHTMLInquiryEmail_Landlord(tenant, tenantMessage, landlordMessag
 		                                    <a href=${landlordMessage}>${landlordMessage}</a>
 		                                </td>
 		                            </tr>
+		                            <tr style='font-size: 1.2rem'>
+		                                <td align='center' valign='top'>
+                                        <h5>By using RentHero you agree to our <a href='https://renthero.ca/termsandconditions'>terms of use</a></h5>
+		                                </td>
+		                            </tr>
 		                        </table>
 		                    </td>
 		                </tr>

@@ -94,6 +94,11 @@ function generateStaffInviteHTMLEmail(email, employee, tenant, building, group) 
                                       <div>Tenant Email: ${tenant.email}</div>
 		                                </td>
 		                            </tr>
+		                            <tr style='font-size: 1.2rem'>
+		                                <td align='center' valign='top'>
+                                        <h5>By using RentHero you agree to our <a href='https://renthero.ca/termsandconditions'>terms of use</a></h5>
+		                                </td>
+		                            </tr>
 		                        </table>
 		                    </td>
 		                </tr>
