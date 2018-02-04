@@ -188,7 +188,7 @@ exports.stranger_message = function(req, res, next) {
       // const twilio_client = new MessagingResponse()
 
       const message_id = shortid.generate()
-      const message = `Hello, please respond to this message with a property name, and we will connect you with the landlord. Cheers! [ VERIFIED RENTHERO MESSAGE: RentHero.cc/m/${message_id} ]`
+      const message = `Hello, please respond to this message with a property name, and we will connect you with the landlord. Cheers! [ RENTHERO TERMS OF USE: RentHero.cc/m/${message_id} ]`
       insertCommunicationsLog({
         'ACTION': 'RENTHERO_FALLBACK',
         'DATE': new Date().getTime(),
