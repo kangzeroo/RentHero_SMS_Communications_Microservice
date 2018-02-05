@@ -11,6 +11,7 @@ exports.determine_new_twilio_number = (tenantPhone, landlordPhone) => {
     const service = twilio_client.messaging.services(messagingServiceSid)
     service.phoneNumbers.list()
     .then((data) => {
+      console.log(data)
       serviceNumbers = data.map(s => s.phoneNumber)
       totalServiceNumbers = data.length
       return get_tenant_landlord_match(tenantPhone, landlordPhone)
@@ -69,6 +70,7 @@ const buyNewTwilioNumber = () => {
     voiceEnabled: true,
   })
   .then((data) => {
+    console.log(data)
     const number = data[0]
     purchasedTwilioNumber = number.phoneNumber
     return twilio_client.incomingPhoneNumbers.create({
