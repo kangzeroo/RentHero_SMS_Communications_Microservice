@@ -46,8 +46,8 @@ exports.stranger_message = function(req, res, next) {
 
     'SENDER_ID': from,
     'SENDER_CONTACT_ID': from,
-    'RECEIVER_CONTACT_ID': 'invalid',
-    'RECEIVER_ID': 'invalid',
+    'RECEIVER_CONTACT_ID': 'RENTHERO_SMS_FALLBACK',
+    'RECEIVER_ID': 'RENTHERO_SMS_FALLBACK',
     'PROXY_CONTACT_ID': to,
     'TEXT': message,
   })
@@ -100,6 +100,7 @@ exports.stranger_message = function(req, res, next) {
             })
           }
         } else {
+          console.log('=====PRIVATE LANDLORD=======')
           const message = `Hello, this is ${landlordData.corporation_name},
                            Please text or call me regarding your interest in ${selectedBuilding.building_alias}.
                            `
