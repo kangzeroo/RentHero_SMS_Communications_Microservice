@@ -35,10 +35,10 @@ exports.voice = function(req, res, next) {
             'COMMUNICATION_ID': shortid.generate(),
             'MEDIUM': 'PHONE',
 
-            'SENDER_ID': outgoingObject.tenant_id,
-            'SENDER_CONTACT_ID': from,
-            'RECEIVER_CONTACT_ID': outgoingObject.landlord_phone,
-            'RECEIVER_ID': outgoingObject.landlord_id,
+            'SENDER_ID': outgoingObject.tenantId,
+            'SENDER_CONTACT_ID': outgoingObject.tenantPhoneNumber,
+            'RECEIVER_CONTACT_ID': outgoingObject.landlordPhoneNumber,
+            'RECEIVER_ID': outgoingObject.landlordId,
             'PROXY_CONTACT_ID': to,
             'TEXT': 'tenant called landlord',
           })
@@ -48,10 +48,10 @@ exports.voice = function(req, res, next) {
             'COMMUNICATION_ID': shortid.generate(),
             'MEDIUM': 'PHONE',
 
-            'SENDER_ID': outgoingObject.tenant_id,
-            'SENDER_CONTACT_ID': from,
-            'RECEIVER_CONTACT_ID': outgoingObject.landlord_phone,
-            'RECEIVER_ID': outgoingObject.landlord_id,
+            'SENDER_ID': outgoingObject.tenantId,
+            'SENDER_CONTACT_ID': outgoingObject.tenantPhoneNumber,
+            'RECEIVER_CONTACT_ID': outgoingObject.landlordPhoneNumber,
+            'RECEIVER_ID': outgoingObject.landlordId,
             'PROXY_CONTACT_ID': to,
             'TEXT': 'tenant called landlord',
           })
@@ -62,10 +62,10 @@ exports.voice = function(req, res, next) {
             'COMMUNICATION_ID': shortid.generate(),
             'MEDIUM': 'PHONE',
 
-            'SENDER_ID': outgoingObject.landlord_id,
-            'SENDER_CONTACT_ID': from,
-            'RECEIVER_CONTACT_ID': outgoingObject.tenant_phone,
-            'RECEIVER_ID': outgoingObject.tenant_id,
+            'SENDER_ID': outgoingObject.landlordId,
+            'SENDER_CONTACT_ID': outgoingObject.landlordPhoneNumber,
+            'RECEIVER_CONTACT_ID': outgoingObject.tenantPhoneNumber,
+            'RECEIVER_ID': outgoingObject.tenantId,
             'PROXY_CONTACT_ID': to,
             'TEXT': 'landlord called tenant',
           })
@@ -75,10 +75,10 @@ exports.voice = function(req, res, next) {
             'COMMUNICATION_ID': shortid.generate(),
             'MEDIUM': 'PHONE',
 
-            'SENDER_ID': outgoingObject.landlord_id,
-            'SENDER_CONTACT_ID': from,
-            'RECEIVER_CONTACT_ID': outgoingObject.tenant_phone,
-            'RECEIVER_ID': outgoingObject.tenant_id,
+            'SENDER_ID': outgoingObject.landlordId,
+            'SENDER_CONTACT_ID': outgoingObject.landlordPhoneNumber,
+            'RECEIVER_CONTACT_ID': outgoingObject.tenantPhoneNumber,
+            'RECEIVER_ID': outgoingObject.tenantId,
             'PROXY_CONTACT_ID': to,
             'TEXT': 'landlord called tenant',
           })
