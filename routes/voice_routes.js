@@ -44,6 +44,19 @@ exports.voice = function(req, res, next) {
         // insert logs
 
         if (outgoingObject.tenant_phone === from ) {
+          console.log('voice 1: ', {
+            'ACTION': 'FORWARDED_CALL',
+            'DATE': new Date().getTime(),
+            'COMMUNICATION_ID': shortid.generate(),
+            'MEDIUM': 'PHONE',
+
+            'SENDER_ID': outgoingObject.tenant_id,
+            'SENDER_CONTACT_ID': from,
+            'RECEIVER_CONTACT_ID': outgoingObject.landlord_phone,
+            'RECEIVER_ID': outgoingObject.landlord_id,
+            'PROXY_CONTACT_ID': to,
+            'TEXT': 'tenant called landlord',
+          })
           insertCommunicationsLog({
             'ACTION': 'FORWARDED_CALL',
             'DATE': new Date().getTime(),
@@ -58,6 +71,19 @@ exports.voice = function(req, res, next) {
             'TEXT': 'tenant called landlord',
           })
         } else if (outgoingObject.landlord_phone === from ) {
+          console.log('voice 2: ', {
+            'ACTION': 'FORWARDED_CALL',
+            'DATE': new Date().getTime(),
+            'COMMUNICATION_ID': shortid.generate(),
+            'MEDIUM': 'PHONE',
+
+            'SENDER_ID': outgoingObject.landlord_id,
+            'SENDER_CONTACT_ID': from,
+            'RECEIVER_CONTACT_ID': outgoingObject.tenant_phone,
+            'RECEIVER_ID': outgoingObject.tenant_id,
+            'PROXY_CONTACT_ID': to,
+            'TEXT': 'landlord called tenant',
+          })
           insertCommunicationsLog({
             'ACTION': 'FORWARDED_CALL',
             'DATE': new Date().getTime(),
