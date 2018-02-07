@@ -171,7 +171,7 @@ exports.get_tenant_landlord_sms_match = (sender_phone, receiver_phone) => {
                            WHERE (tenant_phone = $1 AND landlord_phone = $2)
                               OR (tenant_phone = $2 AND landlord_phone = $1)
                         ) a
-                        INNER JOIN tenant b ON a.tenant_id = b.tenant_id
+                        LEFT OUTER JOIN tenant b ON a.tenant_id = b.tenant_id
    `
 
    const return_rows = (rows) => {
