@@ -201,7 +201,7 @@ exports.send_initial_corporate_sms = function(tenant, corporation, building, gro
                 twilioNumber = purchasedTwilioNumber
                 return sendInitialSMSToTenantAndLandlord(
                   infoObj,
-                  { landlordId: corporation.corporation_id, landlordName: corporation.corporation_name, landlordPhone: employeePhone, textable: false, },
+                  { landlordId: corporation.corporation_id, landlordName: corporation.corporation_name, landlordPhone: employeePhone, textable: true, },
                   { tenantId: tenant.tenant_id, tenantPhone: tenantPhone },
                   purchasedTwilioNumber
                 )
@@ -218,7 +218,7 @@ exports.send_initial_corporate_sms = function(tenant, corporation, building, gro
             twilioNumber = selected_twilio_number
             return sendInitialSMSToTenantAndLandlord(
               infoObj,
-              { landlordId: corporation.corporation_id, landlordName: corporation.corporation_name, landlordPhone: employeePhone, textable: false, },
+              { landlordId: corporation.corporation_id, landlordName: corporation.corporation_name, landlordPhone: employeePhone, textable: true, },
               { tenantId: tenant.tenant_id, tenantPhone: tenantPhone },
               selected_twilio_number
             )
