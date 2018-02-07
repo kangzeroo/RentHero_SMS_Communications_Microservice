@@ -28,7 +28,7 @@ exports.voice = function(req, res, next) {
     .then((outgoingObject) => {
       console.log(outgoingObject)
       if (outgoingObject.outgoingPhoneNumber && outgoingObject.outgoingPhoneNumber.length > 0) {
-        if (outgoingObject.tenant_phone === from ) {
+        if (outgoingObject.outgoingPhoneNumber === outgoingObject.landlordPhoneNumber ) {
           console.log('voice 1: ', {
             'ACTION': 'FORWARDED_CALL',
             'DATE': new Date().getTime(),
@@ -55,7 +55,7 @@ exports.voice = function(req, res, next) {
             'PROXY_CONTACT_ID': to,
             'TEXT': 'tenant called landlord',
           })
-        } else if (outgoingObject.landlord_phone === from ) {
+        } else if (outgoingObject.outgoingPhoneNumber === outgoingObject.tenantPhoneNumber ) {
           console.log('voice 2: ', {
             'ACTION': 'FORWARDED_CALL',
             'DATE': new Date().getTime(),
