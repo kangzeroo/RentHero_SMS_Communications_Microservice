@@ -21,8 +21,9 @@ const log_through = data => {
 }
 
 exports.get_tenant_id_from_phone = (phone) => {
+  console.log('get_tenant_id_from_phone:')
   const number = unFormattedPhoneNumber(phone)
-  console.log(number)
+  console.log('unformatted number: ', number)
 
   const values = [number]
 
@@ -33,7 +34,7 @@ exports.get_tenant_id_from_phone = (phone) => {
 
   return query(get_tenant, values)
   .then((data) => {
-    console.log(data.rows[0])
+    console.log('tenant_id: ', data.rows[0])
     return data.rows[0]
   })
   .catch((err) => {
