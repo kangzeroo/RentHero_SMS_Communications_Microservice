@@ -4,6 +4,7 @@ const messagingServiceSid = process.env.MESSAGE_SERVICE_ID
 const twilio_client = require('../twilio_setup').generate_twilio_client()
 
 exports.determine_new_twilio_number = (tenantPhone, landlordPhone) => {
+  console.log('determine_new_twilio_number: ', tenantPhone, ' ', landlordPhone)
   const p = new Promise((res, rej) => {
     let serviceNumbers
     let totalServiceNumbers
@@ -11,7 +12,6 @@ exports.determine_new_twilio_number = (tenantPhone, landlordPhone) => {
     const service = twilio_client.messaging.services(messagingServiceSid)
     service.phoneNumbers.list()
     .then((data) => {
-      console.log(data)
       serviceNumbers = data.map(s => s.phoneNumber)
       totalServiceNumbers = data.length
       return get_tenant_landlord_match(tenantPhone, landlordPhone)
@@ -64,7 +64,7 @@ const buyNewTwilioNumber = () => {
   let purchasedTwilioNumber
   return twilio_client.availablePhoneNumbers('CA').local
   .list({
-    areaCode: '519',
+    inRegion: 'ON',
     smsEnabled: true,
     mmsEnabled: true,
     voiceEnabled: true,
