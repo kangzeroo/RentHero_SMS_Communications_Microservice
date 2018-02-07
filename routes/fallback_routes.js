@@ -169,11 +169,16 @@ exports.stranger_message = function(req, res, next) {
 }
 
 const send_initial = (tenantPhone, landlordPhone, message, building_id, corporation_id, employee_id) => {
+  let tenant_id = ''
   determine_new_twilio_number(tenantPhone, landlordPhone)
   .then((twilioNumber) => {
     console.log('send_initial_twilio_number: ', twilioNumber)
     get_tenant_id_from_phone(tenantPhone)
     .then((data) => {
+      if (data && data.tenant_id) {
+        console.log('tenant id exists!')
+        tenant_id = data.tenant_id
+      }
       insertCommunicationsLog({
         'ACTION': 'RENTHERO_SMS_FALLBACK',
         'DATE': new Date().getTime(),
@@ -197,7 +202,7 @@ const send_initial = (tenantPhone, landlordPhone, message, building_id, corporat
       body: message,
     })
     .then((data) => {
-      insert_sms_match('', tenantPhone, corporation_id, landlordPhone, data.sid, twilioNumber)
+      insert_sms_match(tenant_id, tenantPhone, corporation_id, landlordPhone, data.sid, twilioNumber)
     })
     // res.type('text/xml')
     // res.send(twilio_client.toString())
