@@ -70,7 +70,6 @@ const buyNewTwilioNumber = () => {
     voiceEnabled: true,
   })
   .then((data) => {
-    console.log(data)
     const number = data[0]
     purchasedTwilioNumber = number.phoneNumber
     return twilio_client.incomingPhoneNumbers.create({

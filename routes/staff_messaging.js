@@ -47,6 +47,7 @@ const send_renthero_inital_message = function(tenant, staff, message) {
           'ACTION': 'RENTHERO_SMS',
           'DATE': new Date().getTime(),
           'COMMUNICATION_ID': shortid.generate(),
+          'MEDIUM': 'SMS',
 
           'SENDER_ID': twilioPhone,
           'SENDER_CONTACT_ID': twilioPhone,

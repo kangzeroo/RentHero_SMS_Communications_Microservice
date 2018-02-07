@@ -48,6 +48,7 @@ exports.voice = function(req, res, next) {
             'ACTION': 'FORWARDED_CALL',
             'DATE': new Date().getTime(),
             'COMMUNICATION_ID': shortid.generate(),
+            'MEDIUM': 'PHONE',
 
             'SENDER_ID': outgoingObject.tenant_id,
             'SENDER_CONTACT_ID': from,
@@ -61,6 +62,7 @@ exports.voice = function(req, res, next) {
             'ACTION': 'FORWARDED_CALL',
             'DATE': new Date().getTime(),
             'COMMUNICATION_ID': shortid.generate(),
+            'MEDIUM': 'PHONE',
 
             'SENDER_ID': outgoingObject.landlord_id,
             'SENDER_CONTACT_ID': from,
@@ -88,6 +90,7 @@ exports.voice = function(req, res, next) {
           'ACTION': 'RENTHERO_CALL_FALLBACK',
           'DATE': new Date().getTime(),
           'COMMUNICATION_ID': shortid.generate(),
+          'MEDIUM': 'PHONE',
 
           'SENDER_ID': 'RENTHERO_CALL_FALLBACK',
           'SENDER_CONTACT_ID': 'RENTHERO_CALL_FALLBACK',
@@ -107,6 +110,7 @@ exports.voice = function(req, res, next) {
           'ACTION': 'RENTHERO_CALL_FALLBACK_MESSAGE',
           'DATE': new Date().getTime(),
           'COMMUNICATION_ID': message_id,
+          'MEDIUM': 'SMS',
 
           'SENDER_ID': 'RENTHERO_CALL_FALLBACK_MESSAGE',
           'SENDER_CONTACT_ID': 'RENTHERO_CALL_FALLBACK_MESSAGE',

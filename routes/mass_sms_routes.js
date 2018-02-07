@@ -38,6 +38,7 @@ exports.send_message_to_phones = function(req, res, next) {
         'ACTION': 'RENTHERO_SMS',
         'DATE': new Date().getTime(),
         'COMMUNICATION_ID': message_id,
+        'MEDIUM': 'SMS',
 
         'SENDER_ID': 'RentHeroSMS',
         'SENDER_CONTACT_ID': 'RentHeroSMS',
@@ -78,6 +79,7 @@ exports.send_message_to_phone = function(req, res, next) {
       'ACTION': 'RENTHERO_SMS',
       'DATE': new Date().getTime(),
       'COMMUNICATION_ID': message_id,
+      'MEDIUM': 'SMS',
 
       'SENDER_ID': 'RentHeroSMS',
       'SENDER_CONTACT_ID': 'RentHeroSMS',
@@ -187,6 +189,7 @@ exports.receive_message_from_phone = function(req, res, next) {
         'ACTION': 'RENTHERO_SMS',
         'DATE': new Date().getTime(),
         'COMMUNICATION_ID': shortid.generate(),
+        'MEDIUM': 'SMS',
 
         'SENDER_CONTACT_ID': info.From || 'NONE',
         'SENDER_ID': data.tenant_id || 'NONE',
@@ -203,6 +206,7 @@ exports.receive_message_from_phone = function(req, res, next) {
         'ACTION': 'RENTHERO_SMS',
         'DATE': new Date().getTime(),
         'COMMUNICATION_ID': shortid.generate(),
+        'MEDIUM': 'SMS',
 
         'SENDER_CONTACT_ID': info.From || 'NONE',
         'SENDER_ID': 'NOT_A_TENANT',
@@ -258,6 +262,7 @@ exports.send_wait_msg_to_tenant = function(tenant, building, suite, corporation,
         'ACTION': 'RENTHERO_SMS',
         'DATE': new Date().getTime(),
         'COMMUNICATION_ID': message_id,
+        'MEDIUM': 'SMS',
 
         'SENDER_ID': corporation.corporation_id,
         'SENDER_CONTACT_ID': 'RentHeroSMS',
