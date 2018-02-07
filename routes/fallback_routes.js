@@ -21,7 +21,7 @@ const get_employee_assigned_to_building = require('./PropertyDB/Queries/Landlord
 const get_landlord_from_twilio_phone = require('./LeasingDB/Queries/SMSQueries').get_landlord_from_twilio_phone
 
 const get_landlord_info = require('./PropertyDB/Queries/LandlordQuery').get_landlord_info
-const get_employee_assigned_to_building = require('./PropertyDB/Queries/LandlordQuery').get_employee_assigned_to_building
+const get_all_employees_from_corporation = require('./PropertyDB/Queries/LandlordQuery').get_all_employees_from_corporation
 
 const formattedPhoneNumber = require('../api/general_api').formattedPhoneNumber
 
