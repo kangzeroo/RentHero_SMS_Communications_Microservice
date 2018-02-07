@@ -28,21 +28,6 @@ exports.voice = function(req, res, next) {
     .then((outgoingObject) => {
       console.log(outgoingObject)
       if (outgoingObject.outgoingPhoneNumber && outgoingObject.outgoingPhoneNumber.length > 0) {
-        const voiceResponse = new VoiceResponse()
-        voiceResponse.say({
-          voice: 'man',
-          language: 'en',
-        },
-         'this call may be recorded for quality and training purposes'
-        )
-        const dial = voiceResponse.dial({ callerId: to, record: 'record-from-answer' })
-        dial.number(outgoingObject.outgoingPhoneNumber)
-
-        console.log(dial)
-        console.log(voiceResponse.toString())
-
-        // insert logs
-
         if (outgoingObject.tenant_phone === from ) {
           console.log('voice 1: ', {
             'ACTION': 'FORWARDED_CALL',
@@ -98,6 +83,20 @@ exports.voice = function(req, res, next) {
             'TEXT': 'landlord called tenant',
           })
         }
+
+        const voiceResponse = new VoiceResponse()
+        voiceResponse.say({
+          voice: 'man',
+          language: 'en',
+        },
+         'this call may be recorded for quality and training purposes'
+        )
+
+        const dial = voiceResponse.dial({ callerId: to, record: 'record-from-answer' })
+        dial.number(outgoingObject.outgoingPhoneNumber)
+
+        console.log(dial)
+        console.log(voiceResponse.toString())
 
         res.type('text/xml')
         res.send(voiceResponse.toString())

@@ -42,12 +42,14 @@ exports.stranger_message = function(req, res, next) {
     'ACTION': 'RENTHERO_FALLBACK',
     'DATE': new Date().getTime(),
     'COMMUNICATION_ID': shortid.generate(),
+    'MEDIUM': 'SMS',
 
     'SENDER_ID': from,
     'SENDER_CONTACT_ID': from,
-    'RECEIVER_CONTACT_ID': to,
-    'RECEIVER_ID': to,
-    'PROXY_CONTACT_ID': 'RENTHERO_FALLBACK',
+    'RECEIVER_CONTACT_ID': 'invalid',
+    'RECEIVER_ID': 'invalid',
+    'PROXY_CONTACT_ID': to,
+    'TEXT': message,
   })
 
   console.log(to, message)
@@ -109,6 +111,7 @@ exports.stranger_message = function(req, res, next) {
         'ACTION': 'RENTHERO_FALLBACK',
         'DATE': new Date().getTime(),
         'COMMUNICATION_ID': message_id,
+        'MEDIUM': 'SMS',
 
         'SENDER_ID': 'RENTHERO_FALLBACK',
         'SENDER_CONTACT_ID': 'RENTHERO_FALLBACK',
@@ -136,6 +139,7 @@ const send_initial = (tenantPhone, landlordPhone, message, building_id) => {
       'ACTION': 'RENTHERO_FALLBACK',
       'DATE': new Date().getTime(),
       'COMMUNICATION_ID': shortid.generate(),
+      'MEDIUM': 'SMS',
 
       'SENDER_ID': 'RENTHERO_FALLBACK',
       'SENDER_CONTACT_ID': 'RENTHERO_FALLBACK',
