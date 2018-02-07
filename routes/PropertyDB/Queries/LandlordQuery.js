@@ -23,7 +23,8 @@ const log_through = data => {
 exports.get_landlord_info = (building_id) => {
   const values = [building_id]
 
-  const get_landlord = `SELECT a.corporation_id, b.corporation_name, b.phone, b.thumbnail, b.email, b.textable,
+  const get_landlord = `SELECT a.corporation_id, b.corporation_name, b.phone,
+                               b.thumbnail, b.email, b.textable, b.random_assign,
                                b.corporate_landlord, c.alias_email
                           FROM corporation_building a
                           INNER JOIN corporation b
@@ -96,6 +97,34 @@ exports.get_employee_assigned_to_building = (builing_id) => {
 
   const return_rows = (rows) => {
     return rows[0]
+  }
+  return query(get_employee, values)
+    .then((data) => {
+      return stringify_rows(data)
+    })
+    .then((data) => {
+      return json_rows(data)
+    })
+    .then((data) => {
+      return return_rows(data)
+    })
+    .catch((error) => {
+      console.log(error)
+    })
+}
+
+exports.get_all_employees_from_corporation = (corporation_id) => {
+  const values = [corporation_id]
+
+  const get_employee = `SELECT a.employee_id, a.first_name, a.last_name, a.email, a.phone, a.alias_email, a.cavalry
+                          FROM employee a
+                          INNER JOIN employee_corporation b
+                          ON a.employee_id = b.employee_id
+                          WHERE b.corporation_id = $1
+                       `
+
+  const return_rows = (rows) => {
+    return rows
   }
   return query(get_employee, values)
     .then((data) => {

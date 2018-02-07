@@ -18,6 +18,8 @@ const send_initial_corporate_sms = require('./sms_routes').send_initial_corporat
 const send_wait_msg_to_tenant = require('./mass_sms_routes').send_wait_msg_to_tenant
 
 const sendEmployeeMappedEmail = require('../api/employee_email_api').sendEmployeeMappedEmail
+const get_landlord_info = require('./PropertyDB/Queries/LandlordQuery').get_landlord_info
+const get_all_employees_from_corporation = require('./PropertyDB/Queries/LandlordQuery').get_all_employees_from_corporation
 
 // Landlord Queries
 const get_employee_assigned_to_building = require('./PropertyDB/Queries/LandlordQuery').get_employee_assigned_to_building
@@ -55,28 +57,37 @@ exports.initial_corporate_inquiry = function(request, response, next) {
     const tenant = info.tenant // tenant_id, first_name, last_name, phone
     const building = info.building // building_id, building_alias, building_address
     const suite = info.suite // suite_id, suite_alias
-    const corporation = info.corporation // corporation_id, corporation_email, corporation_name
+    // const corporation = info.corporation // corporation_id, corporation_email, corporation_name
     const group = info.group // group_notes, group_size
     const inquiry_id = info.inquiry_id
 
-    // First, get the employees assigned to this building
-    get_employee_assigned_to_building(building.building_id)
-    .then((employeeData) => {
-        if (employeeData && employeeData.employee_id) {
-          // if there is an employee asssigned to this building already
-          console.log('Employee Exists!')
+    // First, let's get the corporation behind the building
+    get_landlord_info(building.building_id)
+    .then((landlordData) => {
+      const corporation = {
+        corporation_id: landlordData.corporation_id,
+        corporation_email: landlordData.email,
+        corporation_name: landlordData.corporation_name,
+      }
+      if (landlordData.random_assign) {
+        // Get a list of all the employees for this corporation
+        get_all_employees_from_corporation(landlordData.corporation_id)
+        .then((employeesData) => {
+          console.log(employeesData)
 
-          const employee = employeeData     // employee_id, first_name, last_name, email, alias_email, phone, calvary
+          // randomly select an employee from the list
+          const selectedEmployee = employeesData[Math.floor(Math.random() * employeesData.length)]
+          console.log('selected employee: ', selectedEmployee)
 
           // start the chat thread
-          send_initial_corporate_sms(tenant, corporation, building, group, employee)
+          send_initial_corporate_sms(tenant, corporation, building, group, selectedEmployee)
           .then((data) => {
             // start the email thread
-            return send_initial_corporate_email(tenant, corporation, building, group.group_notes, employee)
+            return send_initial_corporate_email(tenant, corporation, building, group.group_notes, selectedEmployee)
           })
           .then((data) => {
             // now send an email to the corporation's general inbox
-            return sendEmployeeMappedEmail(corporation.corporation_email, employee, tenant, building, group)
+            return sendEmployeeMappedEmail(corporation.corporation_email, selectedEmployee, tenant, building, group)
           })
           .then((data) => {
             console.log(data)
@@ -88,25 +99,58 @@ exports.initial_corporate_inquiry = function(request, response, next) {
             console.log(err)
             response.status(500).send(err)
           })
-        } else {
-          console.log('Employee Does Not Exist')
-          // if there is no employee assigned to this building
-          // send_wait_msg_to_tenant, which accomplishes the following:
-          //    1. Send a wait message to the tenant
-          //    2. Send an email to the corporation's general inbox
+        })
+      } else {
+        // First, get the employees assigned to this building
+        get_employee_assigned_to_building(building.building_id)
+        .then((employeeData) => {
+            if (employeeData && employeeData.employee_id) {
+              // if there is an employee asssigned to this building already
+              console.log('Employee Exists!')
 
-          send_wait_msg_to_tenant(tenant, building, suite, corporation, group, inquiry_id)
-          .then((data) => {
-            console.log(data)
-            response.json({
-              status: 'Success',
-            })
-          })
-          .catch((err) => {
-            console.log(err)
-            response.status(500).send(err)
-          })
-        }
+              const employee = employeeData     // employee_id, first_name, last_name, email, alias_email, phone, calvary
+
+              // start the chat thread
+              send_initial_corporate_sms(tenant, corporation, building, group, employee)
+              .then((data) => {
+                // start the email thread
+                return send_initial_corporate_email(tenant, corporation, building, group.group_notes, employee)
+              })
+              .then((data) => {
+                // now send an email to the corporation's general inbox
+                return sendEmployeeMappedEmail(corporation.corporation_email, employee, tenant, building, group)
+              })
+              .then((data) => {
+                console.log(data)
+                response.json({
+                  status: 'Success',
+                })
+              })
+              .catch((err) => {
+                console.log(err)
+                response.status(500).send(err)
+              })
+            } else {
+              console.log('Employee Does Not Exist')
+              // if there is no employee assigned to this building
+              // send_wait_msg_to_tenant, which accomplishes the following:
+              //    1. Send a wait message to the tenant
+              //    2. Send an email to the corporation's general inbox
+
+              send_wait_msg_to_tenant(tenant, building, suite, corporation, group, inquiry_id)
+              .then((data) => {
+                console.log(data)
+                response.json({
+                  status: 'Success',
+                })
+              })
+              .catch((err) => {
+                console.log(err)
+                response.status(500).send(err)
+              })
+            }
+        })
+      }
     })
   })
   return p
