@@ -16,6 +16,7 @@ const get_tenant_landlord_match = require('./LeasingDB/Queries/SMSQueries').get_
 const get_tenant_landlord_sms_match = require('./LeasingDB/Queries/SMSQueries').get_tenant_landlord_sms_match
 const get_tenant_landlord_twilio_numbers = require('./LeasingDB/Queries/SMSQueries').get_tenant_landlord_twilio_numbers
 const insert_sms_match = require('./LeasingDB/Queries/SMSQueries').insert_sms_match
+const get_employee_assigned_to_building = require('./PropertyDB/Queries/LandlordQuery').get_employee_assigned_to_building
 
 const get_landlord_from_twilio_phone = require('./LeasingDB/Queries/SMSQueries').get_landlord_from_twilio_phone
 
@@ -30,8 +31,7 @@ const determine_new_twilio_number = require('../api/select_number_api').determin
 
 
 exports.stranger_message = function(req, res, next) {
-  console.log(req.body)
-  console.log('====FallBack====')
+  console.log('stranger_message: ====FALLBACK=====')
   const info = req.body
   const from = info.From
   const to = info.To // twilio number
@@ -39,7 +39,7 @@ exports.stranger_message = function(req, res, next) {
   let allBuildingData
 
   insertCommunicationsLog({
-    'ACTION': 'RENTHERO_FALLBACK',
+    'ACTION': 'RENTHERO_SMS_FALLBACK',
     'DATE': new Date().getTime(),
     'COMMUNICATION_ID': shortid.generate(),
     'MEDIUM': 'SMS',
@@ -72,30 +72,66 @@ exports.stranger_message = function(req, res, next) {
       const building_id = selectedBuilding.building_id
 
       console.log(building_id, selectedBuilding.building_id)
-      return get_employee_assigned_to_building(selectedBuilding.building_id)
-      .then((employeeData) => {
-        console.log('employee data: ', employeeData)
 
-        if (employeeData) {
-          get_landlord_info(building_id)
-          .then((lData) => {
-            const message = `Hello, this is ${employeeData.first_name}, I'm a representative of ${lData.corporation_name}.
-                             Please text or call me regarding your interest in ${selectedBuilding.building_alias}
-                             `
-            return send_initial(from, formattedPhoneNumber(employeeData.phone), message, building_id)
-          })
+      return get_landlord_info(building_id)
+      .then((landlordData) => {
+        if (landlordData.corporate_landlord) {
+          if (landlordData.random_assign) {
+            console.log('====RANDOMIZED ASSIGNMENT=====')
+            get_all_employees_from_corporation(landlordData.corporation_id)
+            .then((employeesData) => {
+              const selectedEmployee = employeesData[Math.floor(Math.random() * employeesData.length)]
+              console.log('selected employee: ', selectedEmployee)
+
+              const message = `Hello, this is ${selectedEmployee.first_name}, I'm a representative of ${landlordData.corporation_name}.
+                               Please text or call me regarding your interest in ${selectedBuilding.building_alias}
+                               `
+              return send_initial(from, formattedPhoneNumber(selectedEmployee.phone), message, building_id)
+            })
+          } else {
+            console.log('====BUILDING ASSIGNMENT======')
+            get_employee_assigned_to_building(selectedBuilding.building_id)
+            .then((employeeData) => {
+              console.log('employee data: ', employeeData)
+              const message = `Hello, this is ${employeeData.first_name}, I'm a representative of ${landlordData.corporation_name}.
+                               Please text or call me regarding your interest in ${selectedBuilding.building_alias}
+                               `
+              return send_initial(from, formattedPhoneNumber(employeeData.phone), message, building_id)
+            })
+          }
         } else {
-          get_landlord_info(building_id)
-          .then((landlordData) => {
-            console.log('LINE 73: ', landlordData)
-            // call initial on the tenant and employee using the corporation phone number
-            const message = `Hello, this is ${landlordData.corporation_name},
-                             Please text or call me regarding your interest in ${selectedBuilding.building_alias}.
-                             `
-            return send_initial(from, formattedPhoneNumber(landlordData.phone), message, building_id)
-          })
+          const message = `Hello, this is ${landlordData.corporation_name},
+                           Please text or call me regarding your interest in ${selectedBuilding.building_alias}.
+                           `
+          return send_initial(from, formattedPhoneNumber(landlordData.phone), message, building_id)
         }
       })
+
+
+      // return get_employee_assigned_to_building(selectedBuilding.building_id)
+      // .then((employeeData) => {
+      //   console.log('employee data: ', employeeData)
+      //
+      //   if (employeeData) {
+      //     get_landlord_info(building_id)
+      //     .then((lData) => {
+      //       const message = `Hello, this is ${employeeData.first_name}, I'm a representative of ${lData.corporation_name}.
+      //                        Please text or call me regarding your interest in ${selectedBuilding.building_alias}
+      //                        `
+      //       return send_initial(from, formattedPhoneNumber(employeeData.phone), message, building_id)
+      //     })
+      //   } else {
+      //     get_landlord_info(building_id)
+      //     .then((landlordData) => {
+      //       console.log('LINE 73: ', landlordData)
+      //       // call initial on the tenant and employee using the corporation phone number
+      //       const message = `Hello, this is ${landlordData.corporation_name},
+      //                        Please text or call me regarding your interest in ${selectedBuilding.building_alias}.
+      //                        `
+      //       return send_initial(from, formattedPhoneNumber(landlordData.phone), message, building_id)
+      //     })
+      //   }
+      // })
 
     } else {
       console.log('stranger_message <-- Rating: ', matches.bestMatch.rating)
@@ -108,16 +144,16 @@ exports.stranger_message = function(req, res, next) {
       const message_id = shortid.generate()
       const message = `Hello, please respond to this message with a property name, and we will connect you with the landlord. Cheers! [ RENTHERO TERMS OF USE: RentHero.cc/m/${message_id} ]`
       insertCommunicationsLog({
-        'ACTION': 'RENTHERO_FALLBACK',
+        'ACTION': 'RENTHERO_SMS_FALLBACK',
         'DATE': new Date().getTime(),
         'COMMUNICATION_ID': message_id,
         'MEDIUM': 'SMS',
 
-        'SENDER_ID': 'RENTHERO_FALLBACK',
-        'SENDER_CONTACT_ID': 'RENTHERO_FALLBACK',
+        'SENDER_ID': 'RENTHERO_SMS_FALLBACK',
+        'SENDER_CONTACT_ID': 'RENTHERO_SMS_FALLBACK',
         'RECEIVER_CONTACT_ID': from,
         'RECEIVER_ID': from,
-        'PROXY_CONTACT_ID': 'RENTHERO_FALLBACK',
+        'PROXY_CONTACT_ID': 'RENTHERO_SMS_FALLBACK',
         'TEXT': message,
       })
       twilio_client.messages.create({
@@ -136,13 +172,13 @@ const send_initial = (tenantPhone, landlordPhone, message, building_id) => {
   .then((twilioNumber) => {
     console.log('send_initial_twilio_number: ', twilioNumber)
     insertCommunicationsLog({
-      'ACTION': 'RENTHERO_FALLBACK',
+      'ACTION': 'RENTHERO_SMS_FALLBACK',
       'DATE': new Date().getTime(),
       'COMMUNICATION_ID': shortid.generate(),
       'MEDIUM': 'SMS',
 
-      'SENDER_ID': 'RENTHERO_FALLBACK',
-      'SENDER_CONTACT_ID': 'RENTHERO_FALLBACK',
+      'SENDER_ID': 'RENTHERO_SMS_FALLBACK',
+      'SENDER_CONTACT_ID': 'RENTHERO_SMS_FALLBACK',
       'RECEIVER_CONTACT_ID': tenantPhone,
       'RECEIVER_ID': tenantPhone,
       'PROXY_CONTACT_ID': twilioNumber,
