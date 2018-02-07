@@ -65,6 +65,7 @@ exports.gatherOutgoingNumberWithObject = function(incomingPhoneNumber, anonymous
         res({
           outgoingPhoneNumber,
           tenantPhoneNumber,
+          landlordPhoneNumber,
           tenantId,
           landlordId,
         })
