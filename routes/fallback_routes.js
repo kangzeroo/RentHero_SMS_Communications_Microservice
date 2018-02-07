@@ -17,7 +17,7 @@ const get_tenant_landlord_sms_match = require('./LeasingDB/Queries/SMSQueries').
 const get_tenant_landlord_twilio_numbers = require('./LeasingDB/Queries/SMSQueries').get_tenant_landlord_twilio_numbers
 const insert_sms_match = require('./LeasingDB/Queries/SMSQueries').insert_sms_match
 const get_employee_assigned_to_building = require('./PropertyDB/Queries/LandlordQuery').get_employee_assigned_to_building
-
+const get_tenant_id_from_phone = require('./LeasingDB/Queries/TenantQueries').get_tenant_id_from_phone
 const get_landlord_from_twilio_phone = require('./LeasingDB/Queries/SMSQueries').get_landlord_from_twilio_phone
 
 const get_landlord_info = require('./PropertyDB/Queries/LandlordQuery').get_landlord_info
@@ -86,7 +86,7 @@ exports.stranger_message = function(req, res, next) {
               const message = `Hello, this is ${selectedEmployee.first_name}, I'm a representative of ${landlordData.corporation_name}.
                                Please text or call me regarding your interest in ${selectedBuilding.building_alias}
                                `
-              return send_initial(from, formattedPhoneNumber(selectedEmployee.phone), message, building_id)
+              return send_initial(from, formattedPhoneNumber(selectedEmployee.phone), message, building_id, landlordData.corporation_id, selectedEmployee.employee_id)
             })
           } else {
             console.log('====BUILDING ASSIGNMENT======')
@@ -96,7 +96,7 @@ exports.stranger_message = function(req, res, next) {
               const message = `Hello, this is ${employeeData.first_name}, I'm a representative of ${landlordData.corporation_name}.
                                Please text or call me regarding your interest in ${selectedBuilding.building_alias}
                                `
-              return send_initial(from, formattedPhoneNumber(employeeData.phone), message, building_id)
+              return send_initial(from, formattedPhoneNumber(employeeData.phone), message, building_id, landlordData.corporation_id, employeeData.employee_id)
             })
           }
         } else {
@@ -104,7 +104,7 @@ exports.stranger_message = function(req, res, next) {
           const message = `Hello, this is ${landlordData.corporation_name},
                            Please text or call me regarding your interest in ${selectedBuilding.building_alias}.
                            `
-          return send_initial(from, formattedPhoneNumber(landlordData.phone), message, building_id)
+          return send_initial(from, formattedPhoneNumber(landlordData.phone), message, building_id, landlordData.corporation_id, '')
         }
       })
 
@@ -168,23 +168,27 @@ exports.stranger_message = function(req, res, next) {
   })
 }
 
-const send_initial = (tenantPhone, landlordPhone, message, building_id) => {
+const send_initial = (tenantPhone, landlordPhone, message, building_id, corporation_id, employee_id) => {
   determine_new_twilio_number(tenantPhone, landlordPhone)
   .then((twilioNumber) => {
     console.log('send_initial_twilio_number: ', twilioNumber)
-    insertCommunicationsLog({
-      'ACTION': 'RENTHERO_SMS_FALLBACK',
-      'DATE': new Date().getTime(),
-      'COMMUNICATION_ID': shortid.generate(),
-      'MEDIUM': 'SMS',
+    get_tenant_id_from_phone(tenantPhone)
+    .then((data) => {
+      insertCommunicationsLog({
+        'ACTION': 'RENTHERO_SMS_FALLBACK',
+        'DATE': new Date().getTime(),
+        'COMMUNICATION_ID': shortid.generate(),
+        'MEDIUM': 'SMS',
 
-      'SENDER_ID': 'RENTHERO_SMS_FALLBACK',
-      'SENDER_CONTACT_ID': 'RENTHERO_SMS_FALLBACK',
-      'RECEIVER_CONTACT_ID': tenantPhone,
-      'RECEIVER_ID': tenantPhone,
-      'PROXY_CONTACT_ID': twilioNumber,
-      'TEXT': message,
-      'BUILDING_ID': building_id,
+        'SENDER_ID': corporation_id,
+        'SENDER_CONTACT_ID': landlordPhone,
+        'RECEIVER_CONTACT_ID': tenantPhone,
+        'RECEIVER_ID': data.tenant_id || 'NONE',
+        'PROXY_CONTACT_ID': twilioNumber,
+        'TEXT': message,
+        'BUILDING_ID': building_id,
+        'EMPLOYEE_ID': employee_id || '',
+      })
     })
 
     twilio_client.messages.create({
@@ -193,7 +197,7 @@ const send_initial = (tenantPhone, landlordPhone, message, building_id) => {
       body: message,
     })
     .then((data) => {
-      insert_sms_match('', tenantPhone, '', landlordPhone, data.sid, twilioNumber)
+      insert_sms_match('', tenantPhone, corporation_id, landlordPhone, data.sid, twilioNumber)
     })
     // res.type('text/xml')
     // res.send(twilio_client.toString())
