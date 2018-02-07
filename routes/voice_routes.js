@@ -29,19 +29,6 @@ exports.voice = function(req, res, next) {
       console.log(outgoingObject)
       if (outgoingObject.outgoingPhoneNumber && outgoingObject.outgoingPhoneNumber.length > 0) {
         if (outgoingObject.outgoingPhoneNumber === outgoingObject.landlordPhoneNumber ) {
-          console.log('voice 1: ', {
-            'ACTION': 'FORWARDED_CALL',
-            'DATE': new Date().getTime(),
-            'COMMUNICATION_ID': shortid.generate(),
-            'MEDIUM': 'PHONE',
-
-            'SENDER_ID': outgoingObject.tenantId,
-            'SENDER_CONTACT_ID': outgoingObject.tenantPhoneNumber,
-            'RECEIVER_CONTACT_ID': outgoingObject.landlordPhoneNumber,
-            'RECEIVER_ID': outgoingObject.landlordId,
-            'PROXY_CONTACT_ID': to,
-            'TEXT': 'tenant called landlord',
-          })
           insertCommunicationsLog({
             'ACTION': 'FORWARDED_CALL',
             'DATE': new Date().getTime(),
@@ -56,19 +43,6 @@ exports.voice = function(req, res, next) {
             'TEXT': 'tenant called landlord',
           })
         } else if (outgoingObject.outgoingPhoneNumber === outgoingObject.tenantPhoneNumber ) {
-          console.log('voice 2: ', {
-            'ACTION': 'FORWARDED_CALL',
-            'DATE': new Date().getTime(),
-            'COMMUNICATION_ID': shortid.generate(),
-            'MEDIUM': 'PHONE',
-
-            'SENDER_ID': outgoingObject.landlordId,
-            'SENDER_CONTACT_ID': outgoingObject.landlordPhoneNumber,
-            'RECEIVER_CONTACT_ID': outgoingObject.tenantPhoneNumber,
-            'RECEIVER_ID': outgoingObject.tenantId,
-            'PROXY_CONTACT_ID': to,
-            'TEXT': 'landlord called tenant',
-          })
           insertCommunicationsLog({
             'ACTION': 'FORWARDED_CALL',
             'DATE': new Date().getTime(),
@@ -162,6 +136,10 @@ exports.voice_fallback = function(req, res, next) {
   voiceResponse.hangup()
   res.type('text/xml')
   res.send(voiceResponse.toString())
+}
+
+exports.voice_status_changes = function(req, res, next) {
+  console.log(req.body)
 }
 
 
