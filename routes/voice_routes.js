@@ -8,29 +8,26 @@ const MessagingResponse = require('twilio').twiml.MessagingResponse;
 const VoiceResponse = require('twilio').twiml.VoiceResponse;
 
 const gatherOutgoingNumber = require('../api/sms_routing').gatherOutgoingNumber
+const gatherOutgoingNumberWithObject = require('../api/sms_routing').gatherOutgoingNumberWithObject
 
 const formattedPhoneNumber = require('../api/general_api').formattedPhoneNumber
 
 const get_landlords_twilio = require('./LeasingDB/Queries/SMSQueries').get_landlords_twilio
 const insertCommunicationsLog = require('../message_logs/dynamodb_api').insertCommunicationsLog
+const get_sms_match = require('./LeasingDB/Queries/SMSQueries').get_sms_match
 
 
 exports.voice = function(req, res, next) {
   console.log('/voice')
 
-  // const addons = json.loads(request.values['AddOns'])
-  // const speechtotext = addons['results']['ibm_watson_speechtotext']
-  //
-  // console.log(speechtotext)
-
   let from = req.body.From
   let to   = req.body.To
   let body = req.body.Body
 
-   gatherOutgoingNumber(from, to)
-    .then((outgoingPhoneNumber) => {
-      console.log(outgoingPhoneNumber)
-      if (outgoingPhoneNumber && outgoingPhoneNumber.length > 0) {
+   gatherOutgoingNumberWithObject(from, to)
+    .then((outgoingObject) => {
+      console.log(outgoingObject)
+      if (outgoingObject.outgoingPhoneNumber && outgoingObject.outgoingPhoneNumber.length > 0) {
         const voiceResponse = new VoiceResponse()
         voiceResponse.say({
           voice: 'man',
@@ -39,11 +36,41 @@ exports.voice = function(req, res, next) {
          'this call may be recorded for quality and training purposes'
         )
         const dial = voiceResponse.dial({ callerId: to, record: 'record-from-answer' })
-        dial.number(outgoingPhoneNumber)
-
+        dial.number(outgoingObject.outgoingPhoneNumber)
 
         console.log(dial)
         console.log(voiceResponse.toString())
+
+        // insert logs
+
+        if (outgoingObject.tenant_phone === from ) {
+          insertCommunicationsLog({
+            'ACTION': 'FORWARDED_CALL',
+            'DATE': new Date().getTime(),
+            'COMMUNICATION_ID': shortid.generate(),
+
+            'SENDER_ID': outgoingObject.tenant_id,
+            'SENDER_CONTACT_ID': from,
+            'RECEIVER_CONTACT_ID': outgoingObject.landlord_phone,
+            'RECEIVER_ID': outgoingObject.landlord_id,
+            'PROXY_CONTACT_ID': to,
+            'TEXT': 'tenant called landlord',
+          })
+        } else if (outgoingObject.landlord_phone === from ) {
+          insertCommunicationsLog({
+            'ACTION': 'FORWARDED_CALL',
+            'DATE': new Date().getTime(),
+            'COMMUNICATION_ID': shortid.generate(),
+
+            'SENDER_ID': outgoingObject.landlord_id,
+            'SENDER_CONTACT_ID': from,
+            'RECEIVER_CONTACT_ID': outgoingObject.tenant_phone,
+            'RECEIVER_ID': outgoingObject.tenant_id,
+            'PROXY_CONTACT_ID': to,
+            'TEXT': 'landlord called tenant',
+          })
+        }
+
         res.type('text/xml')
         res.send(voiceResponse.toString())
       } else {
@@ -56,23 +83,39 @@ exports.voice = function(req, res, next) {
           voice: 'man',
           language: 'en',
         }, 'You are calling from an unrecognized number. Please send a text message of the property name')
+
+        insertCommunicationsLog({
+          'ACTION': 'RENTHERO_CALL_FALLBACK',
+          'DATE': new Date().getTime(),
+          'COMMUNICATION_ID': shortid.generate(),
+
+          'SENDER_ID': 'RENTHERO_CALL_FALLBACK',
+          'SENDER_CONTACT_ID': 'RENTHERO_CALL_FALLBACK',
+          'RECEIVER_CONTACT_ID': from,
+          'RECEIVER_ID': from,
+          'PROXY_CONTACT_ID': to,
+          'TEXT': 'You are calling from an unrecognized number. Please send a text message of the property name',
+        })
+
         twilio_client.messages.create({
           to: from,
           from: to,
           body: message,
         })
+
         insertCommunicationsLog({
-          'ACTION': 'RENTHERO_FALLBACK',
+          'ACTION': 'RENTHERO_CALL_FALLBACK_MESSAGE',
           'DATE': new Date().getTime(),
           'COMMUNICATION_ID': message_id,
 
-          'SENDER_ID': 'RENTHERO_FALLBACK',
-          'SENDER_CONTACT_ID': 'RENTHERO_FALLBACK',
+          'SENDER_ID': 'RENTHERO_CALL_FALLBACK_MESSAGE',
+          'SENDER_CONTACT_ID': 'RENTHERO_CALL_FALLBACK_MESSAGE',
           'RECEIVER_CONTACT_ID': from,
           'RECEIVER_ID': from,
-          'PROXY_CONTACT_ID': 'RENTHERO_FALLBACK',
+          'PROXY_CONTACT_ID': to,
           'TEXT': message,
         })
+
         voiceResponse.hangup()
         res.type('text/xml')
         res.send(voiceResponse.toString())

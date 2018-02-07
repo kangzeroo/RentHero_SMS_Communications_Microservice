@@ -29,30 +29,32 @@ const send_renthero_inital_message = function(tenant, staff, message) {
     console.log('send_renthero_inital_message: ', tenant, staff, message)
     const tenantPhone = formattedPhoneNumber(tenant.phone)
     const staffPhone = formattedPhoneNumber(staff.phone)
+    let twilioPhone
     determine_new_twilio_number(tenantPhone, staffPhone)
-    .then((twilioPhone) => {
-      insertCommunicationsLog({
-        'ACTION': 'RENTHERO_SMS',
-        'DATE': new Date().getTime(),
-        'COMMUNICATION_ID': shortid.generate(),
-
-        'SENDER_ID': twilioPhone,
-        'SENDER_CONTACT_ID': twilioPhone,
-        'RECEIVER_CONTACT_ID': staff.staff_id,
-        'RECEIVER_ID': staffPhone,
-        'PROXY_CONTACT_ID': twilioPhone,
-        'TEXT': message,
-      })
+    .then((twilioNumber) => {
+      twilioPhone = twilioNumber
 
       twilio_client.messages.create({
         to: staff.phone,
-        from: twilioPhone,
+        from: twilioNumber,
         body: message,
       })
       .then((data) => {
         return insert_sms_match(tenant.tenant_id, tenantPhone, staff.staff_id, staffPhone, data.sid, twilioPhone)
       })
       .then((data) => {
+        insertCommunicationsLog({
+          'ACTION': 'RENTHERO_SMS',
+          'DATE': new Date().getTime(),
+          'COMMUNICATION_ID': shortid.generate(),
+
+          'SENDER_ID': twilioPhone,
+          'SENDER_CONTACT_ID': twilioPhone,
+          'RECEIVER_CONTACT_ID': staff.staff_id,
+          'RECEIVER_ID': staffPhone,
+          'PROXY_CONTACT_ID': twilioPhone,
+          'TEXT': message,
+        })
         res(twilioPhone)
       })
       .catch((error) => {
