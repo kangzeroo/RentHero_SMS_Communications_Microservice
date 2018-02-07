@@ -74,7 +74,7 @@ exports.initial_corporate_inquiry = function(request, response, next) {
         // Get a list of all the employees for this corporation
         get_all_employees_from_corporation(landlordData.corporation_id)
         .then((employeesData) => {
-          console.log(employeesData)
+          // console.log(employeesData)
 
           // randomly select an employee from the list
           const selectedEmployee = employeesData[Math.floor(Math.random() * employeesData.length)]
