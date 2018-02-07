@@ -70,6 +70,7 @@ exports.initial_corporate_inquiry = function(request, response, next) {
         corporation_name: landlordData.corporation_name,
       }
       if (landlordData.random_assign) {
+        console.log('===RANDOMIZED ASSIGNMENT===')
         // Get a list of all the employees for this corporation
         get_all_employees_from_corporation(landlordData.corporation_id)
         .then((employeesData) => {
@@ -101,6 +102,7 @@ exports.initial_corporate_inquiry = function(request, response, next) {
           })
         })
       } else {
+        console.log('===BUILDING ASSIGNMENT===')
         // First, get the employees assigned to this building
         get_employee_assigned_to_building(building.building_id)
         .then((employeeData) => {
