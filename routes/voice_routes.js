@@ -16,6 +16,7 @@ const get_landlords_twilio = require('./LeasingDB/Queries/SMSQueries').get_landl
 const insertCommunicationsLog = require('../message_logs/dynamodb_api').insertCommunicationsLog
 const get_sms_match = require('./LeasingDB/Queries/SMSQueries').get_sms_match
 
+const TWILIO_accountSid = process.env.TWILIO_accountSid
 
 exports.voice = function(req, res, next) {
   console.log('/voice')
@@ -141,7 +142,6 @@ exports.voice_fallback = function(req, res, next) {
 exports.voice_status_changes = function(req, res, next) {
   console.log(req.body)
 }
-
 
 exports.get_all_calls = function(req, res, next) {
   twilio_client.calls
@@ -281,8 +281,11 @@ exports.get_calls_from_to = function(req, res, next) {
 
 exports.get_recordings_for_given_call = function(req, res, next) {
   const info = req.body
+  console.log(info.call_id)
   twilio_client.api.calls(info.call_id).recordings.list()
   .then((data) => {
+    // console.log(data)
+    // resj
     const arrayOfPromises = data.map((recording) => {
       return {
         callSid: recording.callSid,
