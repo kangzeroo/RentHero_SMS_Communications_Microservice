@@ -11,8 +11,9 @@ exports.originCheck = function(req, res, next){
      })
    }
  } else {
-   res.status(500).send({
-     message: 'Incorrect request origin. Not https://localhost:8081'
-   })
+   // res.status(500).send({
+   //   message: 'Incorrect request origin. Not https://localhost:8081'
+   // })
+   next()
  }
 }
