@@ -498,8 +498,8 @@ exports.sms_forwarder = function(req, res, next) {
           'TENANT_ID': data.tenant_id,
           'TENANT_NAME': [data.first_name, data.last_name].join(' ') || '',
           'TENANT_PHONE': data.tenant_phone || '',
-          'LANDLORD_ID': landlordData.corporation_id || '',
-          'LANDLORD_NAME': landlordData.corporation_name || '',
+          'LANDLORD_ID': landlordData && landlordData.corporation_id ? landlordData.corporation_id : '',
+          'LANDLORD_NAME': landlordData && landlordData.corporation_name ? landlordData.corporation_name : '',
           'LANDLORD_PHONE': landlordData.employee_phone || landlordData.phone,
           'EMPLOYEE_ID': landlordData.employee_id || 'NONE',
         })

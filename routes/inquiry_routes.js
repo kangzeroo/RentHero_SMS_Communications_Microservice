@@ -20,7 +20,7 @@ const send_wait_msg_to_tenant = require('./mass_sms_routes').send_wait_msg_to_te
 const sendEmployeeMappedEmail = require('../api/employee_email_api').sendEmployeeMappedEmail
 const get_landlord_info = require('./PropertyDB/Queries/LandlordQuery').get_landlord_info
 const get_all_employees_from_corporation = require('./PropertyDB/Queries/LandlordQuery').get_all_employees_from_corporation
-const insert_employee_mapping = require('./LeasingDB/Queries/TenantQueries').insert_employee_mapping
+const insert_employee_mapping = require('./PropertyDB/Queries/LandlordQuery').insert_employee_mapping
 
 // Landlord Queries
 const get_employee_assigned_to_building = require('./PropertyDB/Queries/LandlordQuery').get_employee_assigned_to_building

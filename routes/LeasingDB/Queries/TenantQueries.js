@@ -57,19 +57,3 @@ exports.get_tenant_from_id = (tenant_id) => {
     console.log(err)
   })
 }
-
-exports.insert_employee_mapping = (employee_id, inquiry_id, building_id) => {
-  const values = [uuid.v4(), employee_id, inquiry_id, building_id]
-
-  const insert_lead = `INSERT INTO employee_mapping (mapping_id, employee_id, inquiry_id, building_id)
-                                  VALUES ( $1, $2, $3, $4 )
-                                ON CONFLICT (employee_id, inquiry_id) DO NOTHING
-                            `
-  query(insert_lead, values)
-  .then((data) => {
-    console.log(`INSERTED EMPLOYEE MAPPING FOR ${inquiry_id}`)
-  })
-  .catch((err) => {
-    console.log('ERROR! insert_employee_lead: ', err)
-  })
-}
