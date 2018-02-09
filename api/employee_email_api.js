@@ -88,7 +88,7 @@ function generateStaffInviteHTMLEmail(email, employee, tenant, building, group) 
                                       <h2>${employee.first_name} ${employee.last_name} has started communications with ${[tenant.first_name, tenant.last_name].join(' ')}</h2>
                                       <div>Agent Phone: ${employee.phone}</div>
                                       <div>Agent Email: ${employee.email}</div>
-                                      <div>Agent began at ${moment().format('MMMM Do YYYY, h:mm a')}</div>
+                                      <div>Agent began at ${moment().format('MMMM Do YYYY, HH:mm a')}</div>
                                       <h2>${[tenant.first_name, tenant.last_name].join(' ')} has a group of ${group.group_size}, and they are interested in ${building.building_alias}</h2>
                                       <div>Tenant Phone: ${tenant.phone}</div>
                                       <div>Tenant Email: ${tenant.email}</div>
