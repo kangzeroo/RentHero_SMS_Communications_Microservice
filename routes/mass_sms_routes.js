@@ -232,8 +232,8 @@ exports.receive_message_from_phone = function(req, res, next) {
 exports.send_office_hours_ended_to_tenant = function(tenant, building, suite, corporation, group, inquiry_id) {
   const p = new Promise((res, rej) => {
     const message_id = shortid.generate()
-    const message = `Hello ${tenant.first_name}, the office hours for the landlord has ended.
-                     An agent landlord will contact you tomorrow
+    const message = `Hello ${tenant.first_name}, the office hours for the landlord ${corporation.corporation_name} has ended.
+                     An agent of ${corporation.corporation_name} will contact you during the office hours.
                      regarding your inquiry for ${building.building_alias}.
                      [ VERIFIED RENTHERO MESSAGE: RentHero.cc/m/${message_id} ]
                     `
