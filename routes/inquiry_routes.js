@@ -4,6 +4,7 @@ const COMMUNICATIONS_HISTORY = require('../message_logs/schema/dynamodb_tablenam
 const dynaDoc = require("dynamodb-doc")
 AWS.config.update(aws_config)
 const Rx = require('rxjs')
+const moment = require('moment')
 
 const dynamodb = new AWS.DynamoDB({
   dynamodb: '2012-08-10',
@@ -16,6 +17,7 @@ const send_initial_sms = require('./sms_routes').send_initial_sms
 const send_initial_corporate_email = require('./email_routes').send_initial_corporate_email
 const send_initial_corporate_sms = require('./sms_routes').send_initial_corporate_sms
 const send_wait_msg_to_tenant = require('./mass_sms_routes').send_wait_msg_to_tenant
+const send_office_hours_ended_to_tenant = require('./mass_sms_routes').send_office_hours_ended_to_tenant
 
 const sendEmployeeMappedEmail = require('../api/employee_email_api').sendEmployeeMappedEmail
 const get_landlord_info = require('./PropertyDB/Queries/LandlordQuery').get_landlord_info
@@ -70,94 +72,110 @@ exports.initial_corporate_inquiry = function(request, response, next) {
         corporation_email: landlordData.email,
         corporation_name: landlordData.corporation_name,
       }
-      if (landlordData.random_assign) {
-        console.log('===RANDOMIZED ASSIGNMENT===')
-        // Get a list of all the employees for this corporation
-        get_all_employees_from_corporation(landlordData.corporation_id)
-        .then((employeesData) => {
-          // console.log(employeesData)
+      // if office hours on and office hours between start and end time go here, else send the inquiry email
+      const curTime = moment().subtract('hours', 5).format('HHmm')
+      if ((!landlordData.office_hours) || (landlordData.office_hours && (curTime >= landlordData.office_hours_start) && (curTime <= landlordData.office_hours_end))) {
+        if (landlordData.random_assign) {
+          console.log('===RANDOMIZED ASSIGNMENT===')
+          // Get a list of all the employees for this corporation
+          get_all_employees_from_corporation(landlordData.corporation_id)
+          .then((employeesData) => {
+            // console.log(employeesData)
 
-          // randomly select an employee from the list
-          const selectedEmployee = employeesData[Math.floor(Math.random() * employeesData.length)]
-          console.log('selected employee: ', selectedEmployee)
+            // randomly select an employee from the list
+            const selectedEmployee = employeesData[Math.floor(Math.random() * employeesData.length)]
+            console.log('selected employee: ', selectedEmployee)
 
-          // start the chat thread
-          send_initial_corporate_sms(tenant, corporation, building, group, selectedEmployee)
-          .then((data) => {
-            return insert_employee_mapping(selectedEmployee.employee_id, inquiry_id, building.building_id)
-          })
-          .then((data) => {
-            // start the email thread
-            return send_initial_corporate_email(tenant, corporation, building, group.group_notes, selectedEmployee)
-          })
-          .then((data) => {
-            // now send an email to the corporation's general inbox
-            return sendEmployeeMappedEmail(corporation.corporation_email, selectedEmployee, tenant, building, group)
-          })
-          .then((data) => {
-            console.log(data)
-            response.json({
-              status: 'Success',
+            // start the chat thread
+            send_initial_corporate_sms(tenant, corporation, building, group, selectedEmployee)
+            .then((data) => {
+              return insert_employee_mapping(selectedEmployee.employee_id, inquiry_id, building.building_id)
+            })
+            .then((data) => {
+              // start the email thread
+              return send_initial_corporate_email(tenant, corporation, building, group.group_notes, selectedEmployee)
+            })
+            .then((data) => {
+              // now send an email to the corporation's general inbox
+              return sendEmployeeMappedEmail(corporation.corporation_email, selectedEmployee, tenant, building, group)
+            })
+            .then((data) => {
+              console.log(data)
+              response.json({
+                status: 'Success',
+              })
+            })
+            .catch((err) => {
+              console.log(err)
+              response.status(500).send(err)
             })
           })
-          .catch((err) => {
-            console.log(err)
-            response.status(500).send(err)
+        } else {
+          console.log('===BUILDING ASSIGNMENT===')
+          // First, get the employees assigned to this building
+          get_employee_assigned_to_building(building.building_id)
+          .then((employeeData) => {
+              if (employeeData && employeeData.employee_id) {
+                // if there is an employee asssigned to this building already
+                console.log('Employee Exists!')
+
+                const employee = employeeData     // employee_id, first_name, last_name, email, alias_email, phone, calvary
+
+                // start the chat thread
+                send_initial_corporate_sms(tenant, corporation, building, group, employee)
+                .then((data) => {
+                  return insert_employee_mapping(employee.employee_id, inquiry_id, building.building_id)
+                })
+                .then((data) => {
+                  // start the email thread
+                  return send_initial_corporate_email(tenant, corporation, building, group.group_notes, employee)
+                })
+                .then((data) => {
+                  // now send an email to the corporation's general inbox
+                  return sendEmployeeMappedEmail(corporation.corporation_email, employee, tenant, building, group)
+                })
+                .then((data) => {
+                  console.log(data)
+                  response.json({
+                    status: 'Success',
+                  })
+                })
+                .catch((err) => {
+                  console.log(err)
+                  response.status(500).send(err)
+                })
+              } else {
+                console.log('Employee Does Not Exist')
+                // if there is no employee assigned to this building
+                // send_wait_msg_to_tenant, which accomplishes the following:
+                //    1. Send a wait message to the tenant
+                //    2. Send an email to the corporation's general inbox
+
+                send_wait_msg_to_tenant(tenant, building, suite, corporation, group, inquiry_id)
+                .then((data) => {
+                  console.log(data)
+                  response.json({
+                    status: 'Success',
+                  })
+                })
+                .catch((err) => {
+                  console.log(err)
+                  response.status(500).send(err)
+                })
+              }
+          })
+        }
+      } else {
+        send_office_hours_ended_to_tenant(tenant, building, suite, corporation, group, inquiry_id)
+        .then((data) => {
+          console.log(data)
+          response.json({
+            status: 'Success',
           })
         })
-      } else {
-        console.log('===BUILDING ASSIGNMENT===')
-        // First, get the employees assigned to this building
-        get_employee_assigned_to_building(building.building_id)
-        .then((employeeData) => {
-            if (employeeData && employeeData.employee_id) {
-              // if there is an employee asssigned to this building already
-              console.log('Employee Exists!')
-
-              const employee = employeeData     // employee_id, first_name, last_name, email, alias_email, phone, calvary
-
-              // start the chat thread
-              send_initial_corporate_sms(tenant, corporation, building, group, employee)
-              .then((data) => {
-                return insert_employee_mapping(employee.employee_id, inquiry_id, building.building_id)
-              })
-              .then((data) => {
-                // start the email thread
-                return send_initial_corporate_email(tenant, corporation, building, group.group_notes, employee)
-              })
-              .then((data) => {
-                // now send an email to the corporation's general inbox
-                return sendEmployeeMappedEmail(corporation.corporation_email, employee, tenant, building, group)
-              })
-              .then((data) => {
-                console.log(data)
-                response.json({
-                  status: 'Success',
-                })
-              })
-              .catch((err) => {
-                console.log(err)
-                response.status(500).send(err)
-              })
-            } else {
-              console.log('Employee Does Not Exist')
-              // if there is no employee assigned to this building
-              // send_wait_msg_to_tenant, which accomplishes the following:
-              //    1. Send a wait message to the tenant
-              //    2. Send an email to the corporation's general inbox
-
-              send_wait_msg_to_tenant(tenant, building, suite, corporation, group, inquiry_id)
-              .then((data) => {
-                console.log(data)
-                response.json({
-                  status: 'Success',
-                })
-              })
-              .catch((err) => {
-                console.log(err)
-                response.status(500).send(err)
-              })
-            }
+        .catch((err) => {
+          console.log(err)
+          response.status(500).send(err)
         })
       }
     })

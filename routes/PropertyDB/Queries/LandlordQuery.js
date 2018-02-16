@@ -25,12 +25,15 @@ exports.get_landlord_info = (building_id) => {
 
   const get_landlord = `SELECT a.corporation_id, b.corporation_name, b.phone,
                                b.thumbnail, b.email, b.textable, b.random_assign,
-                               b.corporate_landlord, c.alias_email
+                               b.corporate_landlord, b.office_hours, c.alias_email,
+                               d.office_hours_start, d.office_hours_end
                           FROM corporation_building a
                           INNER JOIN corporation b
                           ON a.corporation_id = b.corporation_id
                           LEFT OUTER JOIN corporation_alias_emails c
                           ON a.corporation_id = c.corporation_id
+                          LEFT OUTER JOIN corporation_details d
+                          ON a.corporation_id = d.corporation_id
                           WHERE a.building_id = $1
                             AND c.purpose = 'leasing'
                         `
