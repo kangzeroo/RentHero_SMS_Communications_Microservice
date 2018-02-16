@@ -92,11 +92,36 @@ exports.stranger_message = function(req, res, next) {
             console.log('====BUILDING ASSIGNMENT======')
             get_employee_assigned_to_building(selectedBuilding.building_id)
             .then((employeeData) => {
-              console.log('employee data: ', employeeData)
-              const message = `Hello, this is ${employeeData.first_name}, I'm a representative of ${landlordData.corporation_name}.
-                               Please text or call me regarding your interest in ${selectedBuilding.building_alias}
-                               `
-              return send_initial(from, formattedPhoneNumber(employeeData.phone), message, building_id, landlordData.corporation_id, employeeData.employee_id)
+
+              if (employeeData && employeeData.phone) {
+                // if an employee assignment exists
+                console.log('employee data: ', employeeData)
+                const message = `Hello, this is ${employeeData.first_name}, I'm a representative of ${landlordData.corporation_name}.
+                                 Please text or call me regarding your interest in ${selectedBuilding.building_alias}
+                                 `
+                return send_initial(from, formattedPhoneNumber(employeeData.phone), message, building_id, landlordData.corporation_id, employeeData.employee_id)
+              } else {
+                // send to the corporate landlord?
+                if (landlordData.phone) {
+                  console.log('send directly to corporation phone')
+                  const message = `Hello, this is ${landlordData.corporation_name}, the landlord of ${selectedBuilding.building_alias}. Please text or call me here.`
+                  return send_initial(from, formattedPhoneNumber(landlordData.phone), message, building_id, landlordData.corporation_id, '')
+                } else {
+                  console.log('send to first employee via randomized select')
+                  get_all_employees_from_corporation(landlordData.corporation_id)
+                  .then((employeesData) => {
+                    const selectedEmployee = employeesData[Math.floor(Math.random() * employeesData.length)]
+                    console.log('selected employee: ', selectedEmployee)
+
+                    const message = `Hello, this is ${selectedEmployee.first_name}, I'm a representative of ${landlordData.corporation_name}.
+                                     Please text or call me regarding your interest in ${selectedBuilding.building_alias}
+                                     `
+                    return send_initial(from, formattedPhoneNumber(selectedEmployee.phone), message, building_id, landlordData.corporation_id, selectedEmployee.employee_id)
+                  })
+                }
+
+              }
+
             })
           }
         } else {

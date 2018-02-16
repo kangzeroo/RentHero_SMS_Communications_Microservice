@@ -229,6 +229,62 @@ exports.receive_message_from_phone = function(req, res, next) {
   })
 }
 
+exports.send_office_hours_ended_to_tenant = function(tenant, building, suite, corporation, group, inquiry_id) {
+  const p = new Promise((res, rej) => {
+    const message_id = shortid.generate()
+    const message = `Hello ${tenant.first_name}, the office hours for the landlord has ended.
+                     An agent landlord will contact you tomorrow
+                     regarding your inquiry for ${building.building_alias}.
+                     [ VERIFIED RENTHERO MESSAGE: RentHero.cc/m/${message_id} ]
+                    `
+    twilio_client.notify.services(notifyServicesSid).notifications.create({
+      toBinding: JSON.stringify({
+                    binding_type: 'sms',
+                    address: formattedPhoneNumber(tenant.phone),
+                }),
+      body: message,
+    })
+    .then((notification) => {
+      console.log('generating landlord email...')
+      const landlordMsg = `https://renthero.cc/inquiries/${inquiry_id}`
+      return generateInitialCorporateEmail(
+                    [corporation.corporation_email],    // toEmailAddresses
+                    'inquiries@renthero.cc',            // proxyFromEmailAddress
+                    tenant,                             // tenant Object
+                    group.group_notes,                  // Group Notes written by Tenant
+                    landlordMsg,                        // Message to be sent to Landlord
+                    building,                           // Building Object
+                    suite                               // Suite Object
+                  )
+    })
+    .then((notifications) => {
+      insertCommunicationsLog({
+        'ACTION': 'RENTHERO_SMS',
+        'DATE': new Date().getTime(),
+        'COMMUNICATION_ID': message_id,
+        'MEDIUM': 'SMS',
+
+        'SENDER_ID': corporation.corporation_id,
+        'SENDER_CONTACT_ID': 'RentHeroSMS',
+        'RECEIVER_CONTACT_ID': tenant.phone,
+        'RECEIVER_ID': tenant.tenant_id,
+        'PROXY_CONTACT_ID': 'RENTHERO SMS',
+        'TEXT': message,
+        'INQUIRY_ID': inquiry_id,
+
+        'LANDLORD_NAME': building.building_alias,
+      })
+      res(inquiry_id)
+    })
+    .catch((error) => {
+      console.log(error)
+      rej(error)
+    })
+    .done()
+  })
+  return p
+}
+
 
 exports.send_wait_msg_to_tenant = function(tenant, building, suite, corporation, group, inquiry_id) {
   const p = new Promise((res, rej) => {
