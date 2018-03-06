@@ -11,6 +11,7 @@ const goodbyeSMSRoutes = require('./routes/goodbye_sms_routes')
 const SMS_RDS_Queries = require('./routes/LeasingDB/Queries/SMSQueries')
 const VoiceRoutes = require('./routes/voice_routes')
 const StaffMessaging = require('./routes/staff_messaging')
+const PhoneLookupRoutes = require('./routes/phone_lookup_routes')
 const originCheck = require('./auth/originCheck').originCheck
 const corpOriginCheck = require('./auth/corpOriginCheck').corpOriginCheck
 
@@ -78,4 +79,9 @@ module.exports = function(app){
 
 	// goodbye message
 	app.post('/send_goodbye_message_sms', [json_encoding, originCheck], goodbyeSMSRoutes.send_goodbye_message_sms)
+
+	// phone Lookup Routes
+	app.post('/phone_lookup', [json_encoding], PhoneLookupRoutes.phone_lookup)
+	app.post('/phone_test', [json_encoding], PhoneLookupRoutes.phone_test)
+
 }

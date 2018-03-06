@@ -1,6 +1,23 @@
 const axios = require('axios')
+const twilio_client = require('../twilio_setup').generate_twilio_client();
 
 exports.formattedPhoneNumber = (number) => {
+  // const p = new Promise((res, rej) => {
+  //   console.log('formatting Phone number', number)
+  //   return twilio_client.lookups.v1
+  //   .phoneNumbers(number)
+  //   .fetch()
+  //   .then((data) => {
+  //     console.log(data)
+  //     res(data.phoneNumber)
+  //   })
+  //   .catch((err) => {
+  //     rej(err)
+  //   })
+  // })
+  // return p
+
+
   const countryCode = number.substring(0, 2)
 
   let formattedNumber
