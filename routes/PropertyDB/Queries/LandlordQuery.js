@@ -124,6 +124,7 @@ exports.get_all_employees_from_corporation = (corporation_id) => {
                           INNER JOIN employee_corporation b
                           ON a.employee_id = b.employee_id
                           WHERE b.corporation_id = $1
+                            AND a.active = true
                        `
 
   const return_rows = (rows) => {
