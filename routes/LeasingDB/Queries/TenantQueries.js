@@ -21,25 +21,27 @@ const log_through = data => {
 }
 
 exports.get_tenant_id_from_phone = (phone) => {
-  console.log('get_tenant_id_from_phone:')
-  const number = unFormattedPhoneNumber(phone)
-  console.log('unformatted number: ', number)
+  const p = new Promise((res, rej) => {
+    console.log('get_tenant_id_from_phone:')
+    unFormattedPhoneNumber(phone)
+    .then((number) => {
+      const get_tenant = `SELECT tenant_id
+                            FROM tenant
+                           WHERE phone LIKE '%${number}%'
+                          `
 
-  const values = [number]
-
-  const get_tenant = `SELECT tenant_id
-                        FROM tenant
-                       WHERE phone = $1
-                      `
-
-  return query(get_tenant, values)
-  .then((data) => {
-    console.log('tenant_id: ', data.rows[0])
-    return data.rows[0]
+      return query(get_tenant)
+    })
+    .then((data) => {
+      console.log('tenant_id: ', data.rows[0])
+      res(data.rows[0])
+    })
+    .catch((err) => {
+      console.log(err)
+      rej(err)
+    })
   })
-  .catch((err) => {
-    console.log(err)
-  })
+  return p
 }
 
 exports.get_tenant_from_id = (tenant_id) => {

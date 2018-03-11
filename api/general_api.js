@@ -2,22 +2,6 @@ const axios = require('axios')
 const twilio_client = require('../twilio_setup').generate_twilio_client();
 
 exports.formattedPhoneNumber = (number) => {
-  // const p = new Promise((res, rej) => {
-  //   console.log('formatting Phone number', number)
-  //   return twilio_client.lookups.v1
-  //   .phoneNumbers(number)
-  //   .fetch()
-  //   .then((data) => {
-  //     console.log(data)
-  //     res(data.phoneNumber)
-  //   })
-  //   .catch((err) => {
-  //     rej(err)
-  //   })
-  // })
-  // return p
-
-
   const countryCode = number.substring(0, 2)
 
   let formattedNumber
@@ -31,15 +15,45 @@ exports.formattedPhoneNumber = (number) => {
   return '+1' + formattedNumber.replace(/\D/g,'')
 }
 
+exports.verifiedPhoneNumber = (number) => {
+  const p = new Promise((res, rej) => {
+    console.log('formatting Phone number', number)
+    return twilio_client.lookups.v1
+    .phoneNumbers(number)
+    .fetch()
+    .then((data) => {
+      // console.log(data)
+      res(data.phoneNumber)
+    })
+    .catch((err) => {
+      rej(err)
+    })
+  })
+  return p
+}
+
 exports.unFormattedPhoneNumber = (formattedNumber) => {
-  let number
-  const countryCode = formattedNumber.substring(0, 2)
-  if (countryCode === '+1') {
-    number = formattedNumber.substring(2)
-  } else {
-    number = formattedNumber
-  }
-  return number
+  // let number
+  // const countryCode = formattedNumber.substring(0, 2)
+  // if (countryCode === '+1') {
+  //   number = formattedNumber.substring(2)
+  // } else {
+  //   number = formattedNumber
+  // }
+  // return number
+  const p = new Promise((res, rej) => {
+    return twilio_client.lookups.v1
+    .phoneNumbers(formattedNumber)
+    .fetch()
+    .then((data) => {
+      // console.log(data)
+      res(data.nationalFormat.replace(/\D/g,''))
+    })
+    .catch((err) => {
+      rej(err)
+    })
+  })
+  return p
 }
 
 

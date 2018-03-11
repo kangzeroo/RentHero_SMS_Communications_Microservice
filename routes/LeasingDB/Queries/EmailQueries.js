@@ -2,7 +2,6 @@ const Promise = require('bluebird')
 const { promisify } = Promise
 const pool = require('../db_connect')
 const uuid = require('uuid')
-const unFormattedPhoneNumber = require('../../../api/general_api').unFormattedPhoneNumber
 
 // to run a query we just pass it to the pool
 // after we're done nothing has to be taken care of

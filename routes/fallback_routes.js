@@ -23,12 +23,14 @@ const get_landlord_from_twilio_phone = require('./LeasingDB/Queries/SMSQueries')
 const get_landlord_info = require('./PropertyDB/Queries/LandlordQuery').get_landlord_info
 const get_all_employees_from_corporation = require('./PropertyDB/Queries/LandlordQuery').get_all_employees_from_corporation
 
-const formattedPhoneNumber = require('../api/general_api').formattedPhoneNumber
+// const formattedPhoneNumber = require('../api/general_api').formattedPhoneNumber
+const verifiedPhoneNumber = require('../api/general_api').verifiedPhoneNumber
 
 const insertCommunicationsLog = require('../message_logs/dynamodb_api').insertCommunicationsLog
 
 const determine_new_twilio_number = require('../api/select_number_api').determine_new_twilio_number
 
+const generate_error_email = require('../api/error_api').generate_error_email
 
 exports.stranger_message = function(req, res, next) {
   console.log('stranger_message: ====FALLBACK=====')
@@ -86,7 +88,13 @@ exports.stranger_message = function(req, res, next) {
               const message = `Hello, this is ${selectedEmployee.first_name}, I'm a representative of ${landlordData.corporation_name}.
                                Please text or call me regarding your interest in ${selectedBuilding.building_alias}
                                `
-              return send_initial(from, formattedPhoneNumber(selectedEmployee.phone), message, building_id, landlordData.corporation_id, selectedEmployee.employee_id)
+              verifiedPhoneNumber(selectedEmployee.phone)
+              .then((verifiedNumber) => {
+                return send_initial(from, verifiedNumber, message, building_id, landlordData.corporation_id, selectedEmployee.employee_id)
+              })
+              .catch((err) => {
+                generate_error_email(JSON.stringify(err), 'stranger_message--line 96', `send inital from ${from} to ${to}, message: ${message}, building_id: ${building_id}, landlord: ${landlordData.corporation_id}`)
+              })
             })
           } else {
             console.log('====BUILDING ASSIGNMENT======')
@@ -99,13 +107,27 @@ exports.stranger_message = function(req, res, next) {
                 const message = `Hello, this is ${employeeData.first_name}, I'm a representative of ${landlordData.corporation_name}.
                                  Please text or call me regarding your interest in ${selectedBuilding.building_alias}
                                  `
-                return send_initial(from, formattedPhoneNumber(employeeData.phone), message, building_id, landlordData.corporation_id, employeeData.employee_id)
+                verifiedPhoneNumber(employeeData.phone)
+                .then((verifiedNumber) => {
+                  return send_initial(from, verifiedNumber, message, building_id, landlordData.corporation_id, employeeData.employee_id)
+                })
+                .catch((err) => {
+                  generate_error_email(JSON.stringify(err), 'stranger_message--line 115', `send inital from ${from} to ${to}, message: ${message}, building_id: ${building_id}, landlord: ${landlordData.corporation_id}, employee: ${employeeData.employee_id}`)
+                })
+
               } else {
                 // send to the corporate landlord?
                 if (landlordData.phone) {
                   console.log('send directly to corporation phone')
                   const message = `Hello, this is ${landlordData.corporation_name}, the landlord of ${selectedBuilding.building_alias}. Please text or call me here.`
-                  return send_initial(from, formattedPhoneNumber(landlordData.phone), message, building_id, landlordData.corporation_id, '')
+                  verifiedPhoneNumber(landlordData.phone)
+                  .then((verifiedNumber) => {
+                    return send_initial(from, verifiedNumber, message, building_id, landlordData.corporation_id, '')
+                  })
+                  .catch((err) => {
+                    generate_error_email(JSON.stringify(err), 'stranger_message--line 128', `send inital from ${from} to ${to}, message: ${message}, building_id: ${building_id}, landlord: ${landlordData.corporation_id}`)
+                  })
+
                 } else {
                   console.log('send to first employee via randomized select')
                   get_all_employees_from_corporation(landlordData.corporation_id)
@@ -116,7 +138,13 @@ exports.stranger_message = function(req, res, next) {
                     const message = `Hello, this is ${selectedEmployee.first_name}, I'm a representative of ${landlordData.corporation_name}.
                                      Please text or call me regarding your interest in ${selectedBuilding.building_alias}
                                      `
-                    return send_initial(from, formattedPhoneNumber(selectedEmployee.phone), message, building_id, landlordData.corporation_id, selectedEmployee.employee_id)
+                    verifiedPhoneNumber(selectedEmployee.phone)
+                    .then((verifiedNumber) => {
+                      return send_initial(from, verifiedNumber, message, building_id, landlordData.corporation_id, selectedEmployee.employee_id)
+                    })
+                    .catch((err) => {
+                      generate_error_email(JSON.stringify(err), 'stranger_message--line 146', `send inital from ${from} to ${to}, message: ${message}, building_id: ${building_id}, landlord: ${landlordData.corporation_id}, employee: ${selectedEmployee.employee_id}`)
+                    })
                   })
                 }
 
@@ -129,36 +157,15 @@ exports.stranger_message = function(req, res, next) {
           const message = `Hello, this is ${landlordData.corporation_name},
                            Please text or call me regarding your interest in ${selectedBuilding.building_alias}.
                            `
-          return send_initial(from, formattedPhoneNumber(landlordData.phone), message, building_id, landlordData.corporation_id, '')
+          verifiedPhoneNumber(landlordData.phone)
+          .then((verifiedNumber) => {
+            return send_initial(from, verifiedNumber, message, building_id, landlordData.corporation_id, '')
+          })
+          .catch((err) => {
+            generate_error_email(JSON.stringify(err), 'stranger_message--line 146', `send inital from ${from} to ${to}, message: ${message}, building_id: ${building_id}, landlord: ${landlordData.corporation_id}`)
+          })
         }
       })
-
-
-      // return get_employee_assigned_to_building(selectedBuilding.building_id)
-      // .then((employeeData) => {
-      //   console.log('employee data: ', employeeData)
-      //
-      //   if (employeeData) {
-      //     get_landlord_info(building_id)
-      //     .then((lData) => {
-      //       const message = `Hello, this is ${employeeData.first_name}, I'm a representative of ${lData.corporation_name}.
-      //                        Please text or call me regarding your interest in ${selectedBuilding.building_alias}
-      //                        `
-      //       return send_initial(from, formattedPhoneNumber(employeeData.phone), message, building_id)
-      //     })
-      //   } else {
-      //     get_landlord_info(building_id)
-      //     .then((landlordData) => {
-      //       console.log('LINE 73: ', landlordData)
-      //       // call initial on the tenant and employee using the corporation phone number
-      //       const message = `Hello, this is ${landlordData.corporation_name},
-      //                        Please text or call me regarding your interest in ${selectedBuilding.building_alias}.
-      //                        `
-      //       return send_initial(from, formattedPhoneNumber(landlordData.phone), message, building_id)
-      //     })
-      //   }
-      // })
-
     } else {
       console.log('stranger_message <-- Rating: ', matches.bestMatch.rating)
       // console.log('Message: ', message)
