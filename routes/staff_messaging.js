@@ -1,10 +1,12 @@
 const twilio_client = require('../twilio_setup').generate_twilio_client()
 const determine_new_twilio_number = require('../api/select_number_api').determine_new_twilio_number
-const formattedPhoneNumber = require('../api/general_api').formattedPhoneNumber
+const verifiedPhoneNumber = require('../api/general_api').verifiedPhoneNumber
+
 const insertCommunicationsLog = require('../message_logs/dynamodb_api').insertCommunicationsLog
 const insert_sms_match = require('./LeasingDB/Queries/SMSQueries').insert_sms_match
 const shortid = require('shortid')
 
+const generate_error_email = require('../api/error_api').generate_error_email
 
 exports.set_mapping_with_tenant = function(req, res, next) {
   const info = req.body
@@ -27,10 +29,19 @@ exports.set_mapping_with_tenant = function(req, res, next) {
 const send_renthero_inital_message = function(tenant, staff, message) {
   const p = new Promise((res, rej) => {
     console.log('send_renthero_inital_message: ', tenant, staff, message)
-    const tenantPhone = formattedPhoneNumber(tenant.phone)
-    const staffPhone = formattedPhoneNumber(staff.phone)
+    let tenantPhone = tenant.phone
+    let staffPhone = staff.phone
     let twilioPhone
-    determine_new_twilio_number(tenantPhone, staffPhone)
+
+    verifiedPhoneNumber(tenant.phone)
+    .then((verifiedNumber) => {
+      tenantPhone = verifiedNumber
+      return verifiedPhoneNumber(staff.phone)
+    })
+    .then((verifiedNumber) => {
+      staffPhone = verifiedNumber
+      return determine_new_twilio_number(tenantPhone, staffPhone)
+    })
     .then((twilioNumber) => {
       twilioPhone = twilioNumber
 
@@ -60,6 +71,7 @@ const send_renthero_inital_message = function(tenant, staff, message) {
       })
       .catch((error) => {
         console.log('send_renthero_inital_message: ', error)
+        generate_error_email(JSON.stringify(error), 'send_renthero_inital_message', `tenantID: ${tenant.tenant_id}, tenantPhone: ${tenantPhone}, staffID: ${staff.staff_id}, staffPhone: ${staffPhone}, twilioPhone: ${twilioPhone}`)
         rej('error')
       })
     })

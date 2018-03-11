@@ -8,10 +8,10 @@ const EmailRoutes = require('./routes/email_routes')
 const MassSMSRoutes = require('./routes/mass_sms_routes')
 const FallbackRoutes = require('./routes/fallback_routes')
 const goodbyeSMSRoutes = require('./routes/goodbye_sms_routes')
-const SMS_RDS_Queries = require('./routes/LeasingDB/Queries/SMSQueries')
 const VoiceRoutes = require('./routes/voice_routes')
 const StaffMessaging = require('./routes/staff_messaging')
 const PhoneLookupRoutes = require('./routes/phone_lookup_routes')
+const ApolloConnectRoutes = require('./routes/Apollo/apollo_connect')
 const originCheck = require('./auth/originCheck').originCheck
 const corpOriginCheck = require('./auth/corpOriginCheck').corpOriginCheck
 
@@ -64,8 +64,6 @@ module.exports = function(app){
 
 	app.post('/send_group_invitation_sms', [originCheck, twilio.webhook({ validate: false })], MassSMSRoutes.send_group_invitation_sms)
 
-	app.post('/insert_tenant_landlord_sms', [json_encoding, originCheck], SMS_RDS_Queries.insert_tenant_landlord_sms)
-
 	app.post('/sms', [twilio.webhook({ validate: false })], SMSRoutes.sms_forwarder)
 	app.post('/fallback', [twilio.webhook({ validate: false })], SMSRoutes.fallback)
 	// app.post('/speechtotext', [twilio.webhook({ validate: false })], SMSRoutes.speechtotext)
@@ -84,4 +82,5 @@ module.exports = function(app){
 	app.post('/phone_lookup', [json_encoding], PhoneLookupRoutes.phone_lookup)
 	app.post('/phone_test', [json_encoding], PhoneLookupRoutes.phone_test)
 
+	app.post('/apollo_connect', [json_encoding, corpOriginCheck], ApolloConnectRoutes.apollo_connect_with_tenant)
 }

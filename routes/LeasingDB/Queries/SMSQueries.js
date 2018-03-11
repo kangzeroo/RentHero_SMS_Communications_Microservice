@@ -2,7 +2,6 @@ const Promise = require('bluebird')
 const { promisify } = Promise
 const pool = require('../db_connect')
 const uuid = require('uuid')
-const formattedPhoneNumber = require('../../../api/general_api').formattedPhoneNumber
 
 // to run a query we just pass it to the pool
 // after we're done nothing has to be taken care of
@@ -18,33 +17,6 @@ const json_rows = res => res.map(row => JSON.parse(row))
 const log_through = data => {
   // console.log(data)
   return data
-}
-
-exports.insert_tenant_landlord_sms = (req, res, next) => {
-  const info = req.body
-
-  const tenant_phone = formattedPhoneNumber(info.tenant_phone)
-  const landlord_phone = formattedPhoneNumber(info.landlord_phone)
-  const twilio_phone = '+12268870232'
-  const notes = info.notes
-  const id = uuid.v4()
-
-  const values = [id, tenant_phone, landlord_phone, twilio_phone]
-
-  const insert_match = `INSERT INTO sms_map (id, tenant_phone, landlord_phone, twilio_phone)
-                                     VALUES ($1, $2, $3, $4)
-
-                        `
-
-  query(insert_match, values)
-  .then((data) => {
-    res.json({
-      message: 'Successfully inserted tenant landlord phone match'
-    })
-  })
-  .catch((err) => {
-    console.log(err)
-  })
 }
 
 exports.insert_sms_match = (tenant_id, tenant_phone, landlord_id, landlord_phone, sid, twilio_phone) => {

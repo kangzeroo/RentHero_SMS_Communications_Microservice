@@ -10,8 +10,6 @@ const VoiceResponse = require('twilio').twiml.VoiceResponse;
 const gatherOutgoingNumber = require('../api/sms_routing').gatherOutgoingNumber
 const gatherOutgoingNumberWithObject = require('../api/sms_routing').gatherOutgoingNumberWithObject
 
-const formattedPhoneNumber = require('../api/general_api').formattedPhoneNumber
-
 const get_landlords_twilio = require('./LeasingDB/Queries/SMSQueries').get_landlords_twilio
 const insertCommunicationsLog = require('../message_logs/dynamodb_api').insertCommunicationsLog
 const get_sms_match = require('./LeasingDB/Queries/SMSQueries').get_sms_match

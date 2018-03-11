@@ -1,6 +1,6 @@
 const twilio_client = require('../twilio_setup').generate_twilio_client();
 const notifyServicesSid = process.env.NOTIFY_SERVICE_ID
-const formattedPhoneNumber = require('../api/general_api').formattedPhoneNumber
+const verifiedPhoneNumber = require('../api/general_api').verifiedPhoneNumber
 const MessagingResponse = require('twilio').twiml.MessagingResponse
 
 const shortid = require('shortid')
@@ -13,13 +13,17 @@ const generateInitialCorporateEmail = require('../api/corporate_landlord_api').g
 const insertCommunicationsLog = require('../message_logs/dynamodb_api').insertCommunicationsLog
 const insertOrchestraLog = require('../message_logs/dynamodb_api').insertOrchestraLog
 
+const generate_error_email = require('../api/error_api').generate_error_email
 
 exports.send_message_to_phones = function(req, res, next) {
   const info = req.body
   const message = info.body
 
   const toBind = info.users.map((user) => {
-    return JSON.stringify({ binding_type: 'sms', address: formattedPhoneNumber(user.phone), })
+    return verifiedPhoneNumber(user.phone)
+    .then((verifiedNumber) => {
+      return JSON.stringify({ binding_type: 'sms', address: verifiedNumber, })
+    })
   })
 
   twilio_client.notify.services(notifyServicesSid).notifications.create({
@@ -55,6 +59,7 @@ exports.send_message_to_phones = function(req, res, next) {
     res.send(twilio_client.toString())
   })
   .catch(error => {
+    generate_error_email(JSON.stringify(error), 'send_message_to_phones', '')
     console.log(error)
     res.status(500).send('Error occurred sending SMS notification')
   })
@@ -65,9 +70,12 @@ exports.send_message_to_phone = function(req, res, next) {
   const recipient = info.recipient
   const message = info.message
 
-  twilio_client.notify.services(notifyServicesSid).notifications.create({
-    toBinding: JSON.stringify({ binding_type: 'sms', address: formattedPhoneNumber(recipient.phone), }),
-    body: message,
+  verifiedPhoneNumber(recipient.phone)
+  .then((verifiedNumber) => {
+    return twilio_client.notify.services(notifyServicesSid).notifications.create({
+      toBinding: JSON.stringify({ binding_type: 'sms', address: verifiedNumber, }),
+      body: message,
+    })
   })
   .then((notification) => {
     let message_id = shortid.generate()
@@ -95,7 +103,7 @@ exports.send_message_to_phone = function(req, res, next) {
     res.send(twilio_client.toString())
   })
   .catch(error => {
-    console.log(error)
+    generate_error_email(JSON.stringify(error), 'send_message_to_phone', '')
     res.status(500).send('Error occurred sending SMS notification')
   })
 
@@ -122,13 +130,17 @@ exports.send_group_invitation_sms = function(req, res, next) {
   const magic_link_id = uuid.v4()
   const invitation = info.invitation_id
 
-  const to   = formattedPhoneNumber(info.phone)
+  let to = info.phone
   const longUrl = `${req.get('origin')}/invitation?${encodeURIComponent(`name=${name}&phone=${phone}&email=${email}&group=${group_id}&referrer=${referrer}&magic=${magic_link_id}&invitation=${invitation}&group_alias=${group_alias}`)}&referralcredit=${referralcredit}`
 
-  shortenUrl(longUrl).then((result) => {
+  verifiedPhoneNumber(info.phone)
+  .then((verifiedNumber) => {
+    to = verifiedNumber
+    return shortenUrl(longUrl)
+  })
+  .then((result) => {
     const body = `
-      Hello, You've been invited by your friend ${referrer} to join a group on RentHero. Please sign up using this link! ${result.id}
-      [ VERIFIED RENTHERO MESSAGE: RentHero.cc/m/${comm_id} ]
+      Hello, You've been invited by your friend ${referrer} to join a group on RentHero. Please sign up using this link! ${result.id}\n[ VERIFIED RENTHERO MESSAGE: RentHero.cc/m/${comm_id} ]
     `
 
     twilio_client.notify.services(notifyServicesSid).notifications.create({
@@ -172,6 +184,7 @@ exports.send_group_invitation_sms = function(req, res, next) {
     res.send(twilio_client.toString())
   }).catch((err) => {
     console.log(err)
+    generate_error_email(JSON.stringify(err), 'send_group_invitation_sms', '')
     res.status(500).send('Error occurred sending SMS notification')
   })
 }
@@ -237,12 +250,15 @@ exports.send_office_hours_ended_to_tenant = function(tenant, building, suite, co
                      regarding your inquiry for ${building.building_alias}.
                      [ VERIFIED RENTHERO MESSAGE: RentHero.cc/m/${message_id} ]
                     `
-    twilio_client.notify.services(notifyServicesSid).notifications.create({
-      toBinding: JSON.stringify({
-                    binding_type: 'sms',
-                    address: formattedPhoneNumber(tenant.phone),
-                }),
-      body: message,
+    verifiedPhoneNumber(tenant.phone)
+    .then((verifiedNumber) => {
+      return twilio_client.notify.services(notifyServicesSid).notifications.create({
+        toBinding: JSON.stringify({
+                      binding_type: 'sms',
+                      address: verifiedNumber,
+                  }),
+        body: message,
+      })
     })
     .then((notification) => {
       console.log('generating landlord email...')
@@ -278,6 +294,7 @@ exports.send_office_hours_ended_to_tenant = function(tenant, building, suite, co
     })
     .catch((error) => {
       console.log(error)
+      generate_error_email(JSON.stringify(error), 'send_office_hours_ended_to_tenant', '')
       rej(error)
     })
     .done()
@@ -290,15 +307,18 @@ exports.send_wait_msg_to_tenant = function(tenant, building, suite, corporation,
   const p = new Promise((res, rej) => {
     const message_id = shortid.generate()
     const message = `Hello ${tenant.first_name}, an agent of the landlord will contact you shortly
-                     regarding your inquiry for ${building.building_alias}.
-                     [ VERIFIED RENTHERO MESSAGE: RentHero.cc/m/${message_id} ]
+                     regarding your inquiry for ${building.building_alias}.\n[ VERIFIED RENTHERO MESSAGE: RentHero.cc/m/${message_id} ]
                     `
-    twilio_client.notify.services(notifyServicesSid).notifications.create({
-      toBinding: JSON.stringify({
-                    binding_type: 'sms',
-                    address: formattedPhoneNumber(tenant.phone),
-                }),
-      body: message,
+
+    verifiedPhoneNumber(tenant.phone)
+    .then((verifiedNumber) => {
+      return twilio_client.notify.services(notifyServicesSid).notifications.create({
+        toBinding: JSON.stringify({
+                      binding_type: 'sms',
+                      address: verifiedNumber,
+                  }),
+        body: message,
+      })
     })
     .then((notification) => {
       console.log('generating landlord email...')
@@ -334,6 +354,7 @@ exports.send_wait_msg_to_tenant = function(tenant, building, suite, corporation,
     })
     .catch((error) => {
       console.log(error)
+      generate_error_email(JSON.stringify(error), 'send_wait_msg_to_tenant', '')
       rej(error)
     })
     .done()
@@ -348,50 +369,3 @@ exports.callback = function(req, res, next) {
     message: 'success'
   })
 }
-
-// exports.send_tenant_wait_msg = function(req, res, next) {
-//   const info = req.body
-//   const tenant = info.tenant
-//   const building = info.building
-//   const suite = info.suite
-//   const message_id = shortid.generate()
-//   const message = `
-//     Hello ${tenant.first_name}, an agent of the landlord will contact you shortly regarding your inquiry for ${building.building_alias}.
-//     [ VERIFIED RENTHERO MESSAGE: RentHero.cc/m/${message_id} ]
-//   `
-//
-//   twilio_client.notify.services(notifyServicesSid).notifications.create({
-//     toBinding: JSON.stringify({ binding_type: 'sms', address: formattedPhoneNumber(tenant.phone) }),
-//     body: message,
-//   })
-//   .then((notification) => {
-//     const landlordMsg = `https://renthero.cc/inquiries/${info.inquiry_id}`
-//     return generateInitialCorporateEmail([info.corporation_email], 'inquiries@renthero.cc', tenant, info.group_notes, landlordMsg, building, suite, 'landlord')
-//   })
-//   .then((notification) => {
-//     insertCommunicationsLog({
-//       'ACTION': 'RENTHERO_SMS',
-//       'DATE': new Date().getTime(),
-//       'COMMUNICATION_ID': message_id,
-//
-//       'SENDER_ID': info.corporation_id,
-//       'SENDER_CONTACT_ID': 'RentHeroSMS',
-//       'RECEIVER_CONTACT_ID': tenant.phone || 'NONE',
-//       'RECEIVER_ID': tenant.tenant_id || 'NONE',
-//       'PROXY_CONTACT_ID': 'RENTHERO SMS',
-//       'TEXT': message,
-//       'INQUIRY_ID': info.inquiry_id,
-//
-//       'LANDLORD_NAME': building.building_alias,
-//     })
-//     res.type('text/xml')
-//     res.send(twilio_client.toString())
-//   })
-//   .catch(error => {
-//     console.log(error)
-//     res.status(500).send('Error occurred sending SMS notification')
-//   })
-//
-//
-//
-// }

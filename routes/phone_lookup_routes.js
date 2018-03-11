@@ -1,6 +1,6 @@
 const twilio_client = require('../twilio_setup').generate_twilio_client();
-const formattedPhoneNumber = require('../api/general_api').formattedPhoneNumber
-const select_all_from_sms_map = require('./LeasingDB/Queries/SMSQueries').select_all_from_sms_map
+const unFormattedPhoneNumber = require('../api/general_api').unFormattedPhoneNumber
+const get_tenant_id_from_phone = require('./LeasingDB/Queries/TenantQueries').get_tenant_id_from_phone
 
 exports.phone_lookup = function(req, res, next) {
   const info = req.body
@@ -32,9 +32,8 @@ exports.phone_lookup = function(req, res, next) {
 }
 
 exports.phone_test = function(req, res, next) {
-  formattedPhoneNumber(req.body.phone)
+  get_tenant_id_from_phone('+15195726998')
   .then((data) => {
     console.log(data)
   })
-
 }
