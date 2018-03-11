@@ -251,8 +251,7 @@ exports.send_office_hours_ended_to_tenant = function(tenant, building, suite, co
     const message_id = shortid.generate()
     const message = `Hello ${tenant.first_name}, the office hours for the landlord ${corporation.corporation_name} has ended.
                      An agent of ${corporation.corporation_name} will contact you during the office hours.
-                     regarding your inquiry for ${building.building_alias}.
-                     [ VERIFIED RENTHERO MESSAGE: RentHero.cc/m/${message_id} ]
+                     regarding your inquiry for ${building.building_alias}.\n[ VERIFIED RENTHERO MESSAGE: RentHero.cc/m/${message_id} ]
                     `
     verifiedPhoneNumber(tenant.phone)
     .then((verifiedNumber) => {
@@ -311,7 +310,7 @@ exports.send_wait_msg_to_tenant = function(tenant, building, suite, corporation,
   const p = new Promise((res, rej) => {
     const message_id = shortid.generate()
     const message = `Hello ${tenant.first_name}, an agent of the landlord will contact you shortly
-                     regarding your inquiry for ${building.building_alias}.\n[ VERIFIED RENTHERO MESSAGE: RentHero.cc/m/${message_id} ]
+                     regarding your inquiry for ${building.building_alias}.\nThis is a RentHero number that does not receive calls.\n[ VERIFIED RENTHERO MESSAGE: RentHero.cc/m/${message_id} ]
                     `
 
     verifiedPhoneNumber(tenant.phone)
