@@ -19,24 +19,28 @@ exports.send_message_to_phones = function(req, res, next) {
   const info = req.body
   const message = info.body
 
-  const toBind = info.users.map((user) => {
-    return verifiedPhoneNumber(user.phone)
+  const phoneNumbers = info.users.map((user) => { return user.phone })
+  const arrayOfPromises = phoneNumbers.map((phone) => {
+    return verifiedPhoneNumber(phone)
     .then((verifiedNumber) => {
       return JSON.stringify({ binding_type: 'sms', address: verifiedNumber, })
     })
   })
 
-  twilio_client.notify.services(notifyServicesSid).notifications.create({
-    toBinding: toBind,
-    body: message,
+  Promise.all(arrayOfPromises)
+  .then((toBind) => {
+    console.log(toBind)
+    return twilio_client.notify.services(notifyServicesSid).notifications.create({
+      toBinding: toBind,
+      body: message,
+    })
   })
   .then((notification) => {
-    console.log(info.users)
+    // console.log(info.users)
     info.users.forEach((user) => {
       let message_id = shortid.generate()
       let full_message = `
-        ${message}
-        [ VERIFIED RENTHERO MESSAGE: RentHero.cc/m/${message_id} ]
+        ${message}\n[ VERIFIED RENTHERO MESSAGE: RentHero.cc/m/${message_id} ]
       `
       insertCommunicationsLog({
         'ACTION': 'RENTHERO_SMS',

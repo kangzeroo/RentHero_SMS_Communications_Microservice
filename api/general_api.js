@@ -1,5 +1,6 @@
 const axios = require('axios')
-const twilio_client = require('../twilio_setup').generate_twilio_client();
+const twilio_client = require('../twilio_setup').generate_twilio_client()
+const generate_error_email = require('./error_api').generate_error_email
 
 exports.formattedPhoneNumber = (number) => {
   const countryCode = number.substring(0, 2)
@@ -17,7 +18,7 @@ exports.formattedPhoneNumber = (number) => {
 
 exports.verifiedPhoneNumber = (number) => {
   const p = new Promise((res, rej) => {
-    console.log('formatting Phone number', number)
+    // console.log('formatting Phone number', number)
     return twilio_client.lookups.v1
     .phoneNumbers(number)
     .fetch()
@@ -26,6 +27,7 @@ exports.verifiedPhoneNumber = (number) => {
       res(data.phoneNumber)
     })
     .catch((err) => {
+      generate_error_email(number, 'verifiedPhoneNumber', '')
       rej(err)
     })
   })
