@@ -290,6 +290,7 @@ exports.send_office_hours_ended_to_tenant = function(tenant, building, suite, co
         'PROXY_CONTACT_ID': 'RENTHERO SMS',
         'TEXT': message,
         'INQUIRY_ID': inquiry_id,
+        'TENANT_NAME': `${tenant.first_name} ${tenant.name}`,
 
         'LANDLORD_NAME': building.building_alias,
       })
@@ -337,7 +338,7 @@ exports.send_wait_msg_to_tenant = function(tenant, building, suite, corporation,
                   )
     })
     .then((notifications) => {
-      insertCommunicationsLog({
+      return insertCommunicationsLog({
         'ACTION': 'RENTHERO_SMS',
         'DATE': new Date().getTime(),
         'COMMUNICATION_ID': message_id,
@@ -353,6 +354,9 @@ exports.send_wait_msg_to_tenant = function(tenant, building, suite, corporation,
 
         'LANDLORD_NAME': building.building_alias,
       })
+    })
+    .then((data) => {
+      console.log('res spot')
       res(inquiry_id)
     })
     .catch((error) => {

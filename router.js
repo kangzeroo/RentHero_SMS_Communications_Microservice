@@ -81,6 +81,9 @@ module.exports = function(app){
 	// phone Lookup Routes
 	app.post('/phone_lookup', [json_encoding], PhoneLookupRoutes.phone_lookup)
 	app.post('/phone_test', [json_encoding], PhoneLookupRoutes.phone_test)
+	app.post('/pre_call', [json_encoding], PhoneLookupRoutes.pre_call)
+	app.post('/create_session', [json_encoding], PhoneLookupRoutes.create_session)
+	app.post('/create_participant', [json_encoding], PhoneLookupRoutes.create_participant)
 
 	app.post('/apollo_connect', [json_encoding, corpOriginCheck], ApolloConnectRoutes.apollo_connect_with_tenant)
 }
